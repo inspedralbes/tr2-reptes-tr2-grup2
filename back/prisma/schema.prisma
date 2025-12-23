@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Every String @db.Text excepting the commented ones, is due to is actually JSONs or ARRAYs 
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Tallers {
+  //Fields
+  id          Int       @id @default(autoincrement())
+  nom         String
+  descripcio  String    @db.Text // Actual Text
+  target      Dies
+  institucio  Int
+  tallerista  Int @unique
+  places_max  Int
+  places_disp Int
+  duracio     Int
+  modalitat   Modalitat
+  direccio    String
+  horari      String    @db.Text
+  curs        String
+  autoritzat  Boolean   @default(false)
+
+  // Intern relations
+  id_institucio Institucions @relation(fields: [institucio], references: [id])
+  id_tallerista Usuaris      @relation(fields: [tallerista], references: [id])
+
+  //Foreigns
+  llista_assistencia Assistencia?  
+}
+
+model Institucions {
+  // Fields
+  id          Int        @id
+  nom         String
+  tipus       Institucio
+  responsable Int @unique
+  contacte    String //@type Email
+  
+  // Intern relations
+  id_responsable Usuaris      @relation(fields: [responsable], references: [id])
+
+  //Foreigns 
+  tallers    Tallers[]
+  institucions Inscripcions?
+}
+
+model Inscripcions {
+  // Fields
+  id                Int       @id @default(autoincrement())
+  institucio        Int @unique
+  coordinador       Int @unique
+  primera_vegada    Boolean
+  trimestre         Trimestre
+  alumnes           String    @db.Text
+  referents         String    @db.Text
+  docents_referents String //@type Email
+  comentari         String    @db.Text
+  documents        String    @db.Text
+  autoritzat        Boolean
+
+  // Intern relations
+  id_institucio  Institucions @relation(fields: [institucio], references: [id])
+  id_coordinador Usuaris      @relation(fields: [coordinador], references: [id])   
+}
+
+model Usuaris {
+  id         Int     @id
+  nom        String
+  rol        Rol
+  institucio Int
+  autoritzat Boolean
+
+  //Foreigns
+  tallers   Tallers?
+
+  // Intern relations
+  responsable Institucions?
+  coordinador Inscripcions?
+}
+
+model Assistencia {
+  id                Int      @id @default(autoincrement())
+  id_taller         Int @unique
+  dia               DateTime
+  llista_alumnes    String   @db.Text
+  llista_professors String   @db.Text
+  autoritzat        Boolean
+
+  // Intern relations
+  taller Tallers  @relation(fields: [id_taller], references: [id])
+}
+
+enum Trimestre {
+  Primer
+  Segon
+  Tercer
+}
+
+enum Rol {
+  Admin
+  Professorat
+  Extern
+}
+
+enum Institucio {
+  CentreEducatiu
+  AgentExtern
+}
+
+enum Dies {
+  Dilluns
+  Dimarts
+  Dimecres
+  Dijous
+  Divendres
+}
+
+enum Modalitat {
+  A
+  B
+  C
+  D
+}
