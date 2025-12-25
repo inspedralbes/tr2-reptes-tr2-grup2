@@ -44,3 +44,19 @@ Actualment, el recurs que fa de dummy és **Tallers**.
 ### ▶ Execució
 Un cop instal·lades les dependències, el servidor s'inicia i estarà disponible a:
 `http://localhost:3000`
+
+## Prisma i la base de dades
+
+En aquest projecte utilitzem l'ORM de prisma. En ordre per poder tenir la teva pròpia base de dades funcionant, hauràs de seguir les següents dades.
+
+1. **URL de la base de dades**: 
+
+Al teu punt env hauràs de escriure la URL de la teva connexió a la base de dades seguint la següent sintaxis:
+`mysql://user:password@endpoint:port/database`
+
+2. **Començar la migració**:
+
+El següent que hauràs de fer és escriure a la teva consola `> npx prisma migrate` i `dev` si es per a desenvolupament o `deploy` si és per a producció
+
+Si no comptes amb un visualitzador de dades, prisma compte amb la seva GUI integrada. Fes `npx prisma studio`
+
