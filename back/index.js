@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 
 /* ----------------------------------------- ROUTES ----------------------------------------- */
 
-/* ----------------------------------------- EXAMPLE ----------------------------------------- */
+/* ----------------------------------------- EXAMPLE -------------------------------------- */
 
 // Definir una ruta d'exemple
 app.get("/", (req, res) => {
@@ -34,6 +34,40 @@ app.get("/", (req, res) => {
 });
 
 /* ----------------------------------------- AUTH ----------------------------------------- */
+
+/* ----------------------------------------- Assistencia ----------------------------------------- */
+
+import { getAllAssistencies } from "./functions/database/CRUD/Assistencia.js";
+
+app.get("/assistencies", async (req, res) => {
+  const assistencies = await getAllAssistencies();
+  res.json(assistencies);
+});
+
+app.get("/assistencies/:id", async (req, res) => {
+  const { id } = req.params;
+  const assistencia = await getAssistenciaById(id);
+  res.json(assistencia);
+});
+
+app.post("/assistencies", async (req, res) => {
+  const data = req.body;
+  const newAssistencia = await createAssistencia(data);
+  res.json(newAssistencia);
+});
+
+app.put("/assistencies", async (req, res) => {
+  const data = req.body;
+  const updatedAssistencia = await updateAssistencia(data);
+  res.json(updatedAssistencia);
+});
+app.delete("/assistencies/:id", async (req, res) => {
+  const { id } = req.params;
+  const deletedAssistencia = await deleteAssistencia(id);
+  res.json(deletedAssistencia);
+});
+
+/* ----------------------------------------- START SERVER ----------------------------------------- */
 
 // Iniciar el servidor
 app.listen(port, () => {
