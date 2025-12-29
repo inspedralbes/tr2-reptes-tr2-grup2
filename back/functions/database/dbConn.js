@@ -17,14 +17,12 @@ let prismaInstance;
 export const getPrisma = async () => {
   if (!prismaInstance) {
     try {
-      console.log("Iniciando Prisma v7 con configuración...");
-      // Forzamos un objeto de opciones para evitar el error de "constructor vacío"
       prismaInstance = new PrismaClient({ adapter });
 
       await prismaInstance.$connect();
-      console.log("✅ Conexión establecida con MySQL.");
+      console.log("Conexió establerta amb la base de dades.");
     } catch (error) {
-      console.error("❌ Error al conectar Prisma:", error);
+      console.error("Error:", error);
       throw error;
     }
   }

@@ -5,7 +5,7 @@ import path from "path";
 
 dotenv.config();
 
-//Function to get HTML template and replace variables
+//Funció per obtenir la plantilla HTML i substituir les variables
 function getTemplate(fileName, replacements) {
   const filePath = path.join(process.cwd(), "templates", fileName);
   let html = fs.readFileSync(filePath, "utf8");
@@ -33,14 +33,14 @@ export async function enviarEmail(type, userData) {
   let html;
   let subject;
 
-  if (type === "bienvenida") {
-    subject = "¡Bienvenido a bordo!";
-    html = getTemplate("bienvenida.html", {
+  if (type === "benvinguda") {
+    subject = "¡Benvingut a bord!";
+    html = getTemplate("benvinguda.html", {
       nombre: userData.nombre,
       enlace: "https://www.winewithcola.com",
     });
   } else if (type === "recuperacion") {
-    subject = "Recupera tu contraseña";
+    subject = "Recupera la teva contrasenya";
     html = getTemplate("password.html", { nombre: userData.nombre });
   }
 
@@ -53,7 +53,7 @@ export async function enviarEmail(type, userData) {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("Enviado: %s", info.messageId);
+    console.log("Enviat: %s", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("Error:", error);

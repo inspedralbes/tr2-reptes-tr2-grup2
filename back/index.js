@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
 
 /* ---------------------------------- AUTH ---------------------------------- */
 
-// Login route
+// Ruta de login
 app.post("/login", async (req, res) => {
   const { id, password } = req.body;
 
@@ -96,11 +96,11 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Register route
+// Ruta de registre
 app.post("/register", async (req, res) => {
   const { id, nom, password, rol, institucioId } = req.body;
 
-  // Validar campos requeridos
+  // Validar camps obligatoris
   if (!id || !nom || !password) {
     return res
       .status(400)
@@ -108,22 +108,22 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    // Verificar si el usuario ya existe
+    // Verificar si l'usuari ja existeix
     const existingUser = await getUsuariForAuth(parseInt(id));
     if (existingUser) {
       return res.status(409).json({ error: "L'usuari ja existeix" });
     }
 
-    // Hashear la contraseña
+    // Hashear la contrasenya
     const hashedPassword = await hashPassword(password);
 
-    // Crear el nuevo usuario
+    // Crear el nou usuari
     const newUser = await createUsuari({
       id: parseInt(id),
       nom,
       password: hashedPassword,
       rol: rol || "Professorat",
-      autoritzat: false, // Por defecto no autorizado hasta que un admin lo apruebe
+      autoritzat: false, // Per defecte no autoritzat fins que un admin l'aprovi
       institucioId: institucioId ? parseInt(institucioId) : null,
     });
 
@@ -141,7 +141,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Refresh token route
+// Ruta de refresh token
 app.post("/refresh", async (req, res) => {
   const { refreshToken, userId } = req.body;
 
@@ -150,7 +150,7 @@ app.post("/refresh", async (req, res) => {
   }
 
   try {
-    // Verifica que el token almacenado en BD coincida
+    // Verifica que el token emmagatzemat en BD coincideixi
     const user = await getUsuariForAuth(parseInt(userId));
 
     if (!user || user.token !== refreshToken) {
@@ -171,7 +171,7 @@ app.post("/refresh", async (req, res) => {
   }
 });
 
-// Logout route
+// Ruta de logout
 app.post("/logout", async (req, res) => {
   const { userId } = req.body;
 
