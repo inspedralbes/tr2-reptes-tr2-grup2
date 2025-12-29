@@ -3,7 +3,7 @@ import { getPrisma } from "../dbConn.js";
 // SELECT totes les inscripcions
 export async function getAllInscripcions() {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.inscripcions.findMany({
       include: { id_institucio: true, id_coordinador: true },
     });
@@ -15,9 +15,9 @@ export async function getAllInscripcions() {
 // SELECT una inscripción por ID
 export async function getInscripcioById(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.inscripcions.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
       include: { id_institucio: true, id_coordinador: true },
     });
   } catch (error) {
@@ -28,7 +28,7 @@ export async function getInscripcioById(id) {
 // INSERT nova inscripció
 export async function createInscripcio(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.inscripcions.create({
       data,
       include: { id_institucio: true, id_coordinador: true },
@@ -41,10 +41,10 @@ export async function createInscripcio(data) {
 // UPDATE inscripció
 export async function updateInscripcio(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     const { id, ...updateData } = data;
     return await prisma.inscripcions.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: updateData,
       include: { id_institucio: true, id_coordinador: true },
     });
@@ -56,9 +56,9 @@ export async function updateInscripcio(data) {
 // DELETE inscripció
 export async function deleteInscripcio(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.inscripcions.delete({
-      where: { id },
+      where: { id: parseInt(id) },
     });
   } catch (error) {
     throw new Error(`Error al eliminar inscripció: ${error.message}`);

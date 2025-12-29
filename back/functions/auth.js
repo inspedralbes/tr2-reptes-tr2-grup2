@@ -1,8 +1,8 @@
-// back/functions/auth.js
-// Autenificador de contrasenyes utilitzant bcryptjs
-// Exporta funcions per hashear i comparar contrasenyes
-
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const secretKey = process.env.JWT_SECRET || "your-secret-key";
+const refreshKey = process.env.JWT_REFRESH_SECRET || "your-refresh-key";
 
 export async function hashPassword(password) {
   const salt = await bcrypt.genSalt(10);
@@ -15,36 +15,24 @@ export async function comparePassword(password, hashedPassword) {
   return match;
 }
 
-// Route for refresh access token
-app.post("/refresh", async (req, res) => {
-  console.log("Refresh token 0:", req.body);
-  const { refreshToken } = req.body;
+export function generateTokens(user) {
+  const aToken = jwt.sign(
+    { id: user.id, nom: user.nom, rol: user.rol },
+    secretKey,
+    { expiresIn: "1h" }
+  );
+  const rToken = jwt.sign(
+    { id: user.id, nom: user.nom, rol: user.rol },
+    refreshKey,
+    { expiresIn: "7d" }
+  );
+  return { accessToken: aToken, refreshToken: rToken };
+}
 
-  console.log("Refresh token 1:", refreshToken);
+export function verifyRefreshToken(token) {
+  return jwt.verify(token, refreshKey);
+}
 
-  if (!refreshToken) return res.status(401).send("Token is required");
-  if (!refreshTokensDB.has(refreshToken))
-    return res.status(403).send("Invalid token");
-
-  try {
-    console.log("Refresh token 2:", refreshToken);
-    const decoded = jwt.verify(refreshToken, refreshKey);
-    console.log("Decoded:", decoded);
-    const newAccessToken = jwt.sign(
-      { id: decoded.id, email: decoded.email },
-      secretKey,
-      { expiresIn: "1h" }
-    );
-    res.json({ accessToken: newAccessToken });
-  } catch (err) {
-    console.log("Error refresh:", err);
-    refreshTokensDB.delete(refreshToken);
-    res.status(403).json({ error: "Invalid token or expired" });
-  }
-});
-
-// Function to verify token
-// Use in EX; app.post('/users/qualifications', verifyToken, async (req, res) => {...
 export function verifyToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
@@ -56,10 +44,7 @@ export function verifyToken(req, res, next) {
     return res.status(401).json({ error: "Formato de token inválido" });
   }
 
-  console.log("Token:", token);
-
   jwt.verify(token, secretKey, (err, decoded) => {
-    console.log("Decoded:", decoded);
     if (err) {
       if (err.name === "TokenExpiredError") {
         return res.status(401).json({ error: "Token expirado" });
@@ -70,3 +55,5 @@ export function verifyToken(req, res, next) {
     next();
   });
 }
+
+export { secretKey, refreshKey };

@@ -3,7 +3,7 @@ import { getPrisma } from "../dbConn.js";
 // SELECT totes les institucions
 export async function getAllInstitucions() {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.institucions.findMany({
       include: { id_responsable: true, tallers: true, institucions: true },
     });
@@ -15,9 +15,9 @@ export async function getAllInstitucions() {
 // SELECT una institució per ID
 export async function getInstitucioById(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.institucions.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
       include: { id_responsable: true, tallers: true, institucions: true },
     });
   } catch (error) {
@@ -28,7 +28,7 @@ export async function getInstitucioById(id) {
 // INSERT nova institució
 export async function createInstitucio(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.institucions.create({
       data,
       include: { id_responsable: true },
@@ -41,10 +41,10 @@ export async function createInstitucio(data) {
 // UPDATE institució
 export async function updateInstitucio(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     const { id, ...updateData } = data;
     return await prisma.institucions.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: updateData,
       include: { id_responsable: true },
     });
@@ -56,9 +56,9 @@ export async function updateInstitucio(data) {
 // DELETE institució
 export async function deleteInstitucio(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.institucions.delete({
-      where: { id },
+      where: { id: parseInt(id) },
     });
   } catch (error) {
     throw new Error(`Error al eliminar institució: ${error.message}`);

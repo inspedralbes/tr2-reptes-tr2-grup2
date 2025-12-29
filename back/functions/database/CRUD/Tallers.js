@@ -3,7 +3,7 @@ import { getPrisma } from "../dbConn.js";
 // SELECT tots els tallers
 export async function getAllTallers() {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.tallers.findMany({
       include: {
         id_institucio: true,
@@ -19,9 +19,9 @@ export async function getAllTallers() {
 // SELECT un taller per ID
 export async function getTallerById(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.tallers.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
       include: {
         id_institucio: true,
         id_tallerista: true,
@@ -36,7 +36,7 @@ export async function getTallerById(id) {
 // INSERT nou taller
 export async function createTaller(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.tallers.create({
       data,
       include: { id_institucio: true, id_tallerista: true },
@@ -49,10 +49,10 @@ export async function createTaller(data) {
 // UPDATE taller
 export async function updateTaller(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     const { id, ...updateData } = data;
     return await prisma.tallers.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: updateData,
       include: { id_institucio: true, id_tallerista: true },
     });
@@ -64,9 +64,9 @@ export async function updateTaller(data) {
 // DELETE taller
 export async function deleteTaller(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.tallers.delete({
-      where: { id },
+      where: { id: parseInt(id) },
     });
   } catch (error) {
     throw new Error(`Error al eliminar taller: ${error.message}`);

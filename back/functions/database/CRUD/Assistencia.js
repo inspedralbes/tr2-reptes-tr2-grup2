@@ -15,9 +15,9 @@ export async function getAllAssistencies() {
 // SELECT una assistència per ID
 export async function getAssistenciaById(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.assistencia.findUnique({
-      where: { id },
+      where: { id: parseInt(id) },
       include: { taller: true },
     });
   } catch (error) {
@@ -28,7 +28,7 @@ export async function getAssistenciaById(id) {
 // INSERT nova assistència
 export async function createAssistencia(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.assistencia.create({
       data,
       include: { taller: true },
@@ -41,10 +41,10 @@ export async function createAssistencia(data) {
 // UPDATE assistència
 export async function updateAssistencia(data) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     const { id, ...updateData } = data;
     return await prisma.assistencia.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: updateData,
       include: { taller: true },
     });
@@ -56,9 +56,9 @@ export async function updateAssistencia(data) {
 // DELETE assistència
 export async function deleteAssistencia(id) {
   try {
-    const prisma = getPrisma();
+    const prisma = await getPrisma();
     return await prisma.assistencia.delete({
-      where: { id },
+      where: { id: parseInt(id) },
     });
   } catch (error) {
     throw new Error(`Error al eliminar l'assistència: ${error.message}`);

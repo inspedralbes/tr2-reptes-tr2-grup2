@@ -41,11 +41,12 @@ model Tallers {
 
 model Institucions {
   // Fields
-  id          Int        @id
+  id          Int        @id @default(autoincrement())
   nom         String
   tipus       Institucio
   responsable Int @unique
   contacte    String //@type Email
+  codi_centre String?
   
   // Intern relations
   id_responsable Usuaris      @relation(fields: [responsable], references: [id])
@@ -77,6 +78,9 @@ model Inscripcions {
 model Usuaris {
   id         Int     @id
   nom        String
+  email      String  @unique //@type Email
+  password   String
+  token      String?
   rol        Rol
   institucio Int
   autoritzat Boolean
