@@ -1,6 +1,6 @@
+<script setup>
+import index from "@/pages/index.vue";
+</script>
 <template>
-  <div>
-    <NuxtRouteAnnouncer />
-    <NuxtWelcome />
-  </div>
+  <index />
 </template>
