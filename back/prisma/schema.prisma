@@ -31,6 +31,8 @@ model Tallers {
   curs        String
   autoritzat  Boolean   @default(false)
 
+  admet_insc  Boolean?
+
   // Intern relations
   id_institucio Institucions @relation(fields: [institucio], references: [id])
   id_tallerista Usuaris      @relation(fields: [tallerista], references: [id])
@@ -69,6 +71,8 @@ model Inscripcions {
   comentari         String    @db.Text
   documents        String    @db.Text
   autoritzat        Boolean
+
+  estat             Boolean?
 
   // Intern relations
   id_institucio  Institucions @relation(fields: [institucio], references: [id])
