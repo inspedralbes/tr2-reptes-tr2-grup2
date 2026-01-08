@@ -60,7 +60,7 @@ const getMesNum = (mes) => {
           <span class="info-item">
             <img src="/img/centro/calendar.png" class="icon" />
             {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
-            <img src="/img/centro/Clock.png" class="icon" />
+            <img src="/img/centro/clock.png" class="icon" />
             {{ curso.hora }}
           </span>
         </div>

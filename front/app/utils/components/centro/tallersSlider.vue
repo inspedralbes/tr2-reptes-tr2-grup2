@@ -22,7 +22,7 @@
             <div class="card-time">
               <span>
                 <img
-                  src="/img/centro/Clock.png"
+                  src="/img/centro/clock.png"
                   alt="Reloj"
                   class="clock-icon"
                 />
