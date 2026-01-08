@@ -55,7 +55,7 @@ import llistaTallers from "@/utils/components/centro/listaInscripciones.vue";
   font-weight: 600;
   font-size: 16px;
   padding: 8px 22px;
-  border: 2px solid #5d6bc4;
+  border: 2px solid #3949ab70;
   border-radius: 20px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
@@ -64,8 +64,9 @@ import llistaTallers from "@/utils/components/centro/listaInscripciones.vue";
 }
 
 .btn-filtres:hover {
-  background-color: #5d6bc4;
+  background-color: #aab4e9;
   transform: translateY(-1px);
+  border: 2px solid #5064cd70;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
 }
 </style>
