@@ -2,47 +2,30 @@
 <template>
   <div id="navBar">
     <div id="btns">
-      <NuxtLink
-        to="/centro/paginaPrincipal-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/centro/paginaPrincipal-Profes" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
-          <img src="/img/navBarProfes/Home.png" alt="" />
+          <img src="/img/navBarProfes/home.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
 
-      <NuxtLink
-        to="/centro/paginaInscripcionsTalleres-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/centro/paginaInscripcionsTalleres-Profes" custom v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
           <img src="/img/navBarProfes/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/centro/paginaEstatInscripcionsTalleres-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/centro/paginaEstatInscripcionsTalleres-Profes" custom v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
           <img src="/img/navBarProfes/checkbox.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/centro/paginaTallersFinalitzats-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/centro/paginaTallersFinalitzats-Profes" custom v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
           <img src="/img/navBarProfes/document-alt.png" alt="" />
         </button>
@@ -63,13 +46,16 @@
   margin-top: 30px;
   margin-left: 30px;
 }
+
 #btns {
   margin-top: 10px;
 }
+
 #btns button {
   width: 50px;
   height: 50px;
-  background-color: transparent; /* Fondo inicial transparente */
+  background-color: transparent;
+  /* Fondo inicial transparente */
   border: none;
   cursor: pointer;
   display: flex;
