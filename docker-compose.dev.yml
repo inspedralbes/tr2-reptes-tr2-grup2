@@ -17,7 +17,7 @@ services:
     build:
       dockerfile: ./back/dev.Dockerfile
       context: .
-    command: sh -c "cp .env.DEV .env && npm install && npm run dev"
+    command: sh -c "rm -rf ./generated/prisma && cp .env.DEV .env && npm install && npx prisma generate && npm run dev"
     volumes:
       - ./back:/usr/src/app
     working_dir: /usr/src/app
