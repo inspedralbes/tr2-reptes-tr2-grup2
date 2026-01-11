@@ -23,7 +23,6 @@ const tallers = ref([
   },
 ]);
 
-// Guardamos el ID de la fila que tiene el desplegable abierto
 const filaActiva = ref(null);
 
 const actualizarPrioridad = (id, isOpen) => {
@@ -84,7 +83,7 @@ const getMesNum = (mes) => {
   max-width: 1000px;
   height: 370px;
   overflow-y: auto;
-  overflow-x: visible; /* IMPORTANTE: para que no corte el desplegable hacia los lados */
+  overflow-x: visible;
   padding: 10px 20px;
 }
 
@@ -93,10 +92,9 @@ const getMesNum = (mes) => {
   align-items: center;
   margin-bottom: 5px;
   height: 45px;
-  position: relative; /* Necesario para que el z-index dinámico funcione */
+  position: relative; 
 }
 
-/* Estilos de tus columnas (mantengo los tuyos con ligeros ajustes de z-index) */
 .col-titulo {
   background-color: #7986cb;
   color: #1a1a1a;

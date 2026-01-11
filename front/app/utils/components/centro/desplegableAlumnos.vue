@@ -21,7 +21,7 @@ const getStackStyle = (index) => {
   if (isOpen.value) {
     return {
       transform: `translateY(${index * 32}px)`,
-      zIndex: 100 - index, // El 3 queda arriba del 2
+      zIndex: 100 - index,
       opacity: 1,
     };
   }
@@ -72,7 +72,7 @@ const getStackStyle = (index) => {
 .pill-option {
   position: absolute;
   width: 50px;
-  height: 48px; /* Un poco más alta para que se solapen */
+  height: 48px;
   border-radius: 25px;
   display: flex;
   align-items: center;
@@ -82,11 +82,10 @@ const getStackStyle = (index) => {
   border: 1.5px solid rgba(255, 255, 255, 0.4);
   transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  /* Ajuste visual del texto */
   padding-bottom: 12px;
 }
 
-/* Colores basados en la imagen */
+
 .bg-level-0 {
   background-color: #e8eaf6;
   color: #3f51b5;
@@ -105,5 +104,5 @@ const getStackStyle = (index) => {
   padding-bottom: 0;
 }
 
-/* El último (3) no necesita padding porque es la base del desplegable */
+
 </style>

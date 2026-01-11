@@ -69,7 +69,7 @@
 #btns button {
   width: 50px;
   height: 50px;
-  background-color: transparent; /* Fondo inicial transparente */
+  background-color: transparent; 
   border: none;
   cursor: pointer;
   display: flex;
@@ -85,7 +85,12 @@
   object-fit: contain;
 }
 
-#btns button:hover,
+#btns button:hover {
+  background-color: #5c6bc0;
+  padding: 10px;
+  transform: scale(1.1);
+}
+
 .btn-activo {
   background-color: #5c6bc0;
   padding: 10px;
