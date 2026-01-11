@@ -1,5 +1,8 @@
 <template>
     <div class="stats-container">
+        <div v-if="loading" class="loading-state">
+            <img src="/assets/gifs/loading.gif" alt="Carregant..." width="30" height="30" />
+        </div>
         <div ref="chartRef" class="main-chart"></div>
     </div>
 </template>
@@ -7,38 +10,23 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
+// Ajusta la ruta d'importació
+import { getAllTallers, getAllInstitucions } from '@/services/communicationManagerDatabase';
 
 const chartRef = ref(null);
+const loading = ref(true);
 let myChart = null;
 
-// Datos ejemplo: Total de alumnos inscritos por Institución cada año
-const dataInstituciones = {
-    years: ['2023', '2024', '2025'],
-    // Cada objeto es una institución con sus totales por año
-    series: [
-        {
-            name: 'IES Joan Miró',
-            data: [120, 150, 180] // Alumnos en 2023, 2024, 2025
-        },
-        {
-            name: 'Escola Politècnica',
-            data: [80, 210, 195]
-        },
-        {
-            name: 'Institut de Tecnologies',
-            data: [45, 90, 220]
-        }
-    ]
-};
-
-const initChart = () => {
+const initChart = (years, seriesData) => {
     if (!chartRef.value) return;
+    if (myChart) myChart.dispose();
+
     myChart = echarts.init(chartRef.value);
 
     const option = {
         title: {
-            text: 'Instituciones con Mayor Volumen de Alumnos',
-            subtext: 'Evolución por año de inscripción',
+            text: 'Institucions amb Major Volum d\'Alumnes',
+            subtext: 'Evolució per any d\'inscripció',
             left: 'center'
         },
         tooltip: {
@@ -56,14 +44,14 @@ const initChart = () => {
         },
         xAxis: {
             type: 'category',
-            data: dataInstituciones.years,
-            name: 'Año'
+            data: years,
+            name: 'Any'
         },
         yAxis: {
             type: 'value',
-            name: 'Total Alumnos'
+            name: 'Total Alumnes'
         },
-        series: dataInstituciones.series.map(inst => ({
+        series: seriesData.map(inst => ({
             name: inst.name,
             type: 'bar',
             emphasis: { focus: 'series' },
@@ -78,10 +66,54 @@ const initChart = () => {
     myChart.setOption(option);
 };
 
+const fetchData = async () => {
+    try {
+        loading.value = true;
+        // Demanem les dues coses en paral·lel
+        const [tallers, institucions] = await Promise.all([
+            getAllTallers(),
+            getAllInstitucions()
+        ]);
+
+        // 1. Obtenir tots els anys únics disponibles als tallers
+        const uniqueYears = [...new Set(tallers.map(t => t.curs))].sort();
+
+        // 2. Construir la sèrie per a cada institució
+        const series = institucions.map(inst => {
+            // Per a cada any, sumem les places dels tallers d'aquesta institució
+            const dataPerYear = uniqueYears.map(year => {
+                // Filtrem tallers d'aquesta inst i aquest any
+                const tallersDeInstEnAny = tallers.filter(t =>
+                    t.institucio === inst.id && t.curs === year
+                );
+
+                // Sumem les seves places
+                const totalPlazas = tallersDeInstEnAny.reduce((sum, t) => sum + (t.places_max || 0), 0);
+                return totalPlazas;
+            });
+
+            return {
+                name: inst.nom,
+                data: dataPerYear
+            };
+        });
+
+        // Filtrar institucions que no tenen cap alumne en cap any (opcional, per netejar el gràfic)
+        const activeSeries = series.filter(s => s.data.some(val => val > 0));
+
+        initChart(uniqueYears, activeSeries);
+
+    } catch (error) {
+        console.error("Error obtenint dades institucions:", error);
+    } finally {
+        loading.value = false;
+    }
+};
+
 const handleResize = () => myChart?.resize();
 
 onMounted(() => {
-    initChart();
+    fetchData();
     window.addEventListener('resize', handleResize);
 });
 
@@ -97,14 +129,20 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     padding: 20px;
+    position: relative;
+}
+
+.loading-state {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+    color: #666;
 }
 
 .main-chart {
     width: 100%;
     max-width: 1000px;
     height: 500px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 </style>

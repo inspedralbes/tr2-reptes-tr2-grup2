@@ -7,7 +7,7 @@
 // Every String @db.Text excepting the commented ones, is due to is actually JSONs or ARRAYs 
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
