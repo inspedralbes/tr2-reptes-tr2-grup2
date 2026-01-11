@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref } from "vue";
 
 const emit = defineEmits(["toggle"]);
 const options = [0, 1, 2, 3];
@@ -20,7 +20,7 @@ const selectOption = (val) => {
 const getStackStyle = (index) => {
   if (isOpen.value) {
     return {
-      transform: `translateY(${index * 32}px)`,
+      transform: `translateY(${index * 26}px)`,
       zIndex: 100 - index,
       opacity: 1,
     };
@@ -62,7 +62,7 @@ const getStackStyle = (index) => {
 .selector-container {
   position: relative;
   width: 50px;
-  height: 35px;
+  height: 26px;
 }
 
 .options-wrapper {
@@ -72,19 +72,18 @@ const getStackStyle = (index) => {
 .pill-option {
   position: absolute;
   width: 50px;
-  height: 48px;
-  border-radius: 25px;
+  padding: 4px 0;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  font-size: 14px;
   cursor: pointer;
   border: 1.5px solid rgba(255, 255, 255, 0.4);
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  padding-bottom: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 
 .bg-level-0 {
   background-color: #e8eaf6;
@@ -101,8 +100,9 @@ const getStackStyle = (index) => {
 .bg-level-3 {
   background-color: #7986cb;
   color: #ffffff;
-  padding-bottom: 0;
 }
 
-
+.pill-option:hover {
+  filter: brightness(0.95);
+}
 </style>
