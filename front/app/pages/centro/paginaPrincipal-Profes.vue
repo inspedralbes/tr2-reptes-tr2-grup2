@@ -20,6 +20,10 @@ import tallerSliders from "@/utils/components/centro/tallersSlider.vue";
 </template>
 
 <style scoped>
+@font-face {
+  font-family: "Coolvetica";
+  src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
+}
 #cuerpo {
   display: flex;
   background-color: #f5f5f5;
@@ -29,7 +33,7 @@ import tallerSliders from "@/utils/components/centro/tallersSlider.vue";
 #contenido {
   margin-top: 30px;
   margin-left: 50px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Coolvetica";
   background-color: #e0e0e0;
   border-radius: 20px;
   padding: 30px;
