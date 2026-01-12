@@ -1,0 +1,349 @@
+const BACK_URL = import.meta.env.VITE_URL_BACK;
+
+/* ------------------------------- ASSISTENCIA ------------------------------ */
+
+export async function getAllAssistencies() {
+  const response = await fetch(`${BACK_URL}/assistencies`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al obtenir assistències: ${response.statusText}`);
+  }
+
+  return await response.json();
+}
+
+export async function getAssistenciaById(id) {
+  const response = await fetch(`${BACK_URL}/assistencies/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir assistència per ID: ${response.statusText}`
+    );
+  }
+
+  return await response.json();
+}
+
+export async function createAssistencia(assistenciaData) {
+  const response = await fetch(`${BACK_URL}/assistencies`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(assistenciaData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al crear assistència: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateAssistencia(id, assistenciaData) {
+  const response = await fetch(`${BACK_URL}/assistencies/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(assistenciaData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar assistència: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function deleteAssistencia(id) {
+  const response = await fetch(`${BACK_URL}/assistencies/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al eliminar assistència: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- INSCRIPCIONS ------------------------------ */
+
+export async function getAllInscripcions() {
+  const response = await fetch(`${BACK_URL}/inscripcions`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir inscripcions: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function createInscripcion(inscripcionData) {
+  const response = await fetch(`${BACK_URL}/inscripcions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(inscripcionData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al crear inscripció: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function deleteInscripcion(id) {
+  const response = await fetch(`${BACK_URL}/inscripcions/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al eliminar inscripció: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- INSTITUCIONS ------------------------------ */
+
+export async function getAllInstitucions() {
+  const response = await fetch(`${BACK_URL}/institucions`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al obtenir institucions: ${response.statusText}`);
+  }
+  return await response.json();
+}
+export async function getInstitucionById(id) {
+  const response = await fetch(`${BACK_URL}/institucions/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir institució per ID: ${response.statusText}`
+    );
+  }
+  return await response.json();
+}
+
+export async function createInstitucion(institucionData) {
+  const response = await fetch(`${BACK_URL}/institucions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(institucionData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al crear institució: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateInstitucion(id, institucionData) {
+  const response = await fetch(`${BACK_URL}/institucions/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(institucionData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar institució: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function deleteInstitucion(id) {
+  const response = await fetch(`${BACK_URL}/institucions/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al eliminar institució: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- TALLERS ------------------------------ */
+
+export async function getAllTallers() {
+  const response = await fetch(`${BACK_URL}/tallers`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir tallers: ${response.statusText}`);
+  }
+  return await response.json();
+}
+export async function getTallerById(id) {
+  const response = await fetch(`${BACK_URL}/tallers/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir taller per ID: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function createTaller(tallerData) {
+  const response = await fetch(`${BACK_URL}/tallers`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(tallerData),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al crear taller: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateTaller(id, tallerData) {
+  const response = await fetch(`${BACK_URL}/tallers/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(tallerData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar taller: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function deleteTaller(id) {
+  const response = await fetch(`${BACK_URL}/tallers/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al eliminar taller: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- USUARIS ------------------------------ */
+
+export async function getAllUsuaris() {
+  const response = await fetch(`${BACK_URL}/usuaris`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir usuaris: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function getUsuariById(id) {
+  const response = await fetch(`${BACK_URL}/usuaris/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir usuari per ID: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function createUsuari(usuariData) {
+  const response = await fetch(`${BACK_URL}/usuaris`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(usuariData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al crear usuari: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateUsuari(id, usuariData) {
+  const response = await fetch(`${BACK_URL}/usuaris/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(usuariData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar usuari: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function deleteUsuari(id) {
+  const response = await fetch(`${BACK_URL}/usuaris/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al eliminar usuari: ${response.statusText}`);
+  }
+  return await response.json();
+}

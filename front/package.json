@@ -10,8 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "echarts": "^6.0.0",
     "nuxt": "^4.2.2",
+    "pinia": "^3.0.4",
+    "v-calendar": "^3.1.2",
     "vue": "^3.5.25",
+    "vue-echarts": "^8.0.1",
     "vue-router": "^4.6.4"
   }
 }
