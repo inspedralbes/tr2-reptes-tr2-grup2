@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from "vue";
-import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
 
 const tallers = ref([
   {
@@ -30,6 +29,11 @@ const actualizarPrioridad = (id, isOpen) => {
   filaActiva.value = isOpen ? id : null;
 };
 
+// Toggle del desplegable al clicar el botón
+const toggleDetalls = (id) => {
+  filaActiva.value = filaActiva.value === id ? null : id;
+};
+
 const getMesNum = (mes) => {
   const meses = {
     Septembre: "09",
@@ -46,34 +50,49 @@ const getMesNum = (mes) => {
     <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
       <h2 class="mes-titulo">{{ taller.mes }}</h2>
 
+      <!-- CONTENEDOR: fila + desplegable debajo -->
       <div
         v-for="(curso, cIdx) in taller.cursos"
         :key="cIdx"
-        class="fila-curso"
+        class="curso-item"
+        :class="{ abierto: filaActiva === `${tIdx}-${cIdx}` }"
         :style="{ zIndex: filaActiva === `${tIdx}-${cIdx}` ? 100 : 1 }"
       >
-        <div class="col-titulo">
-          <span class="texto-titulo">{{ curso.titulo }}</span>
+        <!-- FILA (barra superior) -->
+        <div class="fila-curso">
+          <div class="col-titulo">
+            <span class="texto-titulo">{{ curso.titulo }}</span>
+          </div>
+
+          <div class="col-info">
+            <span class="info-item">
+              <img src="/img/centro/calendar.png" class="icon" alt="icon" />
+              {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
+              <img src="/img/centro/clock.png" class="icon" alt="icon" />
+              {{ curso.hora }}
+            </span>
+          </div>
+
+          <button class="btn-detalls" @click="toggleDetalls(`${tIdx}-${cIdx}`)">
+            <span class="btn-detalls-text">
+              {{ filaActiva === `${tIdx}-${cIdx}` ? "− Detalls" : "+ Detalls" }}
+            </span>
+          </button>
         </div>
 
-        <div class="col-info">
-          <span class="info-item">
-            <img src="/img/centro/calendar.png" class="icon" />
-            {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
-            <img src="/img/centro/clock.png" class="icon" />
-            {{ curso.hora }}
-          </span>
-        </div>
-
-        <button class="btn-detalls">
-          <span class="btn-detalls-text">+ Detalls</span>
-        </button>
-
-        <div class="desplegable">
-          <SelectorAlumnos
-            @toggle="(state) => actualizarPrioridad(`${tIdx}-${cIdx}`, state)"
-          />
-        </div>
+        <!-- DESPLEGABLE HACIA ABAJO -->
+        <transition name="slide">
+          <div v-if="filaActiva === `${tIdx}-${cIdx}`" class="desplegable">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipiscing elit ante,
+              suscipit felis ornare donec vehicula ultricies accumsan mauris
+              ullamcorper, luctus blandit potenti fusce inceptos nec sagittis.
+              Per aliquet aenean imperdiet hac volutpat at cursus tempus, eu
+              hendrerit dictum nec id pulvinar magna integer, senectus ultrices
+              penatibus turpis varius egestas porttitor.
+            </p>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -84,19 +103,37 @@ const getMesNum = (mes) => {
   max-width: 1000px;
   height: 370px;
   overflow-y: auto;
-  overflow-x: visible; /* IMPORTANTE: para que no corte el desplegable hacia los lados */
+  overflow-x: visible;
   padding: 10px 20px;
+}
+
+/* contenedor por item (fila + desplegable) */
+.curso-item {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.curso-item.abierto {
+  background: #d7dbff;
+  border-radius: 25px;
+  padding-bottom: 12px;
+  margin-top: 0px;
+  overflow: hidden;
+}
+
+p {
+  padding: 0 25px 15px 25px;
+  margin: 0;
 }
 
 .fila-curso {
   display: flex;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 0px;
   height: 45px;
-  position: relative; /* Necesario para que el z-index dinámico funcione */
+  position: relative;
 }
 
-/* Estilos de tus columnas (mantengo los tuyos con ligeros ajustes de z-index) */
 .col-titulo {
   background-color: #7986cb;
   color: #1a1a1a;
@@ -139,10 +176,30 @@ const getMesNum = (mes) => {
   margin-left: 30px;
 }
 
+/* Desplegable */
 .desplegable {
-  margin-left: 50px;
+  background-color: #d5dafb;
+  margin-left: 0;
   position: relative;
-  width: 50px;
+  width: 100%;
+  padding: 0px 0 0 0;
+}
+
+/* Animación del desplegable */
+.slide-enter-active,
+.slide-leave-active {
+  transition: max-height 0.25s ease, opacity 0.25s ease;
+  overflow: hidden;
+}
+.slide-enter-from,
+.slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.slide-enter-to,
+.slide-leave-from {
+  max-height: 500px;
+  opacity: 1;
 }
 
 .icon {
