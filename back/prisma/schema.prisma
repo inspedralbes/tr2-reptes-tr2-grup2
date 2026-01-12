@@ -39,6 +39,7 @@ model Tallers {
 
   //Foreigns
   llista_assistencia Assistencia?  
+  inscripcions Inscripcions[]
 }
 
 model Institucions {
@@ -71,8 +72,11 @@ model Inscripcions {
   comentari         String    @db.Text
   documents        String    @db.Text
   autoritzat        Boolean
-
   estat             Boolean?
+
+  // relación obligatoria al taller (campo mapeado a columna `taller_id`)
+  tallerId          Int       @map("taller_id")
+  taller            Tallers   @relation(fields: [tallerId], references: [id])
 
   // Intern relations
   id_institucio  Institucions @relation(fields: [institucio], references: [id])
