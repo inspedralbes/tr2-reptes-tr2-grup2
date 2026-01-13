@@ -1,62 +1,37 @@
 <script setup></script>
 <template>
-  <div id="menu-admin">
-    
-    <button><img src="/assets/img/navBarAdmin/Home.png" alt="" /></button>
-    <button><img src="/assets/img/navBarAdmin/backpack.png" alt="" /></button>
-    <button><img src="/assets/img/navBarAdmin/clipboard.png" alt="" /></button>
-    <button>
-      <img src="/assets/img/navBarAdmin/academic-cap.png" alt="" />
-    </button>
-    <button>
-      <img src="/assets/img/navBarAdmin/document-alt.png" alt="" />
-    </button><script setup></script>
-<template>
   <div id="navBar">
     <div id="btns">
-      <NuxtLink
-        to="/centro/paginaPrincipal-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/admin/paginaPrincipal-Admin" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
-          <img src="/img/navBarProfes/Home.png" alt="" />
+          <img src="/img/navBarAdmin/home.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
 
-      <NuxtLink
-        to="/centro/paginaInscripcionsTalleres-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/admin/paginaInscripcionsTalleres-Profes" custom v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
-          <img src="/img/navBarProfes/clipboard.png" alt="" />
+          <img src="/img/navBarAdmin/backpack.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/centro/paginaEstatInscripcionsTalleres-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/admin/???" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
-          <img src="/img/navBarProfes/checkbox.png" alt="" />
+          <img src="/img/navBarAdmin/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/centro/paginaTallersFinalitzats-Profes"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }"
-      >
+      <NuxtLink to="/admin/???" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
         <button @click="navigate">
-          <img src="/img/navBarProfes/document-alt.png" alt="" />
+          <img src="/img/navBarAdmin/academic-cap.png" alt="" />
+        </button>
+      </NuxtLink>
+      <br />
+      <NuxtLink to="/admin/???" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
+        <button @click="navigate">
+          <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
     </div>
@@ -75,13 +50,16 @@
   margin-top: 30px;
   margin-left: 30px;
 }
+
 #btns {
   margin-top: 10px;
 }
+
 #btns button {
   width: 50px;
   height: 50px;
-  background-color: transparent; 
+  background-color: transparent;
+  /* Fondo inicial transparente */
   border: none;
   cursor: pointer;
   display: flex;
@@ -97,19 +75,10 @@
   object-fit: contain;
 }
 
-#btns button:hover {
-  background-color: #5c6bc0;
-  padding: 10px;
-  transform: scale(1.1);
-}
-
+#btns button:hover,
 .btn-activo {
   background-color: #5c6bc0;
   padding: 10px;
   transform: scale(1.1);
 }
 </style>
-
-  </div>
-</template>
-<style></style>
