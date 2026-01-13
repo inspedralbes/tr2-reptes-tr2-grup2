@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
 
 const tallers = ref([
   {
@@ -28,11 +29,6 @@ const actualizarPrioridad = (id, isOpen) => {
   filaActiva.value = isOpen ? id : null;
 };
 
-// Toggle del desplegable al clicar el botón
-const toggleDetalls = (id) => {
-  filaActiva.value = filaActiva.value === id ? null : id;
-};
-
 const getMesNum = (mes) => {
   const meses = {
     Septembre: "09",
@@ -54,51 +50,6 @@ const getMesNum = (mes) => {
       <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
         <h2 class="mes-titulo">{{ taller.mes }}</h2>
 
-<<<<<<< HEAD
-      <!-- CONTENEDOR: fila + desplegable debajo -->
-      <div
-        v-for="(curso, cIdx) in taller.cursos"
-        :key="cIdx"
-        class="curso-item"
-        :class="{ abierto: filaActiva === `${tIdx}-${cIdx}` }"
-        :style="{ zIndex: filaActiva === `${tIdx}-${cIdx}` ? 100 : 1 }"
-      >
-        <!-- FILA (barra superior) -->
-        <div class="fila-curso">
-          <div class="col-titulo">
-            <span class="texto-titulo">{{ curso.titulo }}</span>
-          </div>
-
-          <div class="col-info">
-            <span class="info-item">
-              <img src="/img/centro/calendar.png" class="icon" alt="icon" />
-              {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
-              <img src="/img/centro/clock.png" class="icon" alt="icon" />
-              {{ curso.hora }}
-            </span>
-          </div>
-
-          <button class="btn-detalls" @click="toggleDetalls(`${tIdx}-${cIdx}`)">
-            <span class="btn-detalls-text">
-              {{ filaActiva === `${tIdx}-${cIdx}` ? "− Detalls" : "+ Detalls" }}
-            </span>
-          </button>
-        </div>
-
-        <!-- DESPLEGABLE HACIA ABAJO -->
-        <transition name="slide">
-          <div v-if="filaActiva === `${tIdx}-${cIdx}`" class="desplegable">
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipiscing elit ante,
-              suscipit felis ornare donec vehicula ultricies accumsan mauris
-              ullamcorper, luctus blandit potenti fusce inceptos nec sagittis.
-              Per aliquet aenean imperdiet hac volutpat at cursus tempus, eu
-              hendrerit dictum nec id pulvinar magna integer, senectus ultrices
-              penatibus turpis varius egestas porttitor.
-            </p>
-          </div>
-        </transition>
-=======
         <div
           v-for="(curso, cIdx) in taller.cursos"
           :key="cIdx"
@@ -128,7 +79,6 @@ const getMesNum = (mes) => {
             />
           </div>
         </div>
->>>>>>> origin/Alba
       </div>
     </div>
   </div>
@@ -178,36 +128,13 @@ const getMesNum = (mes) => {
   width: 1000px;
   height: 300px;
   overflow-y: auto;
-<<<<<<< HEAD
-  overflow-x: visible;
-=======
->>>>>>> origin/Alba
   padding: 10px 20px;
-}
-
-/* contenedor por item (fila + desplegable) */
-.curso-item {
-  position: relative;
-  margin-bottom: 10px;
-}
-
-.curso-item.abierto {
-  background: #d7dbff;
-  border-radius: 25px;
-  padding-bottom: 12px;
-  margin-top: 0px;
-  overflow: hidden;
-}
-
-p {
-  padding: 0 25px 15px 25px;
-  margin: 0;
 }
 
 .fila-curso {
   display: flex;
   align-items: center;
-  margin-bottom: 0px;
+  margin-bottom: 5px;
   height: 45px;
   position: relative;
 }
@@ -254,30 +181,10 @@ p {
   margin-left: 30px;
 }
 
-/* Desplegable */
 .desplegable {
-  background-color: #d5dafb;
-  margin-left: 0;
+  margin-left: 50px;
   position: relative;
-  width: 100%;
-  padding: 0px 0 0 0;
-}
-
-/* Animación del desplegable */
-.slide-enter-active,
-.slide-leave-active {
-  transition: max-height 0.25s ease, opacity 0.25s ease;
-  overflow: hidden;
-}
-.slide-enter-from,
-.slide-leave-to {
-  max-height: 0;
-  opacity: 0;
-}
-.slide-enter-to,
-.slide-leave-from {
-  max-height: 500px;
-  opacity: 1;
+  width: 50px;
 }
 
 .icon {

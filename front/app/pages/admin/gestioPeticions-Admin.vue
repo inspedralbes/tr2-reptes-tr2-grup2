@@ -1,7 +1,7 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
 import navBarProfes from "@/layouts/navBarProfes.vue";
-import llistaTallers from "@/utils/components/centro/listaInscripciones.vue";
+import peticionsAdmin from "@/utils/components/admin/peticionsAdmin.vue";
 </script>
 <template>
   <Encabezado></Encabezado>
@@ -10,13 +10,12 @@ import llistaTallers from "@/utils/components/centro/listaInscripciones.vue";
     <div id="content">
       <div class="header-Peticions">
         <h2>Gestió peticions</h2>
-        <button class="btn-filtres">Filtres</button>
       </div>
       <div class="container-courses">
-        <button class="btn-peticions">Centres</button>
-        <button class="btn-peticions">Tallers</button>
+        <!-- <button class="btn-peticions">Centres</button>
+        <button class="btn-peticions">Tallers</button> -->
         <br />
-        <llistaTallers></llistaTallers>
+        <peticionsAdmin></peticionsAdmin>
       </div>
     </div>
   </div>
@@ -31,58 +30,21 @@ import llistaTallers from "@/utils/components/centro/listaInscripciones.vue";
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
 }
-.header-Peticions {
+/* .header-Peticions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-}
+} */
 .container-courses {
   background-color: #f5f5f5;
   border-radius: 20px;
   padding: 24px;
-  width: 1000px;
-  max-width: 900px;
+  width: 1050px;
+  max-width: 1050px;
   margin: 0 auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
   max-height: 500px;
-}
-
-.btn-peticions {
-  background-color: #e0e0e0;
-  color: #1f1f1f;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 8px 22px;
-  border: 2px solid #bdbdbd;
-  border-radius: 20px;
-  cursor: pointer;
-  margin-right: 10px;
-  transition: background-color 0.2s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.btn-filtres,
-.btn-peticions {
-  background-color: #7986cb;
-  color: #1f1f1f;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 8px 22px;
-  border: 2px solid #3949ab70;
-  border-radius: 20px;
-  cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.btn-filtres:hover,
-.btn-peticions:hover {
-  background-color: #aab4e9;
-  border: 2px solid #5064cd70;
-  transform: translateY(-1px);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
 }
 </style>
