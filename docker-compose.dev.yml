@@ -1,4 +1,12 @@
+# Per iniciar l'entorn de desenvolupament, executeu:
 # docker compose -f docker-compose.dev.yml up
+
+# Per executar les migracions de la base de dades:
+# docker compose -f docker-compose.dev.yml exec tr2g2-back npx prisma migrate dev
+
+# Per executar la inicialització de la base de dades:
+# docker compose -f docker-compose.dev.yml exec tr2g2-back npx prisma db seed
+
 version: "3.9"
 
 services:
@@ -12,12 +20,15 @@ services:
       - 3000:3000
     links:
       - tr2g2-back
+    environment:
+      HOST: 0.0.0.0
+      CHOKIDAR_USEPOLLING: "true"
 
   tr2g2-back:
     build:
       dockerfile: ./back/dev.Dockerfile
       context: .
-    command: sh -c "cp .env.DEV .env && npm install && npm run dev"
+    command: sh -c "rm -rf ./generated/prisma && cp .env.DEV .env && npm install && npx prisma generate && npm run dev"
     volumes:
       - ./back:/usr/src/app
     working_dir: /usr/src/app
@@ -32,8 +43,8 @@ services:
       MYSQL_DATABASE: GESTIO-CURSOS
     volumes:
       - mysql-db:/var/lib/mysql:rw
-      - ./back/data/create_db.sql:/docker-entrypoint-initdb.d/create.sql
-      - ./back/data/insert_db.sql:/docker-entrypoint-initdb.d/inserts.sql
+      # - ./back/data/create_db.sql:/docker-entrypoint-initdb.d/create.sql
+      # - ./back/data/insert_db.sql:/docker-entrypoint-initdb.d/inserts.sql
     ports:
       - 3306:3306
 
