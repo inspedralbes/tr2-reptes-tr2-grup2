@@ -144,3 +144,23 @@ enum Modalitat {
   C
   D
 }
+
+model Periodes {
+  id      Int      @id @default(autoincrement())
+  dataIni DateTime
+  dataFi  DateTime
+
+  // Foreigns
+  historic Historic[]
+}
+
+model Historic {
+  id            Int        @id @default(autoincrement())
+  id_institucio Int
+  periode       Int
+  assistencia   Float
+
+  // Relations
+  id_institucio_rel Institucions @relation(fields: [id_institucio], references: [id])
+  periode_rel       Periodes     @relation(fields: [periode], references: [id])
+}
