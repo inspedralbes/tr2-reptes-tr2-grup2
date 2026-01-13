@@ -140,6 +140,26 @@ export async function getAllInstitucions() {
   }
   return await response.json();
 }
+
+export async function getIdAndNameInstitucions() {
+  const response = await fetch(`${BACK_URL}/institucions`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al obtenir institucions: ${response.statusText}`);
+  }
+  response = await response.json();
+  return response.map((institut) => ({
+    id: institut.id, 
+    nom: institut.nom,
+  }));
+}
+
 export async function getInstitucionById(id) {
   const response = await fetch(`${BACK_URL}/institucions/${id}`, {
     method: "GET",

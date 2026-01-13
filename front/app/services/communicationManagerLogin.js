@@ -112,6 +112,30 @@ export const getUserForRefreshLogin = async (user) => {
   }
 };
 
+export const registerUser = async (
+  id,
+  email,
+  password,
+  rol,
+  institucioId
+) => {
+  try {
+    const data = await fetch(`${BACK_URL}/register`, {
+      //canviar endpoint
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id, email, password, rol, institucioId }),
+    });
+    return await data.json();
+  } catch (error) {
+    console.error("Network error:", error);
+    return { error: "Network error. Please try again later." };
+  }
+};
+
 // Logout for my app
 export const logout = async () => {
   try {

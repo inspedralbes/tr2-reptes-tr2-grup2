@@ -5,12 +5,12 @@ export async function getAllInstitucions() {
   try {
     const prisma = await getPrisma();
     return await prisma.institucions.findMany({
-      include: { id_responsable: true, tallers: true, institucions: true },
+      include: { id:true, nom:true, id_responsable: true, tallers: true, institucions: true },
     });
   } catch (error) {
     throw new Error(`Error al obtenir institucions: ${error.message}`);
   }
-}
+} //Retorn una llista d'institucions amb els seus camps id, nom, id_responsable, tallers i institucions
 
 // SELECT una institució per ID
 export async function getInstitucioById(id) {
