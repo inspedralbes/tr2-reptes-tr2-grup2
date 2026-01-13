@@ -85,116 +85,146 @@ const getMesNum = (mes) => {
 </template>
 
 <style scoped>
+/* Contenedor principal (el recuadro gris) */
 #container {
-  margin-left: 30px;
+  margin-top: -25px;
   font-family: Arial, Helvetica, sans-serif;
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   border-radius: 20px;
-  border-color: #87878779;
-  border-style: solid;
-  border-width: 1px;
-  padding: 30px;
+  border: 1px solid #87878779;
+  padding: 25px;
   width: 1050px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  height: 330px;
+  height: 380px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
+/* Header alineado a la derecha */
 .header-lista {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 50px;
-  margin-bottom: 10px;
-  margin-right: 40px;
-}
-.header-lista p {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-}
-#btn-filtro {
-  background-color: #3949ab;
-  right: 0px;
-  border: none;
-  border-radius: 20px;
-  color: white;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-}
-.lista-container {
-  max-width: 100%;
-  width: 1000px;
-  height: 300px;
-  overflow-y: auto;
-  padding: 10px 20px;
+  gap: 40px;
+  margin-bottom: 15px;
+  padding-right: 60px; /* Alineado con el selector numérico */
 }
 
+.header-lista p {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+#btn-filtro {
+  background-color: #7986cb;
+  border: 3px solid #3949ab;
+  border-radius: 30px;
+  color: #1d1d1d;
+  font-weight: bold;
+  padding: 6px 18px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* Contenedor de la lista */
+.lista-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 20px; /* Espacio para que el scroll no toque las filas */
+}
+
+/* --- ESTILO DE LAS FILAS (Cápsulas como en la imagen) --- */
 .fila-curso {
   display: flex;
   align-items: center;
-  margin-bottom: 5px;
-  height: 45px;
+  margin-bottom: 12px;
+  height: 40px;
   position: relative;
 }
 
+/* Columna Título (Azul oscuro izquierda) */
 .col-titulo {
   background-color: #7986cb;
+  margin-left: 150px;
   color: #1a1a1a;
   z-index: 3;
-  flex: 2;
-  width: 300px;
-  min-height: 35px;
+  width: 220px;
+  height: 36px;
   display: flex;
   align-items: center;
-  padding-left: 25px;
-  border-radius: 25px;
+  padding-left: 20px;
+  border-radius: 20px;
   font-weight: bold;
+  font-size: 0.9rem;
 }
 
+/* Columna Info (Azul medio centro) */
 .col-info {
   background-color: #9fa8da;
-  margin-left: -50px;
+  margin-left: -40px;
   z-index: 2;
-  flex: 2;
-  min-height: 35px;
+  width: 240px;
+  height: 36px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: 0 15px;
-  border-radius: 25px;
+  justify-content: center;
+  gap: 10px;
+  padding-left: 30px;
+  border-radius: 20px;
+  font-size: 0.85rem;
 }
 
+/* Botón Detalles (Azul claro derecha) */
 .btn-detalls {
   background-color: #c5cae9;
-  margin-left: -30px;
+  margin-left: -40px;
   z-index: 1;
-  width: 120px;
-  min-height: 35px;
+  width: 180px;
+  height: 36px;
   border: none;
-  border-radius: 25px;
+  border-radius: 20px;
   cursor: pointer;
   font-weight: bold;
-}
-.btn-detalls-text {
-  margin-left: 30px;
+  text-align: right;
+  padding-right: 25px;
+  font-size: 0.85rem;
 }
 
+/* Selector numérico a la derecha (Alumnes) */
 .desplegable {
-  margin-left: 50px;
-  position: relative;
-  width: 50px;
+  margin-left: auto;
+  margin-right: 30px;
+  width: 45px;
+}
+
+/* --- PERSONALIZACIÓN DEL SCROLLBAR --- */
+.lista-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 10px;
+}
+
+.lista-container::-webkit-scrollbar-thumb {
+  background: #878787;
+  border-radius: 10px;
+}
+
+/* Títulos de Mes */
+.mes-titulo {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  margin: 10px 0px 20px 5px;
+  margin-left: 70px;
 }
 
 .icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
-}
-.mes-titulo {
-  font-size: 1.5rem;
-  color: #333;
-  margin: 20px 0 10px 0;
+  width: 14px;
+  height: 14px;
 }
 </style>
