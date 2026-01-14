@@ -1,5 +1,5 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma/client.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -10,6 +10,7 @@ const adapter = new PrismaMariaDb({
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
   connectionLimit: 5,
+  allowPublicKeyRetrieval: true,
 });
 
 let prismaInstance;
