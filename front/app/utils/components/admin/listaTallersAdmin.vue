@@ -47,7 +47,8 @@ const getMesNum = (mes) => {
 <template>
   <div id="container">
     <div class="header-lista">
-      <button id="btn-filtres">Filtres</button>
+      <button class="btn-header">Crear taller</button>
+      <button class="btn-header">Filtres</button>
     </div>
     <div class="lista-container">
       <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
@@ -130,7 +131,7 @@ const getMesNum = (mes) => {
   color: #333;
 }
 
-#btn-filtres {
+.btn-header {
   background-color: #7986cb;
   color: #1f1f1f;
   font-weight: 600;
@@ -144,7 +145,7 @@ const getMesNum = (mes) => {
     box-shadow 0.2s ease;
 }
 
-#btn-filtres:hover {
+.btn-header:hover {
   background-color: #aab4e9;
   transform: translateY(-1px);
   border: 2px solid #5064cd70;

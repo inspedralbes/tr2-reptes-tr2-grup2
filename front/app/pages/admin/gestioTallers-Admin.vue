@@ -9,7 +9,7 @@ import llistaTallers from "@/utils/components/admin/listaTallersAdmin.vue";
     <navBarAdmin />
     <div id="content">
       <div class="header-Tallers">
-        <h2>Gestió tallers</h2>
+        <h1>Gestió tallers</h1>
       </div>
       <div class="container-courses">
         <br />
