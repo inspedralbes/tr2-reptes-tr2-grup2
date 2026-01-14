@@ -28,7 +28,8 @@ model Tallers {
   modalitat   Modalitat
   direccio    String
   horari      String    @db.Text
-  curs        String
+  curs        Int
+  curs_periode Periodes @relation(fields: [curs], references: [id])
   autoritzat  Boolean   @default(false)
 
   admet_insc  Boolean?
@@ -74,6 +75,7 @@ model Inscripcions {
   documents        String    @db.Text
   autoritzat        Boolean
   estat             Boolean?
+  puntuacio         Float?
 
   // relación obligatoria al taller (campo mapeado a columna `taller_id`)
   tallerId          Int       @map("taller_id")
@@ -153,6 +155,7 @@ model Periodes {
 
   // Foreigns
   historic Historic[]
+  tallers  Tallers[]
 }
 
 model Historic {
