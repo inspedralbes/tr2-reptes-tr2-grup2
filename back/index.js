@@ -42,6 +42,9 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/images", express.static("./files/images"));
+app.use("/archives", express.static("./files/archives"));
+
 /* -------------------------------------------------------------------------- */
 /*                                   ROUTES                                   */
 /* -------------------------------------------------------------------------- */
@@ -183,6 +186,23 @@ app.post("/logout", async (req, res) => {
     console.error("Error en logout:", error);
     res.status(500).json({ error: "Error en logout" });
   }
+});
+
+/* ------------------------------- MULTER ------------------------------ */
+
+import uploadArchives from "./functions/uploads/archives.cjs";
+import uploadImages from "./functions/uploads/images.cjs";
+
+app.post("/uploadImage", uploadImages.single("file"), (req, res) => {
+  res.json({ message: "Imagen subida", file: req.file });
+});
+
+app.post("/uploadArchive", uploadArchives.single("file"), (req, res) => {
+  res.json({ message: "Archivo subido", file: req.file });
+});
+
+app.post("/uploadFiles", uploadArchives.array("files", 10), (req, res) => {
+  res.json({ message: "Archivos subidos", files: req.files });
 });
 
 /* ------------------------------- ASSISTENCIA ------------------------------ */
@@ -343,6 +363,7 @@ app.delete("/tallers/:id", async (req, res) => {
 /* ------------------------------- USUARIS ------------------------------ */
 
 import {
+import archiver from "archiver";
   getAllUsuaris,
   getUsuariById,
   createUsuari,
