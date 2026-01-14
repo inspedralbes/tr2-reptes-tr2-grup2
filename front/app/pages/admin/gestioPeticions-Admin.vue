@@ -1,21 +1,19 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
-import navBarProfes from "@/layouts/navBarProfes.vue";
-import peticionsAdmin from "@/utils/components/admin/peticionsAdmin.vue";
+import navBarAdmin from "@/layouts/navBarAdmin.vue";
+import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
 </script>
 <template>
   <Encabezado></Encabezado>
   <div id="body">
-    <navBarProfes></navBarProfes>
+    <navBarAdmin />
     <div id="content">
       <div class="header-Peticions">
         <h2>Gestió peticions</h2>
       </div>
       <div class="container-courses">
-        <!-- <button class="btn-peticions">Centres</button>
-        <button class="btn-peticions">Tallers</button> -->
         <br />
-        <peticionsAdmin></peticionsAdmin>
+        <listaPeticions></listaPeticions>
       </div>
     </div>
   </div>
@@ -25,17 +23,10 @@ import peticionsAdmin from "@/utils/components/admin/peticionsAdmin.vue";
   display: flex;
 }
 #content {
-  margin-top: 50px;
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
 }
-/* .header-Peticions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-} */
 .container-courses {
   background-color: #f5f5f5;
   border-radius: 20px;

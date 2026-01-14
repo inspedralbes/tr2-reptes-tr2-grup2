@@ -1,11 +1,11 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
-import navBarProfes from "@/layouts/navBarProfes.vue";
+import navBarAdmin from "@/layouts/navBarAdmin.vue";
 </script>
 <template>
   <Encabezado></Encabezado>
   <div id="body">
-    <navBarProfes></navBarProfes>
+    <navBarAdmin />
     <div id="content">
       <div class="header-Centres">
         <h2>Gestió informes</h2>
@@ -22,7 +22,6 @@ import navBarProfes from "@/layouts/navBarProfes.vue";
 }
 
 #content {
-  margin-top: 50px;
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
@@ -32,8 +31,8 @@ import navBarProfes from "@/layouts/navBarProfes.vue";
   background-color: #f5f5f5;
   border-radius: 20px;
   padding: 24px;
-  width: 1000px;
-  max-width: 900px;
+  width: 1050px;
+  max-width: 1050px;
   margin: 0 auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto;

@@ -1,20 +1,20 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
-import navBarProfes from "@/layouts/navBarProfes.vue";
-import llistaCentres from "@/utils/components/centro/listaInscripciones.vue";
+import navBarAdmin from "@/layouts/navBarAdmin.vue";
+import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
 </script>
 <template>
   <Encabezado></Encabezado>
   <div id="body">
-    <navBarProfes></navBarProfes>
+    <navBarAdmin />
     <div id="content">
       <div class="header-Centres">
         <h2>Gestió centres</h2>
-        <button class="btn-filtres">Filtres</button>
+        <!-- <button class="btn-filtres">Filtres</button> -->
       </div>
       <div class="container-courses">
         <br />
-        <llistaCentres></llistaCentres>
+        <listaPeticions></listaPeticions>
       </div>
     </div>
   </div>
@@ -25,7 +25,6 @@ import llistaCentres from "@/utils/components/centro/listaInscripciones.vue";
 }
 
 #content {
-  margin-top: 50px;
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
@@ -34,7 +33,6 @@ import llistaCentres from "@/utils/components/centro/listaInscripciones.vue";
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .btn-filtres {
@@ -61,8 +59,8 @@ import llistaCentres from "@/utils/components/centro/listaInscripciones.vue";
   background-color: #f5f5f5;
   border-radius: 20px;
   padding: 24px;
-  width: 1000px;
-  max-width: 900px;
+  width: 1050px;
+  max-width: 1050px;
   margin: 0 auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto;

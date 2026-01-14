@@ -115,6 +115,7 @@ const getMesNum = (mes) => {
   display: flex;
   flex-direction: column;
 }
+
 .header-lista {
   display: flex;
   justify-content: flex-end;

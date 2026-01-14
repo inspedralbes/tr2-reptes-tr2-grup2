@@ -1,12 +1,12 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
-import navBarProfes from "@/layouts/navBarProfes.vue";
+import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import llistaTallers from "@/utils/components/admin/listaTallersAdmin.vue";
 </script>
 <template>
   <Encabezado></Encabezado>
   <div id="body">
-    <navBarProfes></navBarProfes>
+    <navBarAdmin />
     <div id="content">
       <div class="header-Tallers">
         <h2>Gestió tallers</h2>
@@ -32,7 +32,6 @@ import llistaTallers from "@/utils/components/admin/listaTallersAdmin.vue";
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .container-courses {
