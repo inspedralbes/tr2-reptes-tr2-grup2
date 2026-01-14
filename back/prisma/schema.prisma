@@ -57,6 +57,7 @@ model Institucions {
   //Foreigns 
   tallers    Tallers[]
   institucions Inscripcions?
+  historic    Historic[]
 }
 
 model Inscripcions {

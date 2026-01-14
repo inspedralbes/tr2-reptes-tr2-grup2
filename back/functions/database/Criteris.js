@@ -1,75 +1,99 @@
 import { log } from "console";
-import { getAllInscripcions } from "./CRUD/Inscripcions.js";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import { getInscripcioById } from "./CRUD/Inscripcions.js";
 import { getPrisma } from "./dbConn.js";
 
-function safeParseAlumnes(val) {
-  if (val == null) return [];
-  if (Array.isArray(val)) return val;
-  if (typeof val !== "string") return [val];
-  try {
-    const p = JSON.parse(val);
-    return Array.isArray(p) ? p : [p];
-  } catch (e) {
-    console.warn(
-      "safeParseAlumnes: JSON.parse failed, returning []",
-      e.message
-    );
-    return [];
-  }
-}
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const weights = JSON.parse(
+  fs.readFileSync(join(__dirname, "../../data/priority_weights.json"), "utf-8")
+);
 
-export async function collectInscripcionsByTaller(tallerId) {
-  const todasLasInscripciones = await getAllInscripcions();
-  const inscripcionesEncontradas = [];
+const PRIORITY_WEIGHTS = {
+  FIRST_TIME: weights.FIRST_TIME ?? 20,
+  ATTENDANCE_RISK: weights.ATTENDANCE_RISK ?? -30,
+  DIVERSITY: weights.DIVERSITY ?? 15,
+  MIN_ASSIST: weights.MIN_ASSIST ?? 0.8,
+  NO_CAPACITY: weights.NO_CAPACITY ?? -30,
+};
 
-  for (const inscripcion of todasLasInscripciones) {
-    // Normalizar alumnes a array seguro
-    const listaAlumnes = safeParseAlumnes(inscripcion.alumnes);
+let score = 50;
+const prisma = await getPrisma();
+const tallerId = 1;
+const inscripcioId = 3;
 
-    for (const alumne of listaAlumnes) {
-      const tallerVal = Number(alumne?.TALLER);
-
-      if (Number(tallerId) === tallerVal) {
-        inscripcionesEncontradas.push({
-          inscripcioId: inscripcion.id,
-          taller: alumne.TALLER,
-        });
-      }
-    }
-  }
-
-  return inscripcionesEncontradas;
-}
-
-export async function fechaLimite(tallerId) {
-  const inscripciones = await collectInscripcionsByTaller(tallerId);
-
-  // Obtener el valor de admet_insc del taller
-  const prisma = await getPrisma();
-  const taller = await prisma.tallers.findUnique({
-    where: { id: Number(tallerId) },
-    select: { id: true, admet_insc: true },
+export async function isFirstTime(tallerId, inscripcioId) {
+  const inscripcio = await prisma.inscripcions.findUnique({
+    where: { id: Number(inscripcioId) },
+    select: {
+      tallerId: true,
+      primera_vegada: true,
+    },
   });
-    console.log(taller.admet_insc);
 
-  // Si el taller no admite inscripciones, devolver array vacío
-  // Usar comparación estricta con `true` para evitar valores truthy como '0' (string)
-  if (taller?.admet_insc !== true) {
-    return {
-      taller: {
-        id: taller?.id ?? Number(tallerId),
-        admet_insc: Boolean(taller?.admet_insc),
-        
-        
-      },
-      inscripciones: [],
-      totalInscripciones: 0,
-    };
+  if (inscripcio.tallerId == tallerId && inscripcio.primera_vegada) {
+    score += PRIORITY_WEIGHTS.FIRST_TIME;
   }
+}
+
+export async function hasAttendanceRisk(inscripcioId) {
+  const idinstitRes = await prisma.inscripcions.findUnique({
+    where: { id: Number(inscripcioId) },
+    select: { institucio: true },
+  });
+  const idinstit = idinstitRes?.institucio;
+  if (!idinstit) return;
+
+  const assist = await prisma.historic.findMany({
+    where: { id_institucio: Number(idinstit) },
+    select: { assistencia: true },
+  });
+  if (!assist || assist.length === 0) return;
+
+  let suma = 0;
+  for (let i = 0; i < assist.length; i++) {
+    suma += assist[i].assistencia;
+  }
+
+  const porcentaje = suma / assist.length;
+  if (porcentaje < PRIORITY_WEIGHTS.MIN_ASSIST) {
+    score += PRIORITY_WEIGHTS.ATTENDANCE_RISK;
+  }
+}
+
+export async function validateCapacity(tallerId, inscripcioId) {
+  const capacity = await prisma.Tallers.findUnique({
+    where: { id: Number(tallerId) },
+    select: {
+      places_disp: true,
+    },
+  });
+  const sol_insc = await prisma.inscripcions.findUnique({
+    where: { id: Number(inscripcioId) },
+    select: {
+      alumnes: true,
+    },
+  });
+  if (capacity.places_disp < sol_insc.alumnes.QUANTITAT) {
+    score += PRIORITY_WEIGHTS.NO_CAPACITY;
+  }
+}
+
+export async function calcularPuntuacion(inscripcioId, tallerId) {
+  score = 50;
+  const inscripcio = await getInscripcioById(inscripcioId);
+
+  await isFirstTime(tallerId, inscripcioId);
+  await hasAttendanceRisk(inscripcioId);
+  await validateCapacity(tallerId, inscripcioId);
 
   return {
-    taller: { id: taller.id, admet_insc: Boolean(taller.admet_insc) },
-    inscripciones: inscripciones,
-    totalInscripciones: inscripciones.length,
+    id: inscripcio.id,
+    score: score,
   };
 }
+
+const resultado = await calcularPuntuacion(inscripcioId, tallerId);
+console.log(resultado);
+//
