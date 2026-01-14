@@ -10,7 +10,6 @@ import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
     <div id="content">
       <div class="header-Centres">
         <h2>Gestió centres</h2>
-        <!-- <button class="btn-filtres">Filtres</button> -->
       </div>
       <div class="container-courses">
         <br />
