@@ -25,6 +25,24 @@ import Encabezado from "@/layouts/encabezado.vue";
         >
           <button @click="navigate">Personal del Centre</button>
         </NuxtLink>
+        <br />
+
+        <NuxtLink
+          to="/forms/log-in"
+          custom
+          v-slot="{ navigate }"
+        >
+          <button @click="navigate">Formulario Login</button>
+        </NuxtLink>
+        <br />
+
+        <NuxtLink
+          to="/forms/sign-in"
+          custom
+          v-slot="{ navigate }"
+        >
+          <button @click="navigate">Formulario Registro</button>
+        </NuxtLink>
       </div>
     </div>
   </div>
