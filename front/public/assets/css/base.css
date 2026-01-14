@@ -2,6 +2,16 @@
     background-color: #FCFCFC;
 }
 
+@font-face {
+    font-family: 'Coolvetica';
+    src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
+}
+
+@font-face {
+    font-family: 'CoolveticaItalic';
+    src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg\ It.otf);
+}
+
 html, body {
     margin: 0;
     padding: 0;

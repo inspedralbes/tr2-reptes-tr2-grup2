@@ -23,7 +23,6 @@ const tallers = ref([
   },
 ]);
 
-// Guardamos el ID de la fila que tiene el desplegable abierto
 const filaActiva = ref(null);
 
 const actualizarPrioridad = (id, isOpen) => {
@@ -42,37 +41,43 @@ const getMesNum = (mes) => {
 </script>
 
 <template>
-  <div class="lista-container">
-    <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
-      <h2 class="mes-titulo">{{ taller.mes }}</h2>
+  <div id="container">
+    <div class="header-lista">
+      <button id="btn-filtro">Filtres</button>
+      <p>Alumnes</p>
+    </div>
+    <div class="lista-container">
+      <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
+        <h2 class="mes-titulo">{{ taller.mes }}</h2>
 
-      <div
-        v-for="(curso, cIdx) in taller.cursos"
-        :key="cIdx"
-        class="fila-curso"
-        :style="{ zIndex: filaActiva === `${tIdx}-${cIdx}` ? 100 : 1 }"
-      >
-        <div class="col-titulo">
-          <span class="texto-titulo">{{ curso.titulo }}</span>
-        </div>
+        <div
+          v-for="(curso, cIdx) in taller.cursos"
+          :key="cIdx"
+          class="fila-curso"
+          :style="{ zIndex: filaActiva === `${tIdx}-${cIdx}` ? 100 : 1 }"
+        >
+          <div class="col-titulo">
+            <span class="texto-titulo">{{ curso.titulo }}</span>
+          </div>
 
-        <div class="col-info">
-          <span class="info-item">
-            <img src="/img/centro/calendar.png" class="icon" />
-            {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
-            <img src="/img/centro/clock.png" class="icon" />
-            {{ curso.hora }}
-          </span>
-        </div>
+          <div class="col-info">
+            <span class="info-item">
+              <img src="/img/centro/calendar.png" class="icon" />
+              {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
+              <img src="/img/centro/clock.png" class="icon" />
+              {{ curso.hora }}
+            </span>
+          </div>
 
-        <button class="btn-detalls">
-          <span class="btn-detalls-text">+ Detalls</span>
-        </button>
+          <button class="btn-detalls">
+            <span class="btn-detalls-text">+ Detalls</span>
+          </button>
 
-        <div class="desplegable">
-          <SelectorAlumnos
-            @toggle="(state) => actualizarPrioridad(`${tIdx}-${cIdx}`, state)"
-          />
+          <div class="desplegable">
+            <SelectorAlumnos
+              @toggle="(state) => actualizarPrioridad(`${tIdx}-${cIdx}`, state)"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -80,11 +85,49 @@ const getMesNum = (mes) => {
 </template>
 
 <style scoped>
+#container {
+  margin-left: 30px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  border-color: #87878779;
+  border-style: solid;
+  border-width: 1px;
+  padding: 30px;
+  width: 1050px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  height: 330px;
+  display: flex;
+  flex-direction: column;
+}
+.header-lista {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 50px;
+  margin-bottom: 10px;
+  margin-right: 40px;
+}
+.header-lista p {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+#btn-filtro {
+  background-color: #3949ab;
+  right: 0px;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
 .lista-container {
-  max-width: 1000px;
-  height: 370px;
+  max-width: 100%;
+  width: 1000px;
+  height: 300px;
   overflow-y: auto;
-  overflow-x: visible; /* IMPORTANTE: para que no corte el desplegable hacia los lados */
   padding: 10px 20px;
 }
 
@@ -93,10 +136,9 @@ const getMesNum = (mes) => {
   align-items: center;
   margin-bottom: 5px;
   height: 45px;
-  position: relative; /* Necesario para que el z-index dinámico funcione */
+  position: relative;
 }
 
-/* Estilos de tus columnas (mantengo los tuyos con ligeros ajustes de z-index) */
 .col-titulo {
   background-color: #7986cb;
   color: #1a1a1a;

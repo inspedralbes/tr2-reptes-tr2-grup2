@@ -3,8 +3,7 @@ import Encabezado from "@/layouts/encabezado.vue";
 import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import graficaTallers from "@/utils/components/admin/graficaTallers.vue";
 import graficaInstitucions from "@/utils/components/admin/graficaInstitucions.vue";
-import calendari from "@/utils/components/admin/calendari.vue"
-
+import calendari from "@/utils/components/admin/calendari.vue";
 </script>
 <template>
   <Encabezado />
@@ -35,12 +34,10 @@ import calendari from "@/utils/components/admin/calendari.vue"
 }
 
 #contenido {
-  margin-top: 50px;
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
 }
-
 
 #user {
   color: #5c6bc0;
@@ -55,11 +52,12 @@ import calendari from "@/utils/components/admin/calendari.vue"
 
 /* Estilització de les targetes, canviar amb el style de Valeria/Alba */
 .tarjetas-admin {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  min-width: 600px;
-  max-height: 500px;
+  background-color: #f5f5f5;
+  border-radius: 20px;
+  padding: 24px;
+  padding-top: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  min-width: 500px;
+  max-height: 250px;
 }
 </style>
