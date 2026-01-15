@@ -1,14 +1,29 @@
 version: "3.9"
 
 services:
-  tr2g2-front:
+  nginx:
     build:
-      context: ./front
-    restart: always
+      context: .
+      dockerfile: nginx.Dockerfile # Asume un Dockerfile de Nginx en la raíz.
+    container_name: trr-nginx-prod
+    # Puerto HTTP estándar
     ports:
-      - 80:80
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
-      - tr2g2-back
+      tr2g2-back:
+        condition: service_started
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
   tr2g2-back:
     image: node:23-bookworm-slim
     command: sh -c "cp -f .env.PROD .env && npm install && node index.js"
@@ -16,7 +31,7 @@ services:
       - ./back:/usr/src/app
     working_dir: /usr/src/app
     ports:
-      - 3000:3000
+      - 8000:8000
 
   tr2g2-mysql:
     image: mysql
