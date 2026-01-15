@@ -11,7 +11,7 @@ RUN npm run generate
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
 # Copy the built assets from the build stage
-COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY --from=build-stage /app/.output/public /usr/share/nginx/html
 # Copia la configuración de Nginx desde la etapa de construcción
 COPY --from=build-stage /app/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
