@@ -8,6 +8,9 @@ const tallersGrouped = ref([]);
 const cursoExpandido = ref(null);
 const filaActiva = ref(null);
 const cargando = ref(true);
+const isMenuOpen = ref(false);
+const selectedMonth = ref(null);
+
 
 // Funciones de UI
 const toggleDetalles = (id) => {
@@ -17,6 +20,12 @@ const toggleDetalles = (id) => {
 const actualizarPrioridad = (id, isOpen) => {
   filaActiva.value = isOpen ? id : null;
 };
+
+//Para los filtros
+const meses = [
+  "Gener", "Febrer", "Març", "Abril", "Maig", "Juny",
+  "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"
+];
 
 // Lógica de procesamiento de datos
 const processTallers = (data) => {
@@ -119,8 +128,35 @@ const getMesNum = (mes) => {
     <div class="header-lista">
       <button id="btn-filtro">Filtres</button>
       <p>Alumnes</p>
-    </div>
 
+    </div>
+    <div id="popup-filter">
+      <button>x</button>
+
+      <h3>MES</h3>
+      <div>
+        <div @click="isMenuOpen = !isMenuOpen" class="select-header">
+          <span v-if="selectedMonth === null">Escull el mes...</span>
+          <span v-else>{{ selectedMonth }}</span>
+          <span>▲</span>
+        </div>
+        <div v-if="isMenuOpen">
+          <div v-for="mes in meses" :key="mes">
+            <button 
+              @click="selectedMonth = mes" 
+              :class="{ 'is-active': selectedMonth === mes }"
+            >
+              {{ mes }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <h3>TALLER</h3>
+      <h3>HORARI</h3>
+      </div
+
+    </div>
     <div class="lista-container">
       <div v-if="tallersGrouped.length === 0" class="loading-state">
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
@@ -202,6 +238,46 @@ const getMesNum = (mes) => {
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
+}
+
+#popup-filter{
+  position: absolute;
+  top: 150px;
+  right: 150px;
+  width: 300px;
+  height: 400px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 1000;
+}
+.months-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+/* El botón (chip) */
+.month-chip {
+  background-color: #c5cae9;
+  border: none;
+  border-radius: 20px;
+  padding: 5px 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.is-active {
+  background-color: #3949ab !important;
+  color: white;
+}
+h3{
+  grid-column: span 2;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #7987cb8a;
+  padding-bottom: 10px;
 }
 
 .loading-state {

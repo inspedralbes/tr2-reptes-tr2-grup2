@@ -1,19 +1,95 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue"; 
-const pantalla = ref('primero');
+import Encabezado from "@/layouts/encabezado.vue";
+const pantalla = ref("primero");
+const newUser = ref([]);
+
 //Variables para formulario del centre
 const input_sch_name = ref("");
 const input_sch_id = ref("");
 const input_sch_map = ref("");
 //Variables para formulario persona de contacte
 const input_name = ref("");
+const input_surname = ref("");
 const input_email = ref("");
 const input_pass = ref("");
 const input_confirm_pass = ref("");
+
+function reviewForm1() {
+  if (!input_sch_name.value || !input_sch_id.value) {
+    alert("Si us plau, omple tots els camps obligatoris.");
+    return;
+  }
+  pantalla.value = "segundo";
+}
+
+function reviewForm2() {
+  const camposCompletos =
+    input_name.value &&
+    input_surname.value &&
+    input_email.value &&
+    input_pass.value &&
+    input_confirm_pass.value;
+
+  if (!camposCompletos) {
+    alert("Si us plau, omple tots els camps.");
+    return;
+  }
+
+  if (input_pass.value !== input_confirm_pass.value) {
+    alert("Les contrasenyes no coincideixen.");
+    return;
+  }
+  sendForm();
+}
+
+//Función para enviar la info del usuario al backend después de validar el formulario
+async function sendForm() {
+  const datosParaEnviar = {
+    nom: `${input_name.value} ${input_surname.value}`,
+    email: input_email.value,
+    password: input_pass.value,
+    rol: "Extern",
+    tallers: null,
+    coordinador: null,
+    responsable: {
+      nom: input_sch_name.value,
+      tipus: "AgentExtern",
+      contacte: input_email.value,
+      codi_centre: input_sch_id.value
+    }
+  };
+
+  try {
+    const response = await fetch('PreguntarEndpointAClicli', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify(datosParaEnviar)
+    });
+
+    // Control de errores
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error en el registre');
+    }
+
+    //Esperamos la respuesta de el back y si todo va bien se registrara
+    const data = await response.json();
+    console.log("Èxit:", data);
+    alert("Registre completat amb èxit!");
+
+  } catch (error) {
+    console.error("Error detallat:", error);
+    alert("No s'ha pogut fer el registre: " + error.message);
+  }
+}
+
+onMounted(() => {});
 </script>
 
 <template>
-    <Encabezado></Encabezado> 
+  <Encabezado></Encabezado>
   <div id="cuerpo">
     <div id="contenidor">
       <h2>Registre del Centre</h2>
@@ -21,24 +97,24 @@ const input_confirm_pass = ref("");
 
       <div v-if="pantalla === 'primero'" id="prim-part">
         <h3>Informació del centre:</h3>
-        
+
         <div class="form-group">
           <label for="sch-name">Nom del centre:*</label>
-          <input id="sch-name" type="text">
+          <input v-model="input_sch_name" id="sch-name" type="text" />
         </div>
 
         <div class="form-group">
           <label for="sch-id">Identificador del centre:*</label>
-          <input id="sch-id" type="text">
+          <input v-model="input_sch_id" id="sch-id" type="text" />
         </div>
 
         <div class="form-group">
           <label for="sch-map">Adreça: (Opcional)</label>
-          <input id="sch-map" type="text">
+          <input v-model="input_sch_map" id="sch-map" type="text" />
         </div>
 
         <div class="button-container single-btn">
-          <button @click="pantalla = 'segundo'">Següent</button>
+          <button @click="reviewForm1">Següent</button>
         </div>
       </div>
 
@@ -47,34 +123,34 @@ const input_confirm_pass = ref("");
 
         <div class="form-group">
           <label>Nom:</label>
-          <input type="text">
+          <input v-model="input_name" type="text" />
         </div>
 
         <div class="form-group">
           <label>Cognoms:</label>
-          <input type="text">
+          <input v-model="input_surname" type="text" />
         </div>
 
         <div class="form-group">
           <label>Email:</label>
-          <input type="email">
+          <input v-model="input_email" type="email" />
         </div>
 
         <div class="form-group">
           <label>Contrasenya:</label>
-          <input type="password">
+          <input v-model="input_pass" type="password" />
         </div>
 
         <div class="spacer"></div>
 
         <div class="form-group">
           <label>Valida la contrasenya:</label>
-          <input type="password">
+          <input v-model="input_confirm_pass" type="password" />
         </div>
 
         <div class="button-container">
           <button class="btn-back" @click="pantalla = 'primero'">Tornar</button>
-          <button class="btn-next">Registrar</button>
+          <button class="btn-next" @click="reviewForm2">Registrar</button>
         </div>
       </div>
     </div>
@@ -99,15 +175,22 @@ const input_confirm_pass = ref("");
   box-shadow: 0px 0px 13px 3px #909090;
   padding: 10px;
   padding-left: 40px;
-   padding-right: 40px;
+  padding-right: 40px;
   border-radius: 15px;
-  width: 700px; 
+  width: 700px;
 }
 
-h2 { margin-bottom: 5px; }
-h4 { margin-bottom: 25px; color: #555; font-weight: normal; }
+h2 {
+  margin-bottom: 5px;
+}
+h4 {
+  margin-bottom: 25px;
+  color: #555;
+  font-weight: normal;
+}
 
-#prim-part, #sec-part {
+#prim-part,
+#sec-part {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
@@ -143,11 +226,10 @@ input {
   display: block;
 }
 
-
 .button-container {
   grid-column: span 2;
   display: flex;
-  justify-content: flex-end; 
+  justify-content: flex-end;
   gap: 20px;
   margin-top: -10px;
 }
@@ -156,7 +238,7 @@ button {
   width: 130px;
   height: 45px;
   border-radius: 50px;
-  background-color: #1F0DCA;
+  background-color: #1f0dca;
   border: none;
   color: white;
   font-weight: bold;

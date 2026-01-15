@@ -1,9 +1,52 @@
 <script setup>
+import { ref } from 'vue';
 import Encabezado from "@/layouts/encabezado.vue";
 
+// Variables reactivas para el formulario
 const input_email = ref("");
-const input_pass = ref("");
+const input_pass = ref(""); 
+const cargando = ref(false);
+
+// Función para gestionar el inicio de sesión mandandolo al backend para que funcione
+async function handleLogin() {
+  if (cargando.value) return;
+  if (!input_email.value || !input_pass.value) {
+    alert("Si us plau, introdueix el teu email i la contrasenya.");
+    return;
+  }
+
+  cargando.value = true;
+
+  try {
+    const response = await fetch('PreguntarElEndpointAClicli', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: input_email.value,
+        password: input_pass.value
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Login correcto:", data);
+      alert("Login exitós! Benvingut/da.");
+      localStorage.setItem('auth_token', data.token);
+      // navigateTo('/dashboard');
+      alert(data.message || "Credencials incorrectes. Revisa el teu email i contrasenya.");
+    }
+  } catch (error) {
+    console.error("Error en la conexión:", error);
+    alert("No s'ha pogut connectar amb el servidor. Intenta-ho més tard.");
+  } finally {
+    cargando.value = false;
+  }
+}
 </script>
+
 <template>
   <Encabezado></Encabezado>
   <div id="cuerpo">
@@ -11,83 +54,123 @@ const input_pass = ref("");
       <div id="prim-menu">
         <h3>Indica les teves credencials:</h3>
         <br />
-        <br />
-        <input v-model="input_email" type="text" placeholder="Email" required />
-        <br />
-        <br />
-        <input
-          v-model="input_pass"
-          type="text"
-          placeholder="Contraseña"
-          required
-        />
-        <br />
-        <br />
-        <a href="">He oblidat la meva contrasenya.</a>
-        <br />
-        <NuxtLink to="/forms/sign-in" custom v-slot="{ navigate }">
-          <a href="/forms/sign-in">No tens compte? Dona't d'alta!</a>
-        </NuxtLink>
 
-        <br />
-        <br />
-        <button>Entrar</button>
+        <form @submit.prevent="handleLogin">
+          <div class="form-group">
+            <input 
+              v-model="input_email" 
+              type="email" 
+              placeholder="Email" 
+              required 
+            />
+          </div>
+          <br />
+          <div class="form-group">
+            <input
+              v-model="input_pass"
+              type="password" 
+              placeholder="Contrasenya"
+              required
+            />
+          </div>
+          <br />
+
+          <a href="#" class="link-small">He oblidat la meva contrasenya.</a>
+          <br />
+          
+          <NuxtLink to="/forms/sign-in" class="link-small">
+            No tens compte? Dona't d'alta!
+          </NuxtLink>
+
+          <br /><br />
+
+          <button type="submit" :disabled="cargando">
+            {{ cargando ? 'Entrant...' : 'Entrar' }}
+          </button>
+        </form>
       </div>
     </div>
   </div>
 </template>
+
 <style scoped>
 @font-face {
   font-family: "Coolvetica";
   src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
 }
+
 #cuerpo {
-  font-family: "Coolvetica";
+  font-family: "Coolvetica", sans-serif;
   margin-top: 100px;
   display: flex;
   justify-content: center;
-  justify-items: center;
   align-items: center;
 }
+
 #contenidor {
-  justify-content: center;
   font-weight: lighter;
   text-align: center;
   background-color: #ffffff;
-  -webkit-box-shadow: 0px 0px 13px 3px #909090;
   box-shadow: 0px 0px 13px 3px #909090;
-  padding: 20px;
-  border-radius: 10px;
-  width: 500px;
-  min-height: 350px;
+  padding: 30px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 450px;
+}
+
+h3 {
+  margin-bottom: 10px;
 }
 
 input {
-  width: 200px;
-  height: 30px;
-  background-color: #d0d0d0;
-  padding-left: 20px;
-  border-radius: 20px;
-  border-color: transparent;
-  font-size: large;
+  width: 80%;
+  height: 40px;
+  background-color: #f0f0f0;
+  padding: 0 20px;
+  border-radius: 25px;
+  border: 1px solid transparent;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.3s;
 }
 
-a {
-  font-size: smaller;
+input:focus {
+  border: 1px solid #1f0dca;
+}
+
+.link-small {
+  font-size: 0.85rem;
+  color: #555;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.link-small:hover {
+  text-decoration: underline;
+  color: #1f0dca;
 }
 
 button {
-  width: 100px;
+  width: 150px;
   height: 50px;
-  font-size: large;
-  border-color: transparent;
-  border-radius: 15px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 25px;
   background-color: #1f0dca;
   color: white;
+  font-weight: bold;
   transition: 0.3s;
   cursor: pointer;
 }
+
 button:hover {
-  opacity: 0.8;
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 </style>
