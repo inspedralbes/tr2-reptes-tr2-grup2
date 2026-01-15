@@ -1,12 +1,4 @@
 <script setup>
-//    INFO PARA DEVS
-//    Falta el figma de los detalles tanto de descripcion como items sencillo
-//    hasta ahora pondré
-//
-//
-//
-//
-//
 import { ref, onMounted } from "vue";
 import { getAllInstitucions } from "~/services/communicationManagerDatabase";
 
@@ -18,11 +10,10 @@ onMounted(async () => {
   console.log(instituts.value);
 });
 
-const actualizarPrioridad = (id, isOpen) => {
-  filaActiva.value = isOpen ? id : null;
-};
+// const actualizarPrioridad = (id, isOpen) => {
+//   filaActiva.value = isOpen ? id : null;
+// };
 
-// Toggle del desplegable al clicar el botón
 const toggleDetalls = (id) => {
   filaActiva.value = filaActiva.value === id ? null : id;
 };
