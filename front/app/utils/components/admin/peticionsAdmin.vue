@@ -67,14 +67,8 @@ const toggleDetalls = (id) => {
         <!-- DESPLEGABLE HACIA ABAJO -->
         <transition name="slide">
           <div v-if="filaActiva === institut.id" class="desplegable">
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipiscing elit ante,
-              suscipit felis ornare donec vehicula ultricies accumsan mauris
-              ullamcorper, luctus blandit potenti fusce inceptos nec sagittis.
-              Per aliquet aenean imperdiet hac volutpat at cursus tempus, eu
-              hendrerit dictum nec id pulvinar magna integer, senectus ultrices
-              penatibus turpis varius egestas porttitor.
-            </p>
+            <p>Responsable: {{ institut.responsable }}</p>
+            <p>Contacte: {{ institut.contacte }}</p>
           </div>
         </transition>
       </div>
