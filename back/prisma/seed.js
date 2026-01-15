@@ -19,11 +19,32 @@ const workshopsData = [
 ];
 
 // Dades extretes del teu graficaInstitucions.vue
+// Dades extretes i actualitzades per al model Institucions
 const institutionsData = [
-  { name: "IES Joan Miró" },
-  { name: "Escola Politècnica" },
-  { name: "Institut de Tecnologies" },
-  { name: "Centre Cívic Barri" }, // Un extra de farciment
+  {
+    name: "IES Joan Miró",
+    direccio: "Carrer de València, 152",
+    codi_postal: "08011",
+    telefon: 934512233,
+  },
+  {
+    name: "Escola Politècnica",
+    direccio: "Avinguda de la Universitat, 1",
+    codi_postal: "17003",
+    telefon: 972418000,
+  },
+  {
+    name: "Institut de Tecnologies",
+    direccio: "Carrer de Sancho de Ávila, 52",
+    codi_postal: "08018",
+    telefon: 932210044,
+  },
+  {
+    name: "Centre Cívic Barri",
+    direccio: "Plaça Major, 1",
+    codi_postal: "08201",
+    telefon: 937250011,
+  },
 ];
 
 // Funció auxiliar per crear usuaris únics (necessari per les restriccions @unique de l'esquema)
@@ -77,7 +98,6 @@ async function main() {
   const createdInstitutions = [];
 
   for (const instData of institutionsData) {
-    // Cada institució necessita un responsable ÚNIC segons el teu esquema
     const responsableUser = await createDummyUser("Professorat", "Responsable");
 
     const newInst = await prisma.institucions.create({
@@ -89,10 +109,13 @@ async function main() {
           .replace(/\s+/g, "")
           .toLowerCase()}.cat`,
         codi_centre: `COD-${Math.floor(Math.random() * 10000)}`,
+        direccio: instData.direccio,
+        codi_postal: instData.codi_postal,
+        telefon: instData.telefon,
       },
     });
     createdInstitutions.push(newInst);
-    console.log(`Institució creada: ${instData.name}`);
+    console.log(`Institució creada: ${instData.name} (${instData.direccio})`);
   }
 
   /* -------------------------------------------------------------------------- */
