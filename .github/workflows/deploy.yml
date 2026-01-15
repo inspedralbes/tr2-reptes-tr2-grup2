@@ -1,4 +1,4 @@
-name: Deploy to Production (Test Connection)
+name: Deploy to Production
 
 on:
   push:
@@ -7,16 +7,61 @@ on:
 
 jobs:
   deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          API_URL: ${{ secrets.API_URL }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           port: 22
+          timeout: 600s
+          command_timeout: 30m
+          envs: API_URL, DB_PASSWORD, SERVER_USERNAME
           script: |
-            echo "✅ ¡Conexión SSH exitosa!"
-            echo "El servidor es accesible y las credenciales son correctas."
-            echo "No se ha desplegado nada porque estamos en modo prueba."
+            # 1. Anar a la carpeta del projecte
+            cd /tr2-reptes-tr2-grup2
+
+            # 2. Baixar els últims canvis del codi
+            echo "Baixant canvis de Git..."
+            git pull origin main
+
+            # 3. Crear .env.PROD FRONT
+            # Nota: Fem servir les variables d'entorn ($VAR) en lloc de la interpolació de GitHub
+            echo "Creant .env.PROD FRONT..."
+            cd front
+            echo "VITE_API_URL=$API_URL" > .env
+            cd ..
+
+            # 4. Crear .env.PROD BACK
+            echo "Creant .env.PROD BACK..."
+            cd back
+            echo "PORT=8000" > .env
+            echo "HOST=tr2g2-mysql" >> .env
+            echo "USER=root" >> .env
+            echo "PASSWORD=$DB_PASSWORD" >> .env
+            # Construïm la URL fent servir les variables segures
+            echo "DATABASE_URL=mysql://$SERVER_USERNAME:$DB_PASSWORD@tr2g2-mysql:3306/GESTIO-CURSOS" >> .env
+            echo "DATABASE_USER=$SERVER_USERNAME" >> .env
+            echo "DATABASE_PASSWORD=$DB_PASSWORD" >> .env
+            echo "DATABASE_NAME=GESTIO-CURSOS" >> .env
+            echo "DATABASE_HOST=tr2g2-mysql" >> .env
+            echo "DATABASE_PORT=3306" >> .env
+            cd ..
+
+            # 5. Aixecar contenidors reconstruint la imatge
+            echo " Construint i aixecant contenidors..."
+            docker compose -f docker-compose.prod.yml up --build -d
+
+            # 6. Executar migracions i seed dins del contenidor
+            echo " Executant migracions i seed..."
+            # El flag -T és vital per evitar errors de "interactive terminal"
+            docker compose -f docker-compose.prod.yml exec -T tr2g2-back sh -c "npx prisma migrate deploy && npx prisma db seed"
+
+            echo "Desplegem finalitzat amb èxit!"
