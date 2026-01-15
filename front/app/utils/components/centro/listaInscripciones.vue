@@ -1,60 +1,23 @@
 <script setup>
 import { ref } from "vue";
 import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
+import { getAllTallers } from "@/services/communicationManagerDatabase.js";
 
 const cursoExpandido = ref(null);
 const toggleDetalles = (id) => {
   cursoExpandido.value = cursoExpandido.value === id ? null : id;
 };
-const tallers = ref([
-  {
-    mes: "Septembre",
-    diaNum: 23,
-    cursos: [
-      {
-        titulo: "Curs de Vela",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-    ],
-  },
-  {
-    mes: "Octubre",
-    diaNum: 17,
-    cursos: [
-      {
-        titulo: "Curs de Carpinteria",
-        hora: "16:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Cosir",
-        hora: "10:00",
-        imagen: "/img/centro/image.png",
-      },
-    ],
-  },
-]);
+onMounted(async () => {
+  try {
+    const data = await getAllTallers();
+    // Si tu backend devuelve directamete la estructura agrupada por meses, lo asignas así:
+    tallers.value = data;
+  } catch (error) {
+    console.error("Error cargando talleres:", error);
+  } finally {
+    isLoading.value = false;
+  }
+});
 
 const filaActiva = ref(null);
 
@@ -68,6 +31,14 @@ const getMesNum = (mes) => {
     Octubre: "10",
     Novembre: "11",
     Desembre: "12",
+    Gener: "01",
+    Febrer: "02",
+    Marc: "03",
+    Abril: "04",
+    Maig: "05",
+    Juny: "06",
+    Juliol: "07",
+    Agost: "08",
   };
   return meses[mes] || "00";
 };
