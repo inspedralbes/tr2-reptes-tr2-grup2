@@ -15,11 +15,33 @@ const workshopsData = [
   { name: "Sostenibilitat", value: 50, year: "2025" },
 ];
 
+// Dades extretes del teu graficaInstitucions.vue
+// Dades extretes i actualitzades per al model Institucions
 const institutionsData = [
-  { name: "IES Joan Miró" },
-  { name: "Escola Politècnica" },
-  { name: "Institut de Tecnologies" },
-  { name: "Centre Cívic Barri" },
+  {
+    name: "IES Joan Miró",
+    direccio: "Carrer de València, 152",
+    codi_postal: "08011",
+    telefon: 934512233,
+  },
+  {
+    name: "Escola Politècnica",
+    direccio: "Avinguda de la Universitat, 1",
+    codi_postal: "17003",
+    telefon: 972418000,
+  },
+  {
+    name: "Institut de Tecnologies",
+    direccio: "Carrer de Sancho de Ávila, 52",
+    codi_postal: "08018",
+    telefon: 932210044,
+  },
+  {
+    name: "Centre Cívic Barri",
+    direccio: "Plaça Major, 1",
+    codi_postal: "08201",
+    telefon: 937250011,
+  },
 ];
 
 async function main() {
@@ -86,44 +108,24 @@ async function main() {
   const createdInstitutions = [];
 
   for (const instData of institutionsData) {
-    // Busquem si la institució ja existeix pel nom
-    let inst = await prisma.institucions.findFirst({
-      where: { nom: instData.name }
+    const responsableUser = await createDummyUser("Professorat", "Responsable");
+
+    const newInst = await prisma.institucions.create({
+      data: {
+        nom: instData.name,
+        tipus: "CentreEducatiu",
+        responsable: responsableUser.id,
+        contacte: `contacte@${instData.name
+          .replace(/\s+/g, "")
+          .toLowerCase()}.cat`,
+        codi_centre: `COD-${Math.floor(Math.random() * 10000)}`,
+        direccio: instData.direccio,
+        codi_postal: instData.codi_postal,
+        telefon: instData.telefon,
+      },
     });
-
-    if (!inst) {
-      // Només si NO existeix la institució, creem el responsable i la institució
-      // Creem un email únic basat en el nom per evitar errors
-      const emailResp = `resp.${instData.name.replace(/\s+/g, "").toLowerCase()}@test.com`;
-      
-      const responsable = await prisma.usuaris.create({
-        data: {
-            // Usem un ID alt aleatori o deixem que la DB ho gestioni si traguéssim l'ID manual
-            // Com que al teu schema l'ID no és autoincrement, hem de generar-ne un
-            id: Math.floor(Math.random() * 100000) + 1000, 
-            nom: `Responsable ${instData.name}`,
-            email: emailResp,
-            password: "123",
-            rol: "Professorat",
-            institucio: 1,
-            autoritzat: true,
-        }
-      });
-
-      inst = await prisma.institucions.create({
-        data: {
-          nom: instData.name,
-          tipus: "CentreEducatiu",
-          responsable: responsable.id,
-          contacte: `contacte@${instData.name.replace(/\s+/g, "").toLowerCase()}.cat`,
-          codi_centre: `COD-${Math.floor(Math.random() * 10000)}`,
-        },
-      });
-      console.log(`✅ Institució creada: ${instData.name}`);
-    } else {
-      console.log(`ℹ️ Institució existent: ${instData.name}`);
-    }
-    createdInstitutions.push(inst);
+    createdInstitutions.push(newInst);
+    console.log(`Institució creada: ${instData.name} (${instData.direccio})`);
   }
 
   /* -------------------------------------------------------------------------- */
