@@ -1,70 +1,112 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
+import { getAllTallers } from "@/services/communicationManagerDatabase";
 
+// Estados reactivos
+const tallersGrouped = ref([]);
 const cursoExpandido = ref(null);
+const filaActiva = ref(null);
+const cargando = ref(true);
+
+// Funciones de UI
 const toggleDetalles = (id) => {
   cursoExpandido.value = cursoExpandido.value === id ? null : id;
 };
-const tallers = ref([
-  {
-    mes: "Septembre",
-    diaNum: 23,
-    cursos: [
-      {
-        titulo: "Curs de Vela",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Teatre",
-        hora: "15:30",
-        imagen: "/img/centro/image.png",
-      },
-    ],
-  },
-  {
-    mes: "Octubre",
-    diaNum: 17,
-    cursos: [
-      {
-        titulo: "Curs de Carpinteria",
-        hora: "16:30",
-        imagen: "/img/centro/image.png",
-      },
-      {
-        titulo: "Curs de Cosir",
-        hora: "10:00",
-        imagen: "/img/centro/image.png",
-      },
-    ],
-  },
-]);
-
-const filaActiva = ref(null);
 
 const actualizarPrioridad = (id, isOpen) => {
   filaActiva.value = isOpen ? id : null;
 };
 
+// Lógica de procesamiento de datos
+const processTallers = (data) => {
+  const mesesNombres = [
+    "Gener",
+    "Febrer",
+    "Març",
+    "Abril",
+    "Maig",
+    "Juny",
+    "Juliol",
+    "Agost",
+    "Setembre",
+    "Octubre",
+    "Novembre",
+    "Desembre",
+  ];
+
+  const grouped = {};
+
+  data.forEach((t) => {
+    let horari = {};
+    try {
+      horari =
+        typeof t.horari === "string" && t.horari.trim() !== ""
+          ? JSON.parse(t.horari)
+          : t.horari || {};
+    } catch (e) {
+      horari = {};
+    }
+
+    // Parseamos la fecha DATAINI (formato "01/10/2024")
+    const parts = (horari.DATAINI || "").split("/");
+    const year = parts[2] ? parseInt(parts[2], 10) : null;
+    const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+    const day = parts[0] ? parseInt(parts[0], 10) : null;
+    const dateObj = year && month >= 0 ? new Date(year, month, day) : null;
+    const mesNombre = dateObj ? mesesNombres[dateObj.getMonth()] : "Desconegut";
+    const diaNum = dateObj ? dateObj.getDate() : day || null;
+
+    // Si el mes no existe en nuestro objeto agrupador, lo creamos
+    if (!grouped[mesNombre]) {
+      grouped[mesNombre] = {
+        mes: mesNombre,
+        diaNum: diaNum,
+        cursos: [],
+      };
+    }
+
+    // Añadimos el taller al grupo de su mes
+    grouped[mesNombre].cursos.push({
+      id: t.id,
+      titulo: t.nom,
+      hora: horari.TORNS?.[0]?.HORAINICI || "00:00",
+      imagen: "/img/centro/image.png",
+      descripcio: t.descripcio,
+      direccio: t.direccio,
+      mesNum: parts[1] || null,
+      rawHorari: horari,
+    });
+  });
+
+  // Convertimos el objeto en un array para el v-for
+  return Object.values(grouped);
+};
+
+// Carga inicial
+onMounted(async () => {
+  try {
+    const rawData = await getAllTallers();
+    tallersGrouped.value = processTallers(rawData);
+  } catch (error) {
+    console.error("Error cargando talleres:", error);
+  } finally {
+    cargando.value = false;
+  }
+});
+
+// Helper para el número de mes en el calendario visual
 const getMesNum = (mes) => {
   const meses = {
-    Septembre: "09",
+    Gener: "01",
+    Febrer: "02",
+    Març: "03",
+    Abril: "04",
+    Maig: "05",
+    Juny: "06",
+    Juliol: "07",
+    Agost: "08",
+    Setembre: "09",
     Octubre: "10",
     Novembre: "11",
     Desembre: "12",
@@ -79,18 +121,27 @@ const getMesNum = (mes) => {
       <button id="btn-filtro">Filtres</button>
       <p>Alumnes</p>
     </div>
+
     <div class="lista-container">
-      <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
-        <h2 class="mes-titulo">{{ taller.mes }}</h2>
+      <div v-if="tallersGrouped.length === 0" class="loading-state">
+        {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
+      </div>
+
+      <div
+        v-for="seccion in tallersGrouped"
+        :key="seccion.mes"
+        class="seccion-mes"
+      >
+        <h2 class="mes-titulo">{{ seccion.mes }}</h2>
 
         <div
-          v-for="(curso, cIdx) in taller.cursos"
-          :key="cIdx"
+          v-for="curso in seccion.cursos"
+          :key="curso.id"
           class="bloque-curso"
         >
           <div
             class="fila-curso"
-            :style="{ zIndex: filaActiva === `${tIdx}-${cIdx}` ? 100 : 1 }"
+            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
           >
             <div class="col-titulo">
               <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
@@ -102,45 +153,33 @@ const getMesNum = (mes) => {
                 ><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
-                  {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
+                  {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
                   <img src="/img/centro/clock.png" class="icon" />
                   {{ curso.hora }}
                 </span>
               </div>
             </div>
 
-            <button
-              class="btn-detalls"
-              @click="toggleDetalles(`${tIdx}-${cIdx}`)"
-            >
+            <button class="btn-detalls" @click="toggleDetalles(curso.id)">
               <span
                 class="btn-detalls-text"
-                :class="{ rotar: cursoExpandido === `${tIdx}-${cIdx}` }"
+                :class="{ rotar: cursoExpandido === curso.id }"
                 >+</span
               >
             </button>
 
             <div class="desplegable">
               <SelectorAlumnos
-                @toggle="
-                  (state) => actualizarPrioridad(`${tIdx}-${cIdx}`, state)
-                "
+                @toggle="(state) => actualizarPrioridad(curso.id, state)"
               />
             </div>
           </div>
 
           <Transition name="fade-slide">
-            <div
-              v-if="cursoExpandido === `${tIdx}-${cIdx}`"
-              class="info-desplegable"
-            >
+            <div v-if="cursoExpandido === curso.id" class="info-desplegable">
               <div class="contenido-detalle">
-                <p>
-                  <strong>Descripció del curs:</strong> Aquí puedes poner toda
-                  la información detallada que quieras mostrar cuando se abra el
-                  panel.
-                </p>
-                <p><strong>Ubicació:</strong> Aula Magna - Edifici B</p>
+                <p><strong>Descripció:</strong> {{ curso.descripcio }}</p>
+                <p><strong>Ubicació:</strong> {{ curso.direccio }}</p>
               </div>
             </div>
           </Transition>
@@ -160,10 +199,17 @@ const getMesNum = (mes) => {
   border: 1px solid #87878779;
   padding: 25px;
   width: 1050px;
-  height: 420px; /* Aumentado ligeramente para permitir scroll interno cómodo */
+  height: 420px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #7986cb;
+  font-weight: bold;
 }
 
 /* --- HEADER --- */
@@ -215,11 +261,11 @@ const getMesNum = (mes) => {
   border-radius: 10px;
 }
 
-/* --- ESTRUCTURA DE FILAS (COMPACTAS) --- */
+/* --- ESTRUCTURA DE FILAS --- */
 .bloque-curso {
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px; /* Espacio mínimo entre bloques */
+  margin-bottom: 10px;
 }
 
 .fila-curso {
@@ -228,8 +274,8 @@ const getMesNum = (mes) => {
   height: 110px;
   position: relative;
   width: 100%;
-  margin-top: 5px; /* Reducido para compactar */
-  margin-bottom: 5px; /* Reducido para compactar */
+  margin-top: 5px;
+  margin-bottom: 5px;
   transition: 0.3ms;
 }
 
@@ -316,7 +362,7 @@ const getMesNum = (mes) => {
   margin-left: 153px;
   background-color: #f5f6ff;
   width: 34%;
-  margin-top: -60px; /* Solapamiento controlado */
+  margin-top: -60px;
   padding: 50px 20px 15px 40px;
   border-radius: 0 0 30px 30px;
   border: 1px solid #c5cae9;
