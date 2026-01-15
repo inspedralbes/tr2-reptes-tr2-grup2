@@ -46,7 +46,11 @@ model Institucions {
   tipus       Institucio
   responsable Int @unique
   contacte    String //@type Email
-  codi_centre String?
+  codi_centre String
+  direccio    String
+  codi_postal String
+  telefon     Int
+
   
   // Intern relations
   id_responsable Usuaris      @relation(fields: [responsable], references: [id])
