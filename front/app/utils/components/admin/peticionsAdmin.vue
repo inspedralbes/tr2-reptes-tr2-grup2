@@ -53,7 +53,7 @@ const toggleDetalls = (id) => {
           </div>
           <!--Nombre del centre-->
           <div class="col-info">
-            <span>{{ institut.codi_centre }}</span>
+            <span>{{ institut.direccio }}, {{ institut.codi_postal }}</span>
           </div>
 
           <button class="btn-detalls" @click="toggleDetalls(institut.id)">
@@ -68,7 +68,8 @@ const toggleDetalls = (id) => {
         <transition name="slide">
           <div v-if="filaActiva === institut.id" class="desplegable">
             <p>Responsable: {{ institut.responsable }}</p>
-            <p>Contacte: {{ institut.contacte }}</p>
+            <p>Contacte: {{ institut.contacte }} | {{ institut.telefon }}</p>
+            <p>Codi: {{ institut.codi_centre }}</p>
           </div>
         </transition>
       </div>
