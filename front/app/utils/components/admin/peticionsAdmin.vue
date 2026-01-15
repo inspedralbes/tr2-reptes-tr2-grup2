@@ -1,28 +1,22 @@
 <script setup>
-import { ref } from "vue";
+//    INFO PARA DEVS
+//    Falta el figma de los detalles tanto de descripcion como items sencillo
+//    hasta ahora pondré
+//
+//
+//
+//
+//
+import { ref, onMounted } from "vue";
+import { getAllInstitucions } from "~/services/communicationManagerDatabase";
 
-const tallers = ref([
-  {
-    mes: "Septembre",
-    diaNum: 23,
-    cursos: [
-      { titulo: "Curs de Vela", hora: "15:30" },
-      { titulo: "Curs de Teatre", hora: "15:30" },
-      { titulo: "Curs de Teatre", hora: "15:30" },
-      { titulo: "Curs de Teatre", hora: "15:30" },
-    ],
-  },
-  {
-    mes: "Octubre",
-    diaNum: 17,
-    cursos: [
-      { titulo: "Curs de Carpinteria", hora: "16:30" },
-      { titulo: "Curs de Cosir", hora: "10:00" },
-    ],
-  },
-]);
-
+const instituts = ref([]);
 const filaActiva = ref(null);
+
+onMounted(async () => {
+  instituts.value = await getAllInstitucions();
+  console.log(instituts.value);
+});
 
 const actualizarPrioridad = (id, isOpen) => {
   filaActiva.value = isOpen ? id : null;
@@ -31,16 +25,6 @@ const actualizarPrioridad = (id, isOpen) => {
 // Toggle del desplegable al clicar el botón
 const toggleDetalls = (id) => {
   filaActiva.value = filaActiva.value === id ? null : id;
-};
-
-const getMesNum = (mes) => {
-  const meses = {
-    Septembre: "09",
-    Octubre: "10",
-    Novembre: "11",
-    Desembre: "12",
-  };
-  return meses[mes] || "00";
 };
 </script>
 
@@ -54,59 +38,45 @@ const getMesNum = (mes) => {
       <button id="btn-filtres">Filtres</button>
     </div>
     <div class="lista-container">
-      <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
-        <h4 class="mes-titulo">{{ taller.mes }}</h4>
-
-        <!-- CONTENEDOR: fila + desplegable debajo -->
-        <div
-          v-for="(curso, cIdx) in taller.cursos"
-          :key="cIdx"
-          class="curso-item"
-          :class="{ abierto: filaActiva === `${tIdx}-${cIdx}` }"
-          :style="{ zIndex: filaActiva === `${tIdx}-${cIdx}` ? 100 : 1 }"
-        >
-          <!-- FILA (barra superior) -->
-          <div class="fila-curso">
-            <div class="col-titulo">
-              <span class="texto-titulo">{{ curso.titulo }}</span>
-            </div>
-
-            <div class="col-info">
-              <span class="info-item">
-                <img src="/img/centro/calendar.png" class="icon" alt="icon" />
-                {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
-                <img src="/img/centro/clock.png" class="icon" alt="icon" />
-                {{ curso.hora }}
-              </span>
-            </div>
-
-            <button
-              class="btn-detalls"
-              @click="toggleDetalls(`${tIdx}-${cIdx}`)"
-            >
-              <span class="btn-detalls-text">
-                {{
-                  filaActiva === `${tIdx}-${cIdx}` ? "− Detalls" : "+ Detalls"
-                }}
-              </span>
-            </button>
-            <button id="btn-revisar">Revisar</button>
+      <div
+        v-for="institut in instituts"
+        :key="institut.id"
+        class="curso-item"
+        :class="{ abierto: filaActiva === institut.id }"
+        :style="{ zIndex: filaActiva === institut.id ? 100 : 1 }"
+      >
+        <!-- FILA (barra superior) -->
+        <div class="fila-curso">
+          <!--Nom institut-->
+          <div class="col-titulo">
+            <span class="texto-titulo">{{ institut.nom }}</span>
+          </div>
+          <!--Nombre del centre-->
+          <div class="col-info">
+            <span>{{ institut.codi_centre }}</span>
           </div>
 
-          <!-- DESPLEGABLE HACIA ABAJO -->
-          <transition name="slide">
-            <div v-if="filaActiva === `${tIdx}-${cIdx}`" class="desplegable">
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipiscing elit ante,
-                suscipit felis ornare donec vehicula ultricies accumsan mauris
-                ullamcorper, luctus blandit potenti fusce inceptos nec sagittis.
-                Per aliquet aenean imperdiet hac volutpat at cursus tempus, eu
-                hendrerit dictum nec id pulvinar magna integer, senectus
-                ultrices penatibus turpis varius egestas porttitor.
-              </p>
-            </div>
-          </transition>
+          <button class="btn-detalls" @click="toggleDetalls(institut.id)">
+            <span class="btn-detalls-text">
+              {{ filaActiva === institut.id ? "− Detalls" : "+ Detalls" }}
+            </span>
+          </button>
+          <button id="btn-revisar">Revisar</button>
         </div>
+
+        <!-- DESPLEGABLE HACIA ABAJO -->
+        <transition name="slide">
+          <div v-if="filaActiva === institut.id" class="desplegable">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipiscing elit ante,
+              suscipit felis ornare donec vehicula ultricies accumsan mauris
+              ullamcorper, luctus blandit potenti fusce inceptos nec sagittis.
+              Per aliquet aenean imperdiet hac volutpat at cursus tempus, eu
+              hendrerit dictum nec id pulvinar magna integer, senectus ultrices
+              penatibus turpis varius egestas porttitor.
+            </p>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
