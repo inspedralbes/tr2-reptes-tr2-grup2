@@ -138,8 +138,10 @@ export async function getAllInstitucions() {
   if (!response.ok) {
     throw new Error(`Error al obtenir institucions: ${response.statusText}`);
   }
+
   return await response.json();
 }
+
 export async function getInstitucionById(id) {
   const response = await fetch(`${BACK_URL}/institucions/${id}`, {
     method: "GET",
