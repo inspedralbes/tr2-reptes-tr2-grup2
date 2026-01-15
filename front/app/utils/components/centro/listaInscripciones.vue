@@ -48,7 +48,6 @@ const processTallers = (data) => {
       horari = {};
     }
 
-    // Parseamos la fecha DATAINI (formato "01/10/2024")
     const parts = (horari.DATAINI || "").split("/");
     const year = parts[2] ? parseInt(parts[2], 10) : null;
     const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
@@ -103,7 +102,7 @@ const getMesNum = (mes) => {
     Març: "03",
     Abril: "04",
     Maig: "05",
-    Juny: "06",
+    Juny: "06", 
     Juliol: "07",
     Agost: "08",
     Setembre: "09",

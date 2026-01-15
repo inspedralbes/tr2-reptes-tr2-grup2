@@ -1,6 +1,15 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue"; 
 const pantalla = ref('primero');
+//Variables para formulario del centre
+const input_sch_name = ref("");
+const input_sch_id = ref("");
+const input_sch_map = ref("");
+//Variables para formulario persona de contacte
+const input_name = ref("");
+const input_email = ref("");
+const input_pass = ref("");
+const input_confirm_pass = ref("");
 </script>
 
 <template>
