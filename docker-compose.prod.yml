@@ -4,9 +4,8 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: nginx.Dockerfile # Asume un Dockerfile de Nginx en la raíz.
+      dockerfile: nginx.Dockerfile
     container_name: trr-nginx-prod
-    # Puerto HTTP estándar
     ports:
       - "80:80"
       - "443:443"
@@ -17,6 +16,12 @@ services:
       tr2g2-back:
         condition: service_started
     restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
 
   tr2g2-back:
     image: node:23-bookworm-slim
@@ -35,8 +40,8 @@ services:
       MYSQL_DATABASE: GESTIO-CURSOS
     volumes:
       - mysql-db:/var/lib/mysql:rw
-      - ./back/data/create_db.sql:/docker-entrypoint-initdb.d/create.sql
-      - ./back/data/insert_db.sql:/docker-entrypoint-initdb.d/inserts.sql
+      # - ./back/data/create_db.sql:/docker-entrypoint-initdb.d/create.sql
+      # - ./back/data/insert_db.sql:/docker-entrypoint-initdb.d/inserts.sql
 
   tr2g2-adminer:
     image: adminer
