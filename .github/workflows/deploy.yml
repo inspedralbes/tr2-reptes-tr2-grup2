@@ -36,7 +36,7 @@ jobs:
             # Nota: Fem servir les variables d'entorn ($VAR) en lloc de la interpolació de GitHub
             echo "Creant .env.PROD FRONT..."
             cd front
-            echo "VITE_API_URL=$API_URL" > .env
+            echo "VITE_URL_BACK=$API_URL" > .env
             cd ..
 
             # 4. Crear .env.PROD BACK
