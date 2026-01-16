@@ -1,26 +1,39 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { getAllTallers } from "~/services/communicationManagerDatabase";
 
-const tallers = ref([
-  {
-    mes: "Septembre",
-    diaNum: 23,
-    cursos: [
-      { titulo: "Curs de Vela", hora: "15:30" },
-      { titulo: "Curs de Teatre", hora: "15:30" },
-      { titulo: "Curs de Teatre", hora: "15:30" },
-      { titulo: "Curs de Teatre", hora: "15:30" },
-    ],
-  },
-  {
-    mes: "Octubre",
-    diaNum: 17,
-    cursos: [
-      { titulo: "Curs de Carpinteria", hora: "16:30" },
-      { titulo: "Curs de Cosir", hora: "10:00" },
-    ],
-  },
-]);
+const tallers = ref([]);
+
+onMounted(async () => {
+  try {
+    tallers.value = await getAllTallers();
+  } catch (error) {
+    console.error("Error al obtenir els tallers:", error);
+  } finally {
+    console.log("Tallers obtinguts:", tallers.value);
+  }
+});
+
+// const tallers = ref([
+//   {
+//     mes: "Septembre",
+//     diaNum: 23,
+//     cursos: [
+//       { titulo: "Curs de Vela", hora: "15:30" },
+//       { titulo: "Curs de Teatre", hora: "15:30" },
+//       { titulo: "Curs de Teatre", hora: "15:30" },
+//       { titulo: "Curs de Teatre", hora: "15:30" },
+//     ],
+//   },
+//   {
+//     mes: "Octubre",
+//     diaNum: 17,
+//     cursos: [
+//       { titulo: "Curs de Carpinteria", hora: "16:30" },
+//       { titulo: "Curs de Cosir", hora: "10:00" },
+//     ],
+//   },
+// ]);
 
 const filaActiva = ref(null);
 
@@ -50,59 +63,50 @@ const getMesNum = (mes) => {
       <button id="btn-filtres">Filtres</button>
     </div>
     <div class="lista-container">
-      <div v-for="(taller, tIdx) in tallers" :key="tIdx" class="seccion-mes">
-        <h2 class="mes-titulo">{{ taller.mes }}</h2>
+      <!-- <div v-for="taller in tallers" :key="taller.id" class="seccion-mes">
+        <h2 class="mes-titulo">{{ taller.target }}</h2> -->
 
-        <!-- CONTENEDOR: fila + desplegable debajo -->
-        <div
-          v-for="(curso, cIdx) in taller.cursos"
-          :key="cIdx"
-          class="curso-item"
-          :class="{ abierto: filaActiva === `${tIdx}-${cIdx}` }"
-          :style="{ zIndex: filaActiva === `${tIdx}-${cIdx}` ? 100 : 1 }"
-        >
-          <!-- FILA (barra superior) -->
-          <div class="fila-curso">
-            <div class="col-titulo">
-              <span class="texto-titulo">{{ curso.titulo }}</span>
-            </div>
-
-            <div class="col-info">
-              <span class="info-item">
-                <img src="/img/centro/calendar.png" class="icon" alt="icon" />
-                {{ taller.diaNum }}/{{ getMesNum(taller.mes) }}
-                <img src="/img/centro/clock.png" class="icon" alt="icon" />
-                {{ curso.hora }}
-              </span>
-            </div>
-
-            <button
-              class="btn-detalls"
-              @click="toggleDetalls(`${tIdx}-${cIdx}`)"
-            >
-              <span class="btn-detalls-text">
-                {{
-                  filaActiva === `${tIdx}-${cIdx}` ? "− Detalls" : "+ Detalls"
-                }}
-              </span>
-            </button>
+      <!-- CONTENEDOR: fila + desplegable debajo -->
+      <div
+        v-for="taller in tallers"
+        :key="taller.id"
+        class="curso-item"
+        :class="{ abierto: filaActiva === taller.id }"
+        :style="{ zIndex: filaActiva === taller.id ? 100 : 1 }"
+      >
+        <!-- FILA (barra superior) -->
+        <div class="fila-curso">
+          <div class="col-titulo">
+            <span class="texto-titulo">{{ taller.nom }}</span>
           </div>
 
-          <!-- DESPLEGABLE HACIA ABAJO -->
-          <transition name="slide">
-            <div v-if="filaActiva === `${tIdx}-${cIdx}`" class="desplegable">
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipiscing elit ante,
-                suscipit felis ornare donec vehicula ultricies accumsan mauris
-                ullamcorper, luctus blandit potenti fusce inceptos nec sagittis.
-                Per aliquet aenean imperdiet hac volutpat at cursus tempus, eu
-                hendrerit dictum nec id pulvinar magna integer, senectus
-                ultrices penatibus turpis varius egestas porttitor.
-              </p>
-            </div>
-          </transition>
+          <div class="col-info">
+            <span class="info-item">
+              <img src="/img/centro/calendar.png" class="icon" alt="icon" />
+              {{ taller.direccio }}
+              <img src="/img/centro/clock.png" class="icon" alt="icon" />
+              {{ taller.horari }}
+            </span>
+          </div>
+
+          <button class="btn-detalls" @click="toggleDetalls(taller.id)">
+            <span class="btn-detalls-text">
+              {{ filaActiva === taller.id ? "− Detalls" : "+ Detalls" }}
+            </span>
+          </button>
         </div>
+
+        <!-- DESPLEGABLE HACIA ABAJO -->
+        <transition name="slide">
+          <div v-if="filaActiva === taller.id" class="desplegable">
+            <p>{{ taller.descripcio }}</p>
+            <p>Tallerista: {{ taller.tallerista }}</p>
+            <p>Places disponibles: {{ taller.places_disp }}</p>
+            <p>Modalitat: {{ taller.modalitat }}</p>
+          </div>
+        </transition>
       </div>
+      <!-- </div> -->
     </div>
   </div>
 </template>
