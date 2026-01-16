@@ -44,21 +44,18 @@ model Tallers {
 }
 
 model Institucions {
-  // Fields
   id          Int    @id @default(autoincrement())
   nom         String
-  responsable Int    @unique
   codi_centre String
   direccio    String
   codi_postal String
 
-  // Intern relations
-  id_responsable Usuaris @relation(fields: [responsable], references: [id])
-
-  //Foreigns 
   tallers      Tallers[]
   institucions Inscripcions[]
   historic     Historic[]
+
+  // Relación inversa para ver responsables
+  usuaris Usuaris[]
 }
 
 model Inscripcions {
@@ -86,21 +83,20 @@ model Inscripcions {
 }
 
 model Usuaris {
-  id         Int     @id
+  id         Int     @id @default(autoincrement())
   nom        String
-  email      String  @unique //@type Email
+  email      String  @unique
   password   String
   telefon    Int
   token      String?
   rol        Rol
-  institucio Int
+  institucio Int?
   autoritzat Boolean
 
-  //Foreigns
-  tallers Tallers[]
+  // Relación a institución
+  id_institucio Institucions? @relation(fields: [institucio], references: [id])
 
-  // Intern relations
-  responsable Institucions?
+  tallers Tallers[]
 }
 
 model Assistencia {
@@ -152,4 +148,3 @@ enum Modalitat {
   B
   C
 }
-
