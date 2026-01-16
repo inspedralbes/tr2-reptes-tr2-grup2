@@ -10,6 +10,7 @@ const filaActiva = ref(null);
 const cargando = ref(true);
 const isMenuOpen = ref(false);
 const selectedMonth = ref(null);
+const selectedMonths = ref([]);
 
 
 // Funciones de UI
@@ -26,6 +27,18 @@ const meses = [
   "Gener", "Febrer", "Març", "Abril", "Maig", "Juny",
   "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"
 ];
+
+function toggleMonthSelection(mes){
+  const index = selectedMonths.value.indexOf(mes);
+  if (index === -1) {
+    selectedMonths.value.push(mes);
+  } else {
+    selectedMonths.value.splice(index, 1);
+  }
+}
+function removeMonth(mes) {
+  selectedMonths.value = selectedMonths.value.filter(m => m !== mes);
+}
 
 // Lógica de procesamiento de datos
 const processTallers = (data) => {
@@ -131,28 +144,46 @@ const getMesNum = (mes) => {
 
     </div>
     <div id="popup-filter">
-      <button>x</button>
+  <button @click="isMenuOpen = false">x</button>
 
-      <h3>MES</h3>
-      <div>
-        <div @click="isMenuOpen = !isMenuOpen" class="select-header">
-          <span v-if="selectedMonth === null">Escull el mes...</span>
-          <span v-else>{{ selectedMonth }}</span>
-          <span>▲</span>
-        </div>
-        <div v-if="isMenuOpen">
-          <div v-for="mes in meses" :key="mes">
-            <button 
-              @click="selectedMonth = mes" 
-              :class="{ 'is-active': selectedMonth === mes }"
-            >
-              {{ mes }}
-            </button>
-          </div>
-        </div>
+  <h3>MES</h3>
+  <div>
+    <div @click="isMenuOpen = !isMenuOpen" class="select-header">
+      <span v-if="selectedMonths.length === 0">Escull el mes...</span>
+      <span v-else>{{ selectedMonths.length }} meses seleccionats</span>
+      <span>▲</span>
+    </div>
+
+    <div v-if="isMenuOpen" class="months-grid">
+      <button 
+        v-for="mes in meses" 
+        :key="mes"
+        class="month-chip"
+        @click="toggleMonthSelection(mes)" 
+        :class="{ 'is-active': selectedMonths.includes(mes) }"
+      >
+        {{ mes }}
+      </button>
+      <button class="btn-aplicar" @click="isMenuOpen = false">Aplicar</button>
+    </div>
+
+    <div class="selected-tags-container">
+      <div 
+        v-for="mes in selectedMonths" 
+        :key="mes" 
+        class="selected-tag"
+      >
+        {{ mes }}
+        <span class="remove-icon" @click="removeMonth(mes)">×</span>
       </div>
+    </div>
+  </div>
 
       <h3>TALLER</h3>
+      <div>
+        <input type="text" placeholder="Cercar taller..." />
+      </div>
+
       <h3>HORARI</h3>
       </div
 
@@ -253,25 +284,66 @@ const getMesNum = (mes) => {
   z-index: 1000;
 }
 .months-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
   gap: 8px;
   margin-top: 15px;
 }
 
-/* El botón (chip) */
 .month-chip {
   background-color: #c5cae9;
   border: none;
   border-radius: 20px;
-  padding: 5px 15px;
+  padding: 8px 5px;
   cursor: pointer;
   transition: 0.3s;
+  width: 100%;
+  text-align: center;
 }
 
 .is-active {
   background-color: #3949ab !important;
   color: white;
+}
+
+.selected-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.selected-tag {
+  background-color: #3949ab;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remove-icon {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.remove-icon:hover {
+  color: #ff8a80;
+}
+
+.btn-aplicar {
+  grid-column: span 3;
+  margin-top: 10px;
+  background-color: #3949ab;
+  color: white;
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 h3{
   grid-column: span 2;

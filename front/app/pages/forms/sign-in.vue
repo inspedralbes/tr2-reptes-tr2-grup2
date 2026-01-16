@@ -54,13 +54,12 @@ async function sendForm() {
     responsable: {
       nom: input_sch_name.value,
       tipus: "AgentExtern",
-      contacte: input_email.value,
       codi_centre: input_sch_id.value
     }
   };
 
   try {
-    const response = await fetch('PreguntarEndpointAClicli', {
+    const response = await fetch(`${BACK_URL}/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json' 

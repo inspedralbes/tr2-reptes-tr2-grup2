@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 import Encabezado from "@/layouts/encabezado.vue";
 
 // Variables reactivas para el formulario
 const input_email = ref("");
-const input_pass = ref(""); 
+const input_pass = ref("");
 const cargando = ref(false);
 
 // Función para gestionar el inicio de sesión mandandolo al backend para que funcione
@@ -18,15 +18,15 @@ async function handleLogin() {
   cargando.value = true;
 
   try {
-    const response = await fetch('PreguntarElEndpointAClicli', {
-      method: 'POST',
+    const response = await fetch(`${BACK_URL}/login`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email: input_email.value,
-        password: input_pass.value
-      })
+        password: input_pass.value,
+      }),
     });
 
     const data = await response.json();
@@ -34,9 +34,12 @@ async function handleLogin() {
     if (response.ok) {
       console.log("Login correcto:", data);
       alert("Login exitós! Benvingut/da.");
-      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem("auth_token", data.token);
       // navigateTo('/dashboard');
-      alert(data.message || "Credencials incorrectes. Revisa el teu email i contrasenya.");
+      alert(
+        data.message ||
+          "Credencials incorrectes. Revisa el teu email i contrasenya."
+      );
     }
   } catch (error) {
     console.error("Error en la conexión:", error);
@@ -57,18 +60,18 @@ async function handleLogin() {
 
         <form @submit.prevent="handleLogin">
           <div class="form-group">
-            <input 
-              v-model="input_email" 
-              type="email" 
-              placeholder="Email" 
-              required 
+            <input
+              v-model="input_email"
+              type="email"
+              placeholder="Email"
+              required
             />
           </div>
           <br />
           <div class="form-group">
             <input
               v-model="input_pass"
-              type="password" 
+              type="password"
               placeholder="Contrasenya"
               required
             />
@@ -77,7 +80,7 @@ async function handleLogin() {
 
           <a href="#" class="link-small">He oblidat la meva contrasenya.</a>
           <br />
-          
+
           <NuxtLink to="/forms/sign-in" class="link-small">
             No tens compte? Dona't d'alta!
           </NuxtLink>
@@ -85,7 +88,7 @@ async function handleLogin() {
           <br /><br />
 
           <button type="submit" :disabled="cargando">
-            {{ cargando ? 'Entrant...' : 'Entrar' }}
+            {{ cargando ? "Entrant..." : "Entrar" }}
           </button>
         </form>
       </div>
