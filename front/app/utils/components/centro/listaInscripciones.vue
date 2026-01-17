@@ -12,6 +12,7 @@ const isMenuOpen = ref(false);
 const selectedMonth = ref(null);
 const selectedMonths = ref([]);
 
+const selecciones = ref({});
 
 // Funciones de UI
 const toggleDetalles = (id) => {
@@ -20,6 +21,43 @@ const toggleDetalles = (id) => {
 
 const actualizarPrioridad = (id, isOpen) => {
   filaActiva.value = isOpen ? id : null;
+};
+//Paula: Funcion para guardarme los datos que me quiero llevar
+//al backend para hacer los inserts de la bbdd cuando se haga una insc
+const guardarSeleccion = (tallerId, numeroSeleccionado) => {
+  selecciones.value[tallerId] = Number(numeroSeleccionado);
+  console.log("Selecciones actuales:", selecciones.value);
+};
+
+// Devuelve true si hay al menos una selección guardada
+const hasSelections = () => Object.keys(selecciones.value).length > 0;
+
+// Paula: funcion para enviar todas las selecciones guardadas al backend en un solo POST
+const enviarTodasSeleccionadas = async () => {
+  if (Object.keys(selecciones.value).length === 0) {
+    console.log("No hay selecciones para enviar");
+    return;
+  }
+  try {
+    const payload = Object.entries(selecciones.value).map(
+      ([tallerId, numAlumnos]) => ({
+        tallerId: Number(tallerId),
+        numAlumnos: Number(numAlumnos),
+      })
+    );
+
+    const backendBase = import.meta.env.VITE_URL_BACK || "";
+    const res = await fetch(`${backendBase}/inscripcions/dadesinsc`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error("Error al guardar selecciones");
+    console.log("Guardadas todas las selecciones");
+    selecciones.value = {};
+  } catch (err) {
+    console.log("Error al guardar selecciones:", err.message);
+  }
 };
 
 //Para los filtros
@@ -140,6 +178,13 @@ const getMesNum = (mes) => {
   <div id="container">
     <div class="header-lista">
       <button id="btn-filtro">Filtres</button>
+      <button
+        v-if="hasSelections()"
+        class="btn-guardar"
+        @click="enviarTodasSeleccionadas"
+      >
+        Guardar selecciones
+      </button>
       <p>Alumnes</p>
 
     </div>
@@ -237,6 +282,7 @@ const getMesNum = (mes) => {
             <div class="desplegable">
               <SelectorAlumnos
                 @toggle="(state) => actualizarPrioridad(curso.id, state)"
+                @select="(num) => guardarSeleccion(curso.id, num)"
               />
             </div>
           </div>
@@ -547,5 +593,30 @@ h3{
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+/* --- BOTÓN GUARDAR --- */
+.btn-guardar {
+  background-color: #3949ab;
+  border: 2px solid #3949ab;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  padding: 6px 12px;
+  margin-top: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.btn-guardar:hover {
+  background-color: #7986cb;
+  border-color: #7986cb;
+}
+
+.btn-guardar[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

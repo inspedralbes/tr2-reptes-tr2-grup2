@@ -5,7 +5,7 @@ export async function getAllInscripcions() {
   try {
     const prisma = await getPrisma();
     return await prisma.inscripcions.findMany({
-      include: { id_institucio: true, id_coordinador: true },
+      include: { id_institucio: true, periode_relacio: true },
     });
   } catch (error) {
     throw new Error(`Error al obtenir inscripcions: ${error.message}`);
@@ -18,7 +18,7 @@ export async function getInscripcioById(id) {
     const prisma = await getPrisma();
     return await prisma.inscripcions.findUnique({
       where: { id: parseInt(id) },
-      include: { id_institucio: true, id_coordinador: true },
+      include: { id_institucio: true, periode_relacio: true },
     });
   } catch (error) {
     throw new Error(`Error al obtenir inscripció: ${error.message}`);
@@ -31,7 +31,7 @@ export async function createInscripcio(data) {
     const prisma = await getPrisma();
     return await prisma.inscripcions.create({
       data,
-      include: { id_institucio: true, id_coordinador: true },
+      include: { id_institucio: true, periode_relacio: true },
     });
   } catch (error) {
     throw new Error(`Error al crear inscripció: ${error.message}`);
@@ -46,7 +46,7 @@ export async function updateInscripcio(data) {
     return await prisma.inscripcions.update({
       where: { id: parseInt(id) },
       data: updateData,
-      include: { id_institucio: true, id_coordinador: true },
+      include: { id_institucio: true, periode_relacio: true },
     });
   } catch (error) {
     throw new Error(`Error al actualizar inscripció: ${error.message}`);
@@ -62,5 +62,15 @@ export async function deleteInscripcio(id) {
     });
   } catch (error) {
     throw new Error(`Error al eliminar inscripció: ${error.message}`);
+  }
+}
+
+/* ------------------------------- FUNCIONALIDADES ------------------------------ */
+
+//Conseguir datos para complementar el formulario
+export async function completarInscripcio(selections) {
+  for (const { tallerId, numAlumnos } of selections) {
+    const id = Number(tallerId);
+    const numAlumnos = Number(numero);
   }
 }

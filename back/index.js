@@ -250,6 +250,19 @@ app.post("/inscripcions", async (req, res) => {
   res.json(newInscripcio);
 });
 
+app.post("/inscripcions/dadesinsc", async (req, res) => {
+  try {
+    const selections = req.body;
+    console.log("/inscripcions/dadesinsc received:", selections);
+    // TODO: funcion con la que implementar los datos necesarios para el insert
+    
+    res.json({ ok: true, received: selections });
+  } catch (err) {
+    console.error("Error en /inscripcions/dadesinsc:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.put("/inscripcions", async (req, res) => {
   const data = req.body;
   const updatedInscripcio = await updateInscripcio(data);

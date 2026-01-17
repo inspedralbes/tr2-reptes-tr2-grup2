@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 
-const emit = defineEmits(["toggle"]);
+const emit = defineEmits(["toggle", "select"]);
 const options = [0, 1, 2, 3];
 const isOpen = ref(false);
 const selected = ref(0);
@@ -14,6 +14,7 @@ const toggleMenu = () => {
 const selectOption = (val) => {
   selected.value = val;
   isOpen.value = false;
+  emit("select", val);
   emit("toggle", false);
 };
 
