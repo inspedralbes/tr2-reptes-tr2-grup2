@@ -19,75 +19,70 @@ model Tallers {
   id          Int       @id @default(autoincrement())
   nom         String
   descripcio  String    @db.Text // Actual Text
-  target      Dies
   institucio  Int
-  tallerista  Int @unique
+  tallerista  String
   places_max  Int
   places_disp Int
-  duracio     Int
   modalitat   Modalitat
   direccio    String
   horari      String    @db.Text
-  curs        Int
-  curs_periode Periodes @relation(fields: [curs], references: [id])
+  periode     Int
   autoritzat  Boolean   @default(false)
 
-  admet_insc  Boolean?
+  admin Int
+
+  admet_insc Boolean?
 
   // Intern relations
   id_institucio Institucions @relation(fields: [institucio], references: [id])
-  id_tallerista Usuaris      @relation(fields: [tallerista], references: [id])
+  id_admin      Usuaris      @relation(fields: [admin], references: [id])
+  id_periode    Periodes     @relation(fields: [periode], references: [id])
 
   //Foreigns
-  llista_assistencia Assistencia?  
-  inscripcions Inscripcions[]
+  llista_assistencia Assistencia?
+  inscripcions       Inscripcions[]
 }
 
 model Institucions {
   // Fields
-  id          Int        @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   nom         String
-  tipus       Institucio
-  responsable Int @unique
-  contacte    String //@type Email
+  responsable Int    @unique
   codi_centre String
   direccio    String
   codi_postal String
-  telefon     Int
 
-  
   // Intern relations
-  id_responsable Usuaris      @relation(fields: [responsable], references: [id])
+  id_responsable Usuaris @relation(fields: [responsable], references: [id])
 
   //Foreigns 
-  tallers    Tallers[]
-  institucions Inscripcions?
-  historic    Historic[]
+  tallers      Tallers[]
+  institucions Inscripcions[]
+  historic     Historic[]
 }
 
 model Inscripcions {
   // Fields
-  id                Int       @id @default(autoincrement())
-  institucio        Int @unique
-  coordinador       Int @unique
+  id                Int      @id @default(autoincrement())
+  institucio        Int // una institució nomes pot tenir una inscripció per periode
   primera_vegada    Boolean
-  trimestre         Trimestre
-  alumnes           String    @db.Text
-  referents         String    @db.Text
-  docents_referents String //@type Email
-  comentari         String    @db.Text
-  documents        String    @db.Text
-  autoritzat        Boolean
+  periode           Int
+  alumnes           String   @db.Text
+  referents         String?  @db.Text
+  docents_referents String? //@type Email ?
+  comentari         String?  @db.Text
+  documents         String?  @db.Text
+  autoritzat        Boolean  @default(false)
   estat             Boolean?
   puntuacio         Float?
 
   // relación obligatoria al taller (campo mapeado a columna `taller_id`)
-  tallerId          Int       @map("taller_id")
-  taller            Tallers   @relation(fields: [tallerId], references: [id])
+  tallerId Int     @map("taller_id")
+  taller   Tallers @relation(fields: [tallerId], references: [id])
 
   // Intern relations
-  id_institucio  Institucions @relation(fields: [institucio], references: [id])
-  id_coordinador Usuaris      @relation(fields: [coordinador], references: [id])   
+  id_institucio   Institucions @relation(fields: [institucio], references: [id])
+  periode_relacio Periodes     @relation(fields: [periode], references: [id])
 }
 
 model Usuaris {
@@ -95,61 +90,29 @@ model Usuaris {
   nom        String
   email      String  @unique //@type Email
   password   String
+  telefon    Int
   token      String?
   rol        Rol
   institucio Int
   autoritzat Boolean
 
   //Foreigns
-  tallers   Tallers?
+  tallers Tallers[]
 
   // Intern relations
   responsable Institucions?
-  coordinador Inscripcions?
 }
 
 model Assistencia {
   id                Int      @id @default(autoincrement())
-  id_taller         Int @unique
+  id_taller         Int      @unique
   dia               DateTime
   llista_alumnes    String   @db.Text
   llista_professors String   @db.Text
   autoritzat        Boolean
 
   // Intern relations
-  taller Tallers  @relation(fields: [id_taller], references: [id])
-}
-
-enum Trimestre {
-  Primer
-  Segon
-  Tercer
-}
-
-enum Rol {
-  Admin
-  Professorat
-  Extern
-}
-
-enum Institucio {
-  CentreEducatiu
-  AgentExtern
-}
-
-enum Dies {
-  Dilluns
-  Dimarts
-  Dimecres
-  Dijous
-  Divendres
-}
-
-enum Modalitat {
-  A
-  B
-  C
-  D
+  taller Tallers @relation(fields: [id_taller], references: [id])
 }
 
 model Periodes {
@@ -158,12 +121,13 @@ model Periodes {
   dataFi  DateTime
 
   // Foreigns
-  historic Historic[]
-  tallers  Tallers[]
+  historic     Historic[]
+  tallers      Tallers[]
+  inscripcions Inscripcions[]
 }
 
 model Historic {
-  id            Int        @id @default(autoincrement())
+  id            Int   @id @default(autoincrement())
   id_institucio Int
   periode       Int
   assistencia   Float
@@ -172,3 +136,20 @@ model Historic {
   id_institucio_rel Institucions @relation(fields: [id_institucio], references: [id])
   periode_rel       Periodes     @relation(fields: [periode], references: [id])
 }
+
+enum Rol {
+  Admin
+  Professorat
+}
+
+enum Institucio {
+  CentreEducatiu
+  Consorci
+}
+
+enum Modalitat {
+  A
+  B
+  C
+}
+

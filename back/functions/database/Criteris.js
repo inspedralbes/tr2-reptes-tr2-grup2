@@ -63,7 +63,7 @@ export async function hasAttendanceRisk(inscripcioId) {
 }
 
 export async function validateCapacity(tallerId, inscripcioId) {
-  const capacity = await prisma.Tallers.findUnique({
+  const capacity = await prisma.tallers.findUnique({
     where: { id: Number(tallerId) },
     select: {
       places_disp: true,
@@ -75,7 +75,8 @@ export async function validateCapacity(tallerId, inscripcioId) {
       alumnes: true,
     },
   });
-  if (capacity.places_disp < sol_insc.alumnes.QUANTITAT) {
+  const alumnesObj = JSON.parse(sol_insc.alumnes);
+  if (capacity.places_disp < alumnesObj.QUANTITAT) {
     score += PRIORITY_WEIGHTS.NO_CAPACITY;
   }
 }
