@@ -73,9 +73,9 @@ model Inscripcions {
   estat             Boolean?
   puntuacio         Float?
 
-  // relación obligatoria al taller (campo mapeado a columna `taller_id`)
-  tallerId Int     @map("taller_id")
-  taller   Tallers @relation(fields: [tallerId], references: [id])
+  // relación opcional al taller (campo mapeado a columna `taller_id`)
+  tallerId Int?    @map("taller_id")
+  taller   Tallers? @relation(fields: [tallerId], references: [id])
 
   // Intern relations
   id_institucio   Institucions @relation(fields: [institucio], references: [id])

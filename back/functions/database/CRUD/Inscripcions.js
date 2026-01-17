@@ -67,10 +67,33 @@ export async function deleteInscripcio(id) {
 
 /* ------------------------------- FUNCIONALIDADES ------------------------------ */
 
-//Conseguir datos para complementar el formulario
-export async function completarInscripcio(selections) {
-  for (const { tallerId, numAlumnos } of selections) {
-    const id = Number(tallerId);
-    const numAlumnos = Number(numero);
+export async function procesarInscripcio(selections, docentRef, comentari) {
+  try {
+    const prisma = await getPrisma();
+    const institucioId = 3; // ID de la institució, pot ser dinàmic segons el context
+    const periode = 2; // cuando tengamos la opcion de recibir el periodo elegido esto lo cambiare
+
+    const existeEnHistoric = await prisma.historic.findFirst({
+      where: { id_institucio: institucioId },
+    });
+    const primera_vegada = !existeEnHistoric; // true si no existe en Historic
+
+    const alumnes = selections.map(({ tallerId, numAlumnos }) => ({
+      TALLER: Number(tallerId),
+      QUANTITAT: Number(numAlumnos),
+    }));
+
+    const inscripcio = await createInscripcio({
+      institucio: institucioId,
+      primera_vegada: primera_vegada,
+      periode: periode,
+      alumnes: JSON.stringify(alumnes), 
+      docents_referents: docentRef || null,
+      comentari: comentari || null,
+    });
+
+    return inscripcio;
+  } catch (error) {
+    throw new Error(`Error al procesar inscripció: ${error.message}`);
   }
 }

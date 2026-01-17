@@ -231,6 +231,7 @@ import {
   createInscripcio,
   updateInscripcio,
   deleteInscripcio,
+  procesarInscripcio,
 } from "./functions/database/CRUD/Inscripcions.js";
 
 app.get("/inscripcions", async (req, res) => {
@@ -252,14 +253,32 @@ app.post("/inscripcions", async (req, res) => {
 
 app.post("/inscripcions/dadesinsc", async (req, res) => {
   try {
-    const selections = req.body;
-    console.log("/inscripcions/dadesinsc received:", selections);
-    // TODO: funcion con la que implementar los datos necesarios para el insert
-    
-    res.json({ ok: true, received: selections });
+    const { selecciones, "docents-ref": docentRef, comentari } = req.body;
+
+    // Paula: validando que selecciones sea un array no vacío
+    if (!Array.isArray(selecciones) || selecciones.length === 0) {
+      return res.status(400).json({
+        message: "selecciones debe ser un array no vacío",
+      });
+    }
+
+    // Paula: llamando a la función que procesa las inscripciones
+    const resultado = await procesarInscripcio(
+      selecciones,
+      docentRef || null,
+      comentari || null
+    );
+
+    return res.status(200).json({
+      ok: true,
+      message: "Inscripcions procesades correctament",
+      data: resultado,
+    });
   } catch (err) {
-    console.error("Error en /inscripcions/dadesinsc:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Error en /inscripcions/dadesinsc:", err.message);
+    return res.status(500).json({
+      message: `Error al procesar inscripcions: ${err.message}`,
+    });
   }
 });
 

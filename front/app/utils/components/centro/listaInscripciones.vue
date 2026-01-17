@@ -64,7 +64,7 @@ const confirmarEnvio = async () => {
     });
     if (!res.ok) throw new Error("Error al guardar selecciones");
     console.log("Guardadas todas las selecciones");
-    
+
     // Limpiar y cerrar
     selecciones.value = {};
     cerrarModal();
@@ -261,7 +261,7 @@ const getMesNum = (mes) => {
     <div v-if="mostrarModalInsc" class="modal-overlay">
       <div class="modal-content">
         <h3>Dades de la Inscripció</h3>
-        
+
         <div class="form-group">
           <label for="docent-ref">Docent de Referència (opcional):</label>
           <input
@@ -287,12 +287,8 @@ const getMesNum = (mes) => {
         </div>
 
         <div class="modal-buttons">
-          <button class="btn-cancel" @click="cerrarModal">
-            Cancelar
-          </button>
-          <button class="btn-send" @click="confirmarEnvio">
-            Enviar
-          </button>
+          <button class="btn-cancel" @click="cerrarModal">Cancelar</button>
+          <button class="btn-send" @click="confirmarEnvio">Enviar</button>
         </div>
       </div>
     </div>
