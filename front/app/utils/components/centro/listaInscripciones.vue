@@ -8,6 +8,10 @@ const tallersGrouped = ref([]);
 const cursoExpandido = ref(null);
 const filaActiva = ref(null);
 const cargando = ref(true);
+const isMenuOpen = ref(false);
+const selectedMonth = ref(null);
+const selectedMonths = ref([]);
+
 
 // Funciones de UI
 const toggleDetalles = (id) => {
@@ -17,6 +21,24 @@ const toggleDetalles = (id) => {
 const actualizarPrioridad = (id, isOpen) => {
   filaActiva.value = isOpen ? id : null;
 };
+
+//Para los filtros
+const meses = [
+  "Gener", "Febrer", "Març", "Abril", "Maig", "Juny",
+  "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"
+];
+
+function toggleMonthSelection(mes){
+  const index = selectedMonths.value.indexOf(mes);
+  if (index === -1) {
+    selectedMonths.value.push(mes);
+  } else {
+    selectedMonths.value.splice(index, 1);
+  }
+}
+function removeMonth(mes) {
+  selectedMonths.value = selectedMonths.value.filter(m => m !== mes);
+}
 
 // Lógica de procesamiento de datos
 const processTallers = (data) => {
@@ -48,7 +70,6 @@ const processTallers = (data) => {
       horari = {};
     }
 
-    // Parseamos la fecha DATAINI (formato "01/10/2024")
     const parts = (horari.DATAINI || "").split("/");
     const year = parts[2] ? parseInt(parts[2], 10) : null;
     const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
@@ -103,7 +124,7 @@ const getMesNum = (mes) => {
     Març: "03",
     Abril: "04",
     Maig: "05",
-    Juny: "06",
+    Juny: "06", 
     Juliol: "07",
     Agost: "08",
     Setembre: "09",
@@ -120,8 +141,53 @@ const getMesNum = (mes) => {
     <div class="header-lista">
       <button id="btn-filtro">Filtres</button>
       <p>Alumnes</p>
+
+    </div>
+    <div id="popup-filter">
+  <button @click="isMenuOpen = false">x</button>
+
+  <h3>MES</h3>
+  <div>
+    <div @click="isMenuOpen = !isMenuOpen" class="select-header">
+      <span v-if="selectedMonths.length === 0">Escull el mes...</span>
+      <span v-else>{{ selectedMonths.length }} meses seleccionats</span>
+      <span>▲</span>
     </div>
 
+    <div v-if="isMenuOpen" class="months-grid">
+      <button 
+        v-for="mes in meses" 
+        :key="mes"
+        class="month-chip"
+        @click="toggleMonthSelection(mes)" 
+        :class="{ 'is-active': selectedMonths.includes(mes) }"
+      >
+        {{ mes }}
+      </button>
+      <button class="btn-aplicar" @click="isMenuOpen = false">Aplicar</button>
+    </div>
+
+    <div class="selected-tags-container">
+      <div 
+        v-for="mes in selectedMonths" 
+        :key="mes" 
+        class="selected-tag"
+      >
+        {{ mes }}
+        <span class="remove-icon" @click="removeMonth(mes)">×</span>
+      </div>
+    </div>
+  </div>
+
+      <h3>TALLER</h3>
+      <div>
+        <input type="text" placeholder="Cercar taller..." />
+      </div>
+
+      <h3>HORARI</h3>
+      </div
+
+    </div>
     <div class="lista-container">
       <div v-if="tallersGrouped.length === 0" class="loading-state">
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
@@ -203,6 +269,87 @@ const getMesNum = (mes) => {
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
+}
+
+#popup-filter{
+  position: absolute;
+  top: 150px;
+  right: 150px;
+  width: 300px;
+  height: 400px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 1000;
+}
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.month-chip {
+  background-color: #c5cae9;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%;
+  text-align: center;
+}
+
+.is-active {
+  background-color: #3949ab !important;
+  color: white;
+}
+
+.selected-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.selected-tag {
+  background-color: #3949ab;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remove-icon {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.remove-icon:hover {
+  color: #ff8a80;
+}
+
+.btn-aplicar {
+  grid-column: span 3;
+  margin-top: 10px;
+  background-color: #3949ab;
+  color: white;
+  border: none;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+h3{
+  grid-column: span 2;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #7987cb8a;
+  padding-bottom: 10px;
 }
 
 .loading-state {
