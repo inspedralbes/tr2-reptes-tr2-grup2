@@ -1,342 +1,325 @@
 import { getPrisma } from "../functions/database/dbConn.js";
+import * as fs from "fs";
+import * as path from "path";
+import * as readline from "readline";
 
 let prisma;
 
-// Helper function para crear usuarios dummy
-async function createDummyUser(rol, type) {
-  const uniqueId = Math.floor(Math.random() * 1000000);
-  const email = `user.${type}.${uniqueId}@test.com`;
-
-  return await prisma.usuaris.create({
-    data: {
-      id: uniqueId + 10000,
-      nom: `${type} User ${uniqueId}`,
-      email: email,
-      password: "123",
-      telefon: 934512233,
-      rol: rol,
-      institucio: 1,
-      autoritzat: true,
-    },
-  });
-}
-
-// Configuración
-const workshopsData = [
-  { name: "Robòtica", value: 45, year: "2023" },
-  { name: "Teatre", value: 32, year: "2023" },
-  { name: "Cuina", value: 28, year: "2023" },
-  { name: "IA Generativa", value: 60, year: "2024" },
-  { name: "Robòtica", value: 55, year: "2024" },
-  { name: "Disseny 3D", value: 40, year: "2024" },
-  { name: "Ciberseguretat", value: 75, year: "2025" },
-  { name: "IA Generativa", value: 70, year: "2025" },
-  { name: "Sostenibilitat", value: 50, year: "2025" },
+// 1. Periodes Fixos
+const customPeriods = [
+  { start: "2025-09-12", end: "2025-12-22", name: "Tardor 2025" },
+  { start: "2026-01-08", end: "2026-03-27", name: "Hivern 2026" },
+  { start: "2026-04-09", end: "2026-05-22", name: "Primavera 2026" },
+  { start: "2026-09-12", end: "2026-12-22", name: "Tardor 2026" },
+  { start: "2027-01-08", end: "2027-03-27", name: "Hivern 2027" },
+  { start: "2027-04-09", end: "2027-05-22", name: "Primavera 2027" },
 ];
 
-// Dades institucions (Institucions NO tiene campo telefon en schema)
-const institutionsData = [
-  {
-    name: "IES Joan Miró",
-    direccio: "Carrer de València, 152",
-    codi_postal: "08011",
-  },
-  {
-    name: "Escola Politècnica",
-    direccio: "Avinguda de la Universitat, 1",
-    codi_postal: "17003",
-  },
-  {
-    name: "Institut de Tecnologies",
-    direccio: "Carrer de Sancho de Ávila, 52",
-    codi_postal: "08018",
-  },
-  {
-    name: "Centre Cívic Barri",
-    direccio: "Plaça Major, 1",
-    codi_postal: "08201",
-  },
+// Dades de tallers
+const workshopsData = [
+  { name: "Robòtica Avançada", value: 45 },
+  { name: "Teatre Social", value: 32 },
+  { name: "IA Generativa", value: 60 },
+  { name: "Ciberseguretat", value: 75 },
 ];
 
 async function main() {
   prisma = await getPrisma();
-  console.log("🔒 Iniciant seed en mode SEGUR (sense esborrar dades)...");
+  console.log(
+    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)..."
+  );
+
+  const periodsIds = [];
 
   /* -------------------------------------------------------------------------- */
-  /* 1. PERIODES (Trimestres) - Comprovació abans de crear                      */
+  /* 1. PERIODES                                                                */
   /* -------------------------------------------------------------------------- */
+  console.log("📅 [1/6] Creant Periodes...");
+  for (const pData of customPeriods) {
+    const dInicio = new Date(`${pData.start}T00:00:00.000Z`);
+    const dFin = new Date(`${pData.end}T23:59:59.000Z`);
 
-  const periodsMap = {};
-  const periodsDates = {};
-  const years = ["2023", "2024", "2025"];
-
-  for (const year of years) {
-    const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
-    const endDate = new Date(`${year}-03-31T23:59:59.000Z`);
-
-    // Busquem si ja existeix aquest període per dates
-    let p = await prisma.periodes.findFirst({
-      where: {
-        dataIni: startDate,
-        dataFi: endDate,
-      },
-    });
-
+    // Busquem o creem
+    let p = await prisma.periodes.findFirst({ where: { dataIni: dInicio } });
     if (!p) {
       p = await prisma.periodes.create({
-        data: { dataIni: startDate, dataFi: endDate },
+        data: { dataIni: dInicio, dataFi: dFin },
       });
-      console.log(`✅ Període creat: ${year}`);
-    } else {
-      console.log(`ℹ️ Període existent: ${year}`);
     }
-
-    periodsMap[year] = p.id;
-    periodsDates[year] = { start: `01/01/${year}`, end: `31/03/${year}` };
+    periodsIds.push(p.id);
   }
 
   /* -------------------------------------------------------------------------- */
-  /* 2. USUARIS ADMIN (Upsert)                                                  */
+  /* 2. INSTITUCIÓ 1: CONSORCI D'EDUCACIÓ                                       */
   /* -------------------------------------------------------------------------- */
+  console.log("🏢 [2/6] Creant Institució Principal (Consorci)...");
 
-  // Utilitzem upsert: Si l'ID 1 existeix, no fa res (o actualitza). Si no, el crea.
+  // Ara podem crear la institució directament sense necessitar un usuari responsable
+  // Intentem crear-la o buscar-la.
+  let consorciInst = await prisma.institucions.findFirst({
+    where: { codi_centre: "CONSORCI-001" },
+  });
+
+  if (!consorciInst) {
+    consorciInst = await prisma.institucions.create({
+      data: {
+        // Com que és autoincrement, normalment serà l'ID 1 si la BD està buida.
+        nom: "Consorci d'Educació de Barcelona",
+        codi_centre: "CONSORCI-001",
+        direccio: "Plaça Urquinaona, 6",
+        codi_postal: "08010",
+      },
+    });
+    console.log(`   ✅ Consorci creat (ID: ${consorciInst.id})`);
+  } else {
+    console.log(`   ℹ️ Consorci ja existent (ID: ${consorciInst.id})`);
+  }
+
+  const ID_CONSORCI = consorciInst.id;
+
+  /* -------------------------------------------------------------------------- */
+  /* 3. USUARIS ADMINS (SuperAdmin + 2 Consorci)                                */
+  /* -------------------------------------------------------------------------- */
+  console.log("👤 [3/6] Creant Usuaris Admin vinculats al Consorci...");
+
+  // Nota: Ara 'id' és autoincrement, no el passem manualment.
+
+  // 3.1 Super Admin
   await prisma.usuaris.upsert({
-    where: { email: "admin@sistema.com" }, // Busquem per unique
-    update: {}, // No canviem res si ja existeix (per no resetear passwords reals)
+    where: { email: "admin@sistema.com" },
+    update: {}, // Si existeix no toquem res
     create: {
-      id: 1, // Forcem ID 1 només si es crea de nou
       nom: "Super Admin",
       email: "admin@sistema.com",
-      password: "123", // Hash en prod
+      password: "123",
       telefon: 934512233,
       rol: "Admin",
-      institucio: 1, // Placeholder segur
+      institucio: ID_CONSORCI,
       autoritzat: true,
     },
   });
-  console.log("✅ Super Admin verificat.");
 
-  /* -------------------------------------------------------------------------- */
-  /* 3. INSTITUCIONS (Idempotent)                                               */
-  /* -------------------------------------------------------------------------- */
+  // 3.2 Staff Consorci
+  const consorciAdmins = [
+    { nom: "Director Consorci", email: "director@consorci.cat" },
+    { nom: "Admin Consorci", email: "admin@consorci.cat" },
+  ];
 
-  const createdInstitutions = [];
-
-  for (const instData of institutionsData) {
-    const responsableUser = await createDummyUser("Professorat", "Responsable");
-
-    const newInst = await prisma.institucions.create({
-      data: {
-        nom: instData.name,
-        responsable: responsableUser.id,
-        codi_centre: `COD-${Math.floor(Math.random() * 10000)}`,
-        direccio: instData.direccio,
-        codi_postal: instData.codi_postal,
+  for (const admin of consorciAdmins) {
+    await prisma.usuaris.upsert({
+      where: { email: admin.email },
+      update: {},
+      create: {
+        nom: admin.nom,
+        email: admin.email,
+        password: "123",
+        telefon: 934000001,
+        rol: "Admin",
+        institucio: ID_CONSORCI,
+        autoritzat: true,
       },
     });
-    createdInstitutions.push(newInst);
-    console.log(`Institució creada: ${instData.name} (${instData.direccio})`);
+  }
+  console.log("   ✅ Admins creats.");
+
+  /* -------------------------------------------------------------------------- */
+  /* 4. IMPORTAR CSV (Institucions + 10 Profes VIP)                             */
+  /* -------------------------------------------------------------------------- */
+  console.log("🏢 [4/6] Important CSV (Totes les institucions)...");
+
+  const vipInstitutions = []; // Guardarem les 10 primeres
+  const csvFilePath = path.join(
+    process.cwd(),
+    "prisma",
+    "totcat-centres-educatius.csv"
+  );
+
+  if (fs.existsSync(csvFilePath)) {
+    const fileStream = fs.createReadStream(csvFilePath);
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
+
+    let isHeader = true;
+    let count = 0;
+
+    for await (const line of rl) {
+      if (isHeader) {
+        isHeader = false;
+        continue;
+      }
+
+      const cols = line.split(";");
+      const codiCentre = cols[0]?.trim();
+      const nomCentre = cols[1]?.trim();
+      const direccio = cols[6]?.trim();
+      const codiPostal = cols[7]?.trim();
+
+      if (!codiCentre || !nomCentre) continue;
+
+      try {
+        // 4.1 Creem la Institució (ara és independent)
+        // Usem findFirst per codi_centre per evitar duplicats
+        let inst = await prisma.institucions.findFirst({
+          where: { codi_centre: codiCentre },
+        });
+
+        if (!inst) {
+          inst = await prisma.institucions.create({
+            data: {
+              codi_centre: codiCentre,
+              nom: nomCentre,
+              direccio: direccio || "Desconeguda",
+              codi_postal: codiPostal || "00000",
+              // Ja no cal el camp 'responsable' aquí!
+            },
+          });
+          count++;
+          if (count % 200 === 0) process.stdout.write(".");
+        }
+
+        // 4.2 Lògica VIP: Si és una de les 10 primeres, creem el seu Professor
+        if (vipInstitutions.length < 10) {
+          // Evitem afegir duplicats a l'array vip si el seed es reexecuta
+          if (!vipInstitutions.find((v) => v.id === inst.id)) {
+            vipInstitutions.push(inst);
+
+            const emailProfesor = `profesor.${codiCentre}@xtec.cat`;
+
+            // Creem l'usuari professor vinculat a aquesta institució
+            await prisma.usuaris.upsert({
+              where: { email: emailProfesor },
+              update: {},
+              create: {
+                nom: `Profesor - ${nomCentre}`.substring(0, 50),
+                email: emailProfesor,
+                password: "123",
+                telefon: 930000000,
+                rol: "Professorat",
+                institucio: inst.id, // <--- Vinculem l'usuari a la institució
+                autoritzat: true,
+              },
+            });
+
+            console.log(
+              `   🌟 [VIP] Institució i Profesor creats: ${nomCentre}`
+            );
+          }
+        }
+      } catch (err) {
+        // console.error(`Error fila CSV: ${err.message}`);
+      }
+    }
+    console.log(
+      `\n   ✅ Importació CSV finalitzada. Total processats: ${count}`
+    );
+    console.log(
+      `   ✅ Institucions VIP seleccionades: ${vipInstitutions.length}`
+    );
+  } else {
+    console.error("   ⛔ NO S'HA TROBAT EL CSV.");
   }
 
   /* -------------------------------------------------------------------------- */
-  /* 4. TALLERS (Només si no existeixen)                                        */
+  /* 5. GENERAR DADES (TALLERS I INSCRIPCIONS PER A VIPs)                       */
   /* -------------------------------------------------------------------------- */
+  console.log("🛠️ [5/6] Generant Talleres (Només per a les 10 VIP)...");
 
-  // Nota per a Producció: Normalment no es vol "brossa" a les taules de tallers
-  // en una app real, però si necessites aquestes dades per als gràfics:
+  // Necessitem un ID d'admin per crear els tallers. Usem el de 'admin@sistema.com'
+  const superAdmin = await prisma.usuaris.findUnique({
+    where: { email: "admin@sistema.com" },
+  });
+  const adminId = superAdmin ? superAdmin.id : 1;
 
+  let i = 0;
   for (const workshop of workshopsData) {
-    const periodId = periodsMap[workshop.year];
+    // Assignació rotativa determinista
+    const inst = vipInstitutions[i % vipInstitutions.length];
+    const period = periodsIds[i % periodsIds.length];
+    i++;
 
-    // Busquem si existeix un taller amb el mateix nom en el mateix període
-    const existingTaller = await prisma.tallers.findFirst({
-      where: {
-        nom: workshop.name,
-        periode: periodId,
-      },
-    });
+    if (!inst) continue;
 
-    if (!existingTaller) {
-      const randomInst =
-        createdInstitutions[
-          Math.floor(Math.random() * createdInstitutions.length)
-        ];
-
-      // Creem admin per al taller
-      const emailAdmin = `admin.${workshop.name.replace(/\s+/g, "")}.${
-        workshop.year
-      }@test.com`;
-      let adminUser = await prisma.usuaris.findUnique({
-        where: { email: emailAdmin },
-      });
-      if (!adminUser) {
-        adminUser = await prisma.usuaris.create({
-          data: {
-            id: Math.floor(Math.random() * 100000) + 2000,
-            nom: `Admin ${workshop.name}`,
-            email: emailAdmin,
-            password: "123",
-            telefon: 934512233,
-            rol: "Professorat",
-            institucio: 1,
-            autoritzat: true,
-          },
-        });
-      }
-
-      const horariJSON = {
-        DATAINI: periodsDates[workshop.year].start,
-        DATAFIN: periodsDates[workshop.year].end,
-        TORNS: [
-          {
-            ID: 1,
-            DIA: "Dilluns",
-            HORAINICI: "09:00",
-            HORAFI: "11:00",
-          },
-          {
-            ID: 2,
-            DIA: "Dimecres",
-            HORAINICI: "10:00",
-            HORAFI: "12:00",
-          },
-        ],
-      };
-
-      await prisma.tallers.create({
+    try {
+      // Crear Taller
+      const taller = await prisma.tallers.create({
         data: {
           nom: workshop.name,
-          descripcio: `Taller de ${workshop.name} (${workshop.year})`,
-          institucio: randomInst.id,
-          tallerista: `Tallerista ${workshop.name}`,
+          descripcio: "Activitat educativa (Seed)",
+          institucio: inst.id,
+          tallerista: "Tallerista Expert",
           places_max: workshop.value,
           places_disp: workshop.value,
           modalitat: "A",
-          direccio: "Aula Principal",
-          horari: JSON.stringify(horariJSON),
-          periode: periodId,
-          admin: adminUser.id,
+          direccio: inst.direccio,
+          horari: JSON.stringify({
+            TORNS: [{ DIA: "Dilluns", HORAINICI: "10:00", HORAFI: "12:00" }],
+          }),
+          periode: period,
+          admin: adminId,
           autoritzat: true,
         },
       });
-      console.log(`✅ Taller creat: ${workshop.name} (${workshop.year})`);
-    } else {
-      console.log(`ℹ️ Taller existent: ${workshop.name} (${workshop.year})`);
-    }
-  }
 
-  /* -------------------------------------------------------------------------- */
-  /* 5. INSCRIPCIONS (Exemple amb alumnes en format JSON)                      */
-  /* -------------------------------------------------------------------------- */
-
-  // Obtenim els primers tallers creats per associar-los a inscripcions
-  const allTallers = await prisma.tallers.findMany({ take: 3 });
-
-  for (const taller of allTallers) {
-    const inscripcioAlumnes = JSON.stringify([
-      {
-        TALLER: taller.id,
-        TORN: 1,
-        QUANTITAT: Math.floor(Math.random() * 10) + 1,
-      },
-    ]);
-
-    try {
+      // Crear Inscripció
       await prisma.inscripcions.create({
         data: {
-          institucio: taller.institucio,
-          primera_vegada: Math.random() > 0.5,
-          periode: taller.periode,
-          alumnes: inscripcioAlumnes,
-          referents: "Maria;Joan",
-          docents_referents: "prof@test.com",
-          comentari: `Inscripció per a ${taller.nom}`,
-          documents: "document1.pdf",
-          autoritzat: false,
+          institucio: inst.id,
+          primera_vegada: true,
+          periode: period,
+          alumnes: JSON.stringify([{ TALLER: taller.id, QUANTITAT: 15 }]),
+          referents: "Cap d'Estudis",
+          docents_referents: "docent@centre.cat",
+          autoritzat: true,
           tallerId: taller.id,
         },
       });
-      console.log(`✅ Inscripció creada per a taller: ${taller.nom}`);
-    } catch (err) {
-      console.log(`ℹ️ Inscripció existent o error per a taller ${taller.nom}`);
-    }
-  }
 
-  /* -------------------------------------------------------------------------- */
-  /* 6. ASSISTENCIA (Exemple amb alumnes i professors en format JSON)          */
-  /* -------------------------------------------------------------------------- */
-
-  for (const taller of allTallers) {
-    const listaAlumnes = JSON.stringify([
-      {
-        NOM: "Manolo",
-        INSTITUT: taller.institucio,
-        ASSISTENCIA: true,
-        JUSTIFICAT: false,
-      },
-      {
-        NOM: "Clara",
-        INSTITUT: taller.institucio,
-        ASSISTENCIA: Math.random() > 0.5,
-        JUSTIFICAT: false,
-      },
-    ]);
-
-    const listaProfessors = JSON.stringify([
-      {
-        NOM: "Laura Pérez",
-        ROL: "Professorat",
-        ASSISTENCIA: true,
-      },
-      {
-        NOM: "Joan Serra",
-        ROL: "Professorat",
-        ASSISTENCIA: Math.random() > 0.5,
-      },
-    ]);
-
-    try {
+      // Crear Assistència Dummy
       await prisma.assistencia.create({
         data: {
           id_taller: taller.id,
           dia: new Date(),
-          llista_alumnes: listaAlumnes,
-          llista_professors: listaProfessors,
+          llista_alumnes: JSON.stringify([
+            { NOM: "Alumne 1", ASSISTENCIA: true },
+          ]),
+          llista_professors: JSON.stringify([
+            { NOM: "Profe 1", ASSISTENCIA: true },
+          ]),
           autoritzat: false,
         },
       });
-      console.log(`✅ Assistència creada per a taller: ${taller.nom}`);
-    } catch (err) {
-      console.log(`ℹ️ Assistència existent o error per a taller ${taller.nom}`);
+    } catch (e) {
+      /* Ignorem errors de duplicats en rellançar */
     }
   }
 
   /* -------------------------------------------------------------------------- */
-  /* 7. HISTORIC (Registres de desempeño histórico)                             */
+  /* 6. HISTÒRIC (SOLO PARA VIPs)                                               */
   /* -------------------------------------------------------------------------- */
+  console.log("📚 [6/6] Generant Històric...");
 
-  // Crear un registro de Historic por institución
-  for (const institution of createdInstitutions) {
+  let assistencia = 80;
+  for (const inst of vipInstitutions) {
+    assistencia = (assistencia + 1) % 100;
     try {
       await prisma.historic.create({
         data: {
-          id_institucio: institution.id,
-          periode: periodsMap["2025"], // Período más reciente
-          assistencia: Math.random() * 100, // Porcentaje de asistencia entre 0-100
+          id_institucio: inst.id,
+          periode: periodsIds[0],
+          assistencia: assistencia,
         },
       });
-      console.log(`✅ Historic creat per a ${institution.nom}`);
-    } catch (err) {
-      console.log(`ℹ️ Historic existent o error per a ${institution.nom}`);
-    }
+    } catch (e) {}
   }
 
-  console.log("Seed segur completat.");
+  console.log("\n🏁 [FIN] Seed completat correctament.");
 }
 
 main()
   .catch((e) => {
-    console.error("Error en el seed:", e);
+    console.error("❌ ERROR CRÍTIC:", e);
     process.exit(1);
   })
   .finally(async () => {

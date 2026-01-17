@@ -47,7 +47,7 @@ jobs:
             echo "USER=root" >> .env
             echo "PASSWORD=$DB_PASSWORD" >> .env
             # Construïm la URL fent servir les variables segures
-            echo "DATABASE_URL=mysql://$SERVER_USERNAME:$DB_PASSWORD@tr2g2-mysql:3306/GESTIO-CURSOS" >> .env
+            echo "DATABASE_URL=mysql://$SERVER_USERNAME:$DB_PASSWORD@tr2g2-mysql:3306/GESTIO-CURSOS?charset=utf8mb4" >> .env
             echo "DATABASE_USER=$SERVER_USERNAME" >> .env
             echo "DATABASE_PASSWORD=$DB_PASSWORD" >> .env
             echo "DATABASE_NAME=GESTIO-CURSOS" >> .env
