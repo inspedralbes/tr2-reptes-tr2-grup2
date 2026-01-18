@@ -355,9 +355,22 @@ app.get("/tallers/:id", async (req, res) => {
 });
 
 app.post("/tallers", async (req, res) => {
-  const data = req.body;
-  const newTaller = await createTaller(data);
-  res.json(newTaller);
+  try {
+    const data = req.body;
+    
+    // Validaciones básicas
+    if (!data.nom || !data.descripcio || !data.tallerista || !data.direccio || !data.horari || !data.periode || !data.admin) {
+      return res.status(400).json({ 
+        error: "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)" 
+      });
+    }
+    
+    const newTaller = await createTaller(data);
+    res.status(201).json(newTaller);
+  } catch (error) {
+    console.error("Error al crear taller:", error);
+    res.status(500).json({ error: error.message || "Error al crear taller" });
+  }
 });
 
 app.put("/tallers", async (req, res) => {
