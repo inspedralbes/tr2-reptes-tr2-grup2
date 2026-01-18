@@ -65,7 +65,29 @@ export async function deleteInscripcio(id) {
   }
 }
 
+// SELECT inscripcions por ID de taller
+export async function getInscripciosByTallerId(tallerId) {
+  try {
+    const prisma = await getPrisma();
+    const inscripcions = await prisma.inscripcions.findMany({
+      include: { id_institucio: true, periode_relacio: true },
+    });
 
+    // Filtrar inscripcions que contengan el taller especificado en el campo alumnes (JSON)
+    return inscripcions.filter((inscripcion) => {
+      try {
+        const alumnes = JSON.parse(inscripcion.alumnes || "[]");
+        return alumnes.some((alumne) => alumne.TALLER === parseInt(tallerId));
+      } catch (e) {
+        return false;
+      }
+    });
+  } catch (error) {
+    throw new Error(
+      `Error al obtenir inscripcions del taller: ${error.message}`
+    );
+  }
+}
 
 /* ------------------------------- FUNCIONALIDADES ------------------------------ */
 
