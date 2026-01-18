@@ -11,6 +11,12 @@ const filaActiva = ref(null);
 const cargando = ref(true);
 const viendoInscripciones = ref(false);
 const tallerNomActual = ref("");
+const tallerIdActual = ref(null);
+const inscripciones = ref([]);
+const placesDisp = ref(0);
+const placesMax = ref(0);
+const inscripcionesExpandidas = ref({});
+const inscripcionesSeleccionadas = ref({});
 
 // Funciones de UI
 const toggleDetalles = (id) => {
@@ -22,12 +28,73 @@ const toggleDetalles = (id) => {
 const vereuInscripcions = (tallerId, tallerNom) => {
   viendoInscripciones.value = true;
   tallerNomActual.value = tallerNom;
-  console.log("Viendo inscripciones del taller ID:", tallerId);
+  tallerIdActual.value = tallerId;
+  cargarInscripciones(tallerId);
 };
 
 const volverALista = () => {
   viendoInscripciones.value = false;
   tallerNomActual.value = "";
+  tallerIdActual.value = null;
+  inscripciones.value = [];
+  inscripcionesSeleccionadas.value = {};
+  inscripcionesExpandidas.value = {};
+};
+
+const cargarInscripciones = async (tallerId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/tallers/${tallerId}/inscripcions-ordenadas`
+    );
+    const data = await response.json();
+    inscripciones.value = data.inscripciones;
+    placesMax.value = data.taller.placesMax;
+    placesDisp.value = data.taller.placesDisp;
+  } catch (error) {
+    console.error("Error al cargar inscripciones:", error);
+  }
+};
+
+const toggleInscripcionExpandida = (id) => {
+  inscripcionesExpandidas.value[id] = !inscripcionesExpandidas.value[id];
+};
+
+const selectInscripcion = (id, alumnos) => {
+  if (inscripcionesSeleccionadas.value[id]) {
+    // Desmarcar
+    delete inscripcionesSeleccionadas.value[id];
+  } else {
+    // Marcar
+    inscripcionesSeleccionadas.value[id] = alumnos;
+  }
+};
+
+const alumnosSeleccionados = () => {
+  return Object.values(inscripcionesSeleccionadas.value).reduce(
+    (sum, alumnos) => sum + alumnos,
+    0
+  );
+};
+
+const placesRestantes = () => {
+  return placesMax.value - alumnosSeleccionados();
+};
+
+const puedeSeleccionar = (alumnos) => {
+  return placesRestantes() >= alumnos;
+};
+
+const guardarSeleccion = () => {
+  const idsSeleccionados = Object.keys(inscripcionesSeleccionadas.value).map(
+    (id) => Number(id)
+  );
+  const resultado = {
+    tallerId: tallerIdActual.value,
+    inscripcionesAprobadas: idsSeleccionados,
+    alumnosAprobados: alumnosSeleccionados(),
+  };
+  console.log("Inscripciones aprobadas:", resultado);
+  alert(`Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`);
 };
 
 // Lógica de procesamiento de datos
@@ -143,7 +210,81 @@ const getMesNum = (mes) => {
       </div>
     </div>
 
-    <div v-if="!viendoInscripciones" class="lista-container">
+    <!-- Vista de inscripciones -->
+    <div v-if="viendoInscripciones" class="inscripciones-container">
+      <div class="info-plazas">
+        <p>Plazas disponibles: <strong>{{ alumnosSeleccionados() }} / {{ placesMax.value }}</strong></p>
+        <div class="progress-bar">
+          <div 
+            class="progress-fill" 
+            :style="{ width: (alumnosSeleccionados() / placesMax.value) * 100 + '%' }"
+          ></div>
+        </div>
+      </div>
+
+      <table class="tabla-inscripciones">
+        <thead>
+          <tr>
+            <th style="width: 40px;">✓</th>
+            <th>Institució</th>
+            <th style="width: 80px;">Alumnes</th>
+            <th style="width: 100px;">Puntuació</th>
+            <th style="width: 60px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="insc in inscripciones" :key="insc.id">
+            <tr 
+              :class="{ 'disabled-row': !puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id] }"
+            >
+              <td>
+                <input 
+                  type="checkbox"
+                  :checked="!!inscripcionesSeleccionadas[insc.id]"
+                  @change="selectInscripcion(insc.id, insc.alumnos)"
+                  :disabled="!puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id]"
+                />
+              </td>
+              <td>{{ insc.institucion }}</td>
+              <td>{{ insc.alumnos }}</td>
+              <td>
+                <div class="puntuacion-cell">
+                  <span class="score">{{ insc.puntuacion }}</span>
+                  <button 
+                    class="btn-expandir"
+                    @click="toggleInscripcionExpandida(insc.id)"
+                  >
+                    +
+                  </button>
+                </div>
+              </td>
+              <td></td>
+            </tr>
+            <!-- Fila expandida de desglose -->
+            <tr v-if="inscripcionesExpandidas[insc.id]" class="fila-desglose">
+              <td colspan="5">
+                <div class="desglose">
+                  <div class="desglose-item" v-for="item in insc.breakdown" :key="item.criterio">
+                    <span class="criterio">{{ item.criterio }}</span>
+                    <span 
+                      :class="['puntos', { 'positivo': item.puntos > 0, 'negativo': item.puntos < 0, 'no-aplicat': !item.aplicat }]"
+                    >
+                      {{ item.aplicat ? (item.puntos > 0 ? '+' : '') + item.puntos : 'No aplicat' }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+      <div class="acciones">
+        <button class="btn-guardar" @click="guardarSeleccion">
+          Guardar selecció
+        </button>
+      </div>
+    </div>
       <div v-if="tallersGrouped.length === 0" class="loading-state">
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
@@ -490,5 +631,193 @@ const getMesNum = (mes) => {
   transform: translateY(-10px);
 }
 
+/* --- VISTA DE INSCRIPCIONES --- */
+.inscripciones-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+}
+
+.info-plazas {
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.info-plazas p {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #3949ab;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #5064cd;
+  transition: width 0.3s ease;
+}
+
+.tabla-inscripciones {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+}
+
+.tabla-inscripciones thead {
+  background-color: #f5f6ff;
+  border-bottom: 2px solid #7986cb;
+}
+
+.tabla-inscripciones th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #3949ab;
+}
+
+.tabla-inscripciones tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s ease;
+}
+
+.tabla-inscripciones tbody tr:hover {
+  background-color: #f9f9ff;
+}
+
+.tabla-inscripciones tbody tr.disabled-row {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.tabla-inscripciones td {
+  padding: 12px 15px;
+}
+
+.tabla-inscripciones input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #5064cd;
+}
+
+.puntuacion-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score {
+  font-weight: 600;
+  color: #3949ab;
+  font-size: 0.95rem;
+}
+
+.btn-expandir {
+  background: none;
+  border: none;
+  color: #7986cb;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-expandir:hover {
+  background-color: #e8eaf6;
+  transform: scale(1.1);
+}
+
+.fila-desglose {
+  background-color: #f5f6ff;
+}
+
+.fila-desglose td {
+  padding: 15px !important;
+}
+
+.desglose {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.desglose-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background-color: white;
+  border-radius: 4px;
+  border-left: 3px solid #7986cb;
+}
+
+.criterio {
+  font-size: 0.85rem;
+  color: #3949ab;
+  font-weight: 500;
+}
+
+.puntos {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.puntos.positivo {
+  color: #2e7d32;
+  background-color: #e8f5e9;
+}
+
+.puntos.negativo {
+  color: #c62828;
+  background-color: #ffebee;
+}
+
+.puntos.no-aplicat {
+  color: #666;
+  background-color: #eeeeee;
+}
+
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-guardar {
+  background-color: #5064cd;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-guardar:hover {
+  background-color: #3949ab;
+  transform: translateY(-2px);
+}
 
 </style>

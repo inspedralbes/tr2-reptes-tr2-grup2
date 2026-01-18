@@ -17,6 +17,7 @@ import {
   updateUsuariToken,
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
+import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -381,6 +382,17 @@ app.get("/tallers/:id/inscripcions", async (req, res) => {
     res.json(inscripcions);
   } catch (error) {
     console.error("Error al obtenir inscripcions del taller:", error);
+    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+  }
+});
+
+app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resultado = await calcularPuntuacionesDelTaller(id);
+    res.json(resultado);
+  } catch (error) {
+    console.error("Error al obtenir inscripcions ordenadas:", error);
     res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
   }
 });
