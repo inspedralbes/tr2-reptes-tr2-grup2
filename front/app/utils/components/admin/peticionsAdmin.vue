@@ -1,3 +1,55 @@
+<!--
+  Paula:
+
+  Hooolii, si cambias los estilos o la estructura HTML, no toques estas variables que el backend las necesita.
+  Te dejo por aquí las que son críticas:
+  
+  VARIABLES (no renombrar ni cambiar tipos):
+  - viendoInscripciones: boolean - controla si estamos viendo la lista de tallers o las inscripciones
+  - tallerIdActual: número del ID del taller (IMPORTANTE: se usa en el fetch /tallers/:id/inscripcions-ordenadas)
+  - tallerNomActual: nombre del taller (para mostrar en el header)
+  - inscripciones: array de objetos con {id, institucion, alumnos, puntuacion, aceptadas[]}
+  - placesMax: plazas totales del taller (viene del backend)
+  - placesDisp: plazas disponibles (viene del backend)
+  - inscripcionesSeleccionadas: objeto {inscripcionId: alumnosCount} para saber qué está checked
+  - inscripcionesExpandidas: objeto {inscripcionId: boolean} para las filas expandidas
+  
+  FUNCIONES (mini explicacion por si no se entienden):
+  - selectInscripcion(id, alumnos): actualiza inscripcionesSeleccionadas on/off
+  - alumnosSeleccionados(): suma el total de alumnos seleccionados (se usa para validar plazas)
+  - placesRestantes(): calcula placesMax - alumnosSeleccionados()
+  - puedeSeleccionar(alumnos): chequea si hay suficientes plazas (para deshabilitar checkboxes)
+  - guardarSeleccion(): crea {tallerId, inscripcionesAprobadas[], alumnosAprobados} y lo manda
+  - cargarInscripciones(tallerId): hace fetch a /tallers/:id/inscripcions-ordenadas
+  
+  LO QUE EL BACKEND TE DEVUELVE:
+  GET /tallers/:id/inscripcions-ordenadas retorna algo así:
+  {
+    taller: { placesMax: number, placesDisp: number },
+    inscripciones: [
+      {
+        id: number,
+        institucion: string,
+        alumnos: number,
+        puntuacion: number,
+        aceptadas: [
+          { criterio: string, puntos: number, aplicat: boolean }
+        ]
+      }
+    ]
+  } omgg
+  
+  COSAS QUE ESCPLOTA TODO SI LAS CAMBIAS:
+  - Los checkboxes tienen que deshabilitarse cuando no hay plazas
+  - inscripcionesSeleccionadas debe guardar {inscripcionId: alumnosCount} 
+  - placesMax no cambia una vez que se carga (viene del backend)
+  - alumnosSeleccionados() tiene que sumar bien para que la validación funcione
+  - guardarSeleccion() tiene que mantener el formato JSON con tallerId, inscripcionesAprobadas, alumnosAprobados
+
+  GRACIAS <3
+  :33
+-->
+
 <script setup>
 import { ref, onMounted } from "vue";
 // SelectorAlumnos removed from this component to hide numeric dropdown
@@ -213,11 +265,11 @@ const getMesNum = (mes) => {
     <!-- Vista de inscripciones -->
     <div v-if="viendoInscripciones" class="inscripciones-container">
       <div class="info-plazas">
-        <p>Plazas disponibles: <strong>{{ alumnosSeleccionados() }} / {{ placesMax.value }}</strong></p>
+        <p>Plazas disponibles: <strong>{{ alumnosSeleccionados() }} / {{ placesMax }}</strong></p>
         <div class="progress-bar">
           <div 
             class="progress-fill" 
-            :style="{ width: (alumnosSeleccionados() / placesMax.value) * 100 + '%' }"
+            :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"
           ></div>
         </div>
       </div>
@@ -264,7 +316,7 @@ const getMesNum = (mes) => {
             <tr v-if="inscripcionesExpandidas[insc.id]" class="fila-desglose">
               <td colspan="5">
                 <div class="desglose">
-                  <div class="desglose-item" v-for="item in insc.breakdown" :key="item.criterio">
+                  <div class="desglose-item" v-for="item in insc.aceptadas" :key="item.criterio">
                     <span class="criterio">{{ item.criterio }}</span>
                     <span 
                       :class="['puntos', { 'positivo': item.puntos > 0, 'negativo': item.puntos < 0, 'no-aplicat': !item.aplicat }]"
@@ -349,7 +401,6 @@ const getMesNum = (mes) => {
           </Transition>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
@@ -634,7 +685,11 @@ const getMesNum = (mes) => {
   transform: translateY(-10px);
 }
 
-/* --- VISTA DE INSCRIPCIONES --- */
+/* ========================================
+   SELECCIÓN DE INSCRIPCIONES
+   ======================================== */
+
+/* --- CONTENEDOR Y HEADER --- */
 .inscripciones-container {
   flex: 1;
   display: flex;
@@ -668,6 +723,7 @@ const getMesNum = (mes) => {
   transition: width 0.3s ease;
 }
 
+/* --- TABLA DE INSCRIPCIONES --- */
 .tabla-inscripciones {
   width: 100%;
   border-collapse: collapse;
@@ -712,6 +768,7 @@ const getMesNum = (mes) => {
   accent-color: #5064cd;
 }
 
+/* --- PUNTUACIÓN Y EXPANSIÓN --- */
 .puntuacion-cell {
   display: flex;
   align-items: center;
@@ -745,6 +802,7 @@ const getMesNum = (mes) => {
   transform: scale(1.1);
 }
 
+/* --- DESGLOSE DE CRITERIOS --- */
 .fila-desglose {
   background-color: #f5f6ff;
 }
@@ -797,6 +855,7 @@ const getMesNum = (mes) => {
   background-color: #eeeeee;
 }
 
+/* --- ACCIONES (GUARDAR) --- */
 .acciones {
   display: flex;
   justify-content: center;
