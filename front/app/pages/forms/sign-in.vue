@@ -48,13 +48,12 @@ async function sendForm() {
     nom: `${input_name.value} ${input_surname.value}`,
     email: input_email.value,
     password: input_pass.value,
-    rol: "Extern",
-    tallers: null,
-    coordinador: null,
+    rol: "Professorat",
     responsable: {
       nom: input_sch_name.value,
-      tipus: "AgentExtern",
-      codi_centre: input_sch_id.value
+      codi_centre: input_sch_id.value,
+      direccio: input_sch_map.value,
+      codi_postal: ""
     }
   };
 
@@ -70,13 +69,16 @@ async function sendForm() {
     // Control de errores
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Error en el registre');
+      throw new Error(errorData.error || 'Error en el registre');
     }
 
     //Esperamos la respuesta de el back y si todo va bien se registrara
     const data = await response.json();
     console.log("Èxit:", data);
     alert("Registre completat amb èxit!");
+    
+    // Redirigir al login después del éxito
+    window.location.href = '/forms/log-in';
 
   } catch (error) {
     console.error("Error detallat:", error);

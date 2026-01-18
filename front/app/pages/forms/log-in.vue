@@ -34,10 +34,19 @@ async function handleLogin() {
     if (response.ok) {
       console.log("Login correcto:", data);
       alert("Login exitós! Benvingut/da.");
-      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_token", data.accessToken);
+      localStorage.setItem("user_id", data.user.id);
+      localStorage.setItem("user_email", data.user.email);
+      localStorage.setItem("user_institution_id", data.user.institucio || "");
+      localStorage.setItem("user_rol", data.user.rol);
       // navigateTo('/dashboard');
       alert(
         data.message ||
+          "Login completat correctament"
+      );
+    } else {
+      alert(
+        data.error ||
           "Credencials incorrectes. Revisa el teu email i contrasenya."
       );
     }

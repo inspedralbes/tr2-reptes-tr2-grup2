@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
-import { getAllTallers } from "@/services/communicationManagerDatabase";
+import { getAllTallers, getAllInscripcions, getInstitucionById, getUsuariById } from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
 const tallersGrouped = ref([]);
@@ -9,13 +8,14 @@ const cursoExpandido = ref(null);
 const filaActiva = ref(null);
 const cargando = ref(true);
 const filterOpen = ref(false);
-const isMenuOpen = ref(false);
 const openMonthFilter = ref(false);
 const openHorariFilter = ref(false);
 const selectedMonth = ref(null);
 const selectedMonths = ref([]);
 const selectedHoraris = ref([]);
 const searchTaller = ref("");
+const inscripcionsMap = ref({}); 
+const usuarioInstitucion = ref(null); 
 const horaris = ref([]);
 
 const selecciones = ref({});
@@ -23,47 +23,6 @@ const selecciones = ref({});
 // Funciones de UI
 const toggleDetalles = (id) => {
   cursoExpandido.value = cursoExpandido.value === id ? null : id;
-};
-
-const actualizarPrioridad = (id, isOpen) => {
-  filaActiva.value = isOpen ? id : null;
-};
-//Paula: Funcion para guardarme los datos que me quiero llevar
-//al backend para hacer los inserts de la bbdd cuando se haga una insc
-const guardarSeleccion = (tallerId, numeroSeleccionado) => {
-  selecciones.value[tallerId] = Number(numeroSeleccionado);
-  console.log("Selecciones actuales:", selecciones.value);
-};
-
-// Devuelve true si hay al menos una selección guardada
-const hasSelections = () => Object.keys(selecciones.value).length > 0;
-
-// Paula: funcion para enviar todas las selecciones guardadas al backend en un solo POST
-const enviarTodasSeleccionadas = async () => {
-  if (Object.keys(selecciones.value).length === 0) {
-    console.log("No hay selecciones para enviar");
-    return;
-  }
-  try {
-    const payload = Object.entries(selecciones.value).map(
-      ([tallerId, numAlumnos]) => ({
-        tallerId: Number(tallerId),
-        numAlumnos: Number(numAlumnos),
-      })
-    );
-
-    const backendBase = import.meta.env.VITE_URL_BACK || "";
-    const res = await fetch(`${backendBase}/inscripcions/dadesinsc`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error("Error al guardar selecciones");
-    console.log("Guardadas todas las selecciones");
-    selecciones.value = {};
-  } catch (err) {
-    console.log("Error al guardar selecciones:", err.message);
-  }
 };
 
 //Para los filtros
@@ -97,10 +56,6 @@ function removeHorari(horari) {
   selectedHoraris.value = selectedHoraris.value.filter(h => h !== horari);
 }
 
-function toggleFilter(){
-  isMenuOpen.value = !isMenuOpen.value;
-}
-
 // Obtener lista de horarios únicos
 function extractHoraris(data) {
   const horarisSet = new Set();
@@ -120,7 +75,7 @@ function extractHoraris(data) {
 }
 
 // Lógica de procesamiento de datos
-const processTallers = (data) => {
+const processTallers = (data, inscritos) => {
   const mesesNombres = [
     "Gener",
     "Febrer",
@@ -138,7 +93,14 @@ const processTallers = (data) => {
 
   const grouped = {};
 
+  // Filtrar solo los talleres a los que hay inscripción
   data.forEach((t) => {
+    // Buscar si hay inscripción para este taller
+    const inscripcion = inscritos.find(i => i.tallerId === t.id);
+    
+    // Si no hay inscripción, no incluir el taller
+    if (!inscripcion) return;
+
     let horari = {};
     try {
       horari =
@@ -166,7 +128,7 @@ const processTallers = (data) => {
       };
     }
 
-    // Añadimos el taller al grupo de su mes
+    // Añadimos el taller al grupo de su mes con el estado de inscripción
     grouped[mesNombre].cursos.push({
       id: t.id,
       titulo: t.nom,
@@ -176,6 +138,8 @@ const processTallers = (data) => {
       direccio: t.direccio,
       mesNum: parts[1] || null,
       rawHorari: horari,
+      estadoInscripcion: inscripcion.estat !== null ? (inscripcion.estat ? "Aprovada" : "Pendent") : "Pendent",
+      autoritzat: inscripcion.autoritzat || false,
     });
   });
 
@@ -186,6 +150,7 @@ const processTallers = (data) => {
 // Carga inicial
 onMounted(async () => {
   try {
+    // Obtener todos los talleres
     const rawData = await getAllTallers();
     console.log("Datos crudos de talleres:", rawData);
     
@@ -193,9 +158,33 @@ onMounted(async () => {
     horaris.value = extractHoraris(rawData);
     console.log("Horarios disponibles:", horaris.value);
     
-    tallersGrouped.value = processTallers(rawData);
+    // Obtener las inscripciones
+    const inscripciones = await getAllInscripcions();
+    console.log("Todas las inscripciones:", inscripciones);
+    
+    const token = localStorage.getItem("auth_token");
+    
+    const usuarioInstitucionId = localStorage.getItem("user_institution_id");
+    
+    // Filtrar inscripciones por institución
+    const inscripcionesFiltridas = inscripciones.filter(i => {
+      // Si tenemos un ID de institución, filtrar por él
+      if (usuarioInstitucionId) {
+        return i.institucio === parseInt(usuarioInstitucionId);
+      }
+      // Si no, mostrar todas
+      return true;
+    });
+    
+    console.log("Inscripciones filtradas:", inscripcionesFiltridas);
+    inscripcionsMap.value = {};
+    inscripcionesFiltridas.forEach(i => {
+      inscripcionsMap.value[i.tallerId] = i;
+    });
+    
+    tallersGrouped.value = processTallers(rawData, inscripcionesFiltridas);
   } catch (error) {
-    console.error("Error cargando talleres:", error);
+    console.error("Error cargando talleres o inscripciones:", error);
   } finally {
     cargando.value = false;
   }
@@ -256,21 +245,12 @@ const getMesNum = (mes) => {
 <template>
   <div id="container">
     <div class="header-lista">
-      <button id="btn-filtro" @click="filterOpen = !filterOpen">Filtres</button>
-      <button
-        v-if="hasSelections()"
-        class="btn-guardar"
-        @click="enviarTodasSeleccionadas"
-      >
-        Guardar selecciones
-      </button>
-      <p>Alumnes</p>
-
+      <button @click="filterOpen = !filterOpen" id="btn-filtro">Filtres</button>
     </div>
-    <div v-if="filterOpen" id="popup-filter">
+  
+  <div v-if="filterOpen" id="popup-filter">
   <button @click="filterOpen = false">x</button>
 
-  <!-- Filtro de MES -->
   <h3>MES</h3>
   <div>
     <div @click="openMonthFilter = !openMonthFilter" class="select-header">
@@ -304,22 +284,20 @@ const getMesNum = (mes) => {
     </div>
   </div>
 
-  <!-- Filtro de BÚSQUEDA -->
   <h3>TALLER</h3>
   <div>
     <input 
       v-model="searchTaller"
       type="text" 
-      class="search-input"
       placeholder="Cercar taller..." 
+      class="search-input"
     />
   </div>
 
-  <!-- Filtro de HORARI -->
   <h3>HORARI</h3>
   <div>
     <div @click="openHorariFilter = !openHorariFilter" class="select-header">
-      <span v-if="selectedHoraris.length === 0">Escull el horari...</span>
+      <span v-if="selectedHoraris.length === 0">Escull l'horari...</span>
       <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
       <span>▲</span>
     </div>
@@ -348,9 +326,11 @@ const getMesNum = (mes) => {
       </div>
     </div>
   </div>
-</div>
+      </div
+
+    </div>
     <div class="lista-container">
-      <div v-if="filteredTallers.length === 0" class="loading-state">
+      <div v-if="tallersGrouped.length === 0" class="loading-state">
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
 
@@ -395,11 +375,10 @@ const getMesNum = (mes) => {
               >
             </button>
 
-            <div class="desplegable">
-              <SelectorAlumnos
-                @toggle="(state) => actualizarPrioridad(curso.id, state)"
-                @select="(num) => guardarSeleccion(curso.id, num)"
-              />
+            <div class="col-estado">
+              <span class="estado-badge" :class="{ 'estado-aprovada': curso.estadoInscripcion === 'Aprovada', 'estado-pendent': curso.estadoInscripcion === 'Pendent', 'estado-denegado': curso.estadoInscripcion === 'Denegada' }">
+                {{ curso.estadoInscripcion }}
+              </span>
             </div>
           </div>
 
@@ -433,310 +412,6 @@ const getMesNum = (mes) => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
 }
 
-#popup-filter{
-  position: absolute;
-  top: 150px;
-  right: 150px;
-  width: 300px;
-  height: 400px;
-  background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  z-index: 1000;
-}
-.months-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 8px;
-  margin-top: 15px;
-}
-
-.month-chip {
-  background-color: #c5cae9;
-  border: none;
-  border-radius: 20px;
-  padding: 8px 5px;
-  cursor: pointer;
-  transition: 0.3s;
-  width: 100%;
-  text-align: center;
-}
-
-.is-active {
-  background-color: #3949ab !important;
-  color: white;
-}
-
-.selected-tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.selected-tag {
-  background-color: #3949ab;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 15px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.remove-icon {
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.remove-icon:hover {
-  color: #ff8a80;
-}
-
-.btn-aplicar {
-  grid-column: span 3;
-  margin-top: 10px;
-  background-color: #3949ab;
-  color: white;
-  border: none;
-  padding: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-h3{
-  grid-column: span 2;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #7987cb8a;
-  padding-bottom: 10px;
-}
-
-.loading-state {
-  text-align: center;
-  padding: 40px;
-  color: #7986cb;
-  font-weight: bold;
-}
-
-/* --- HEADER --- */
-.header-lista {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 40px;
-  margin-bottom: 15px;
-  padding-right: 60px;
-}
-
-.header-lista p {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
-}
-
-#btn-filtro {
-  background-color: #7986cb;
-  border: 3px solid #3949ab;
-  border-radius: 30px;
-  color: #1d1d1d;
-  font-weight: bold;
-  padding: 6px 18px;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-/* --- LISTA Y SCROLL --- */
-.lista-container {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 20px;
-}
-
-.lista-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.lista-container::-webkit-scrollbar-track {
-  background: transparent;
-  margin-block: 10px;
-}
-
-.lista-container::-webkit-scrollbar-thumb {
-  background: #878787;
-  border-radius: 10px;
-}
-
-/* --- ESTRUCTURA DE FILAS --- */
-.bloque-curso {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
-}
-
-.fila-curso {
-  display: flex;
-  align-items: center;
-  height: 110px;
-  position: relative;
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  transition: 0.3ms;
-}
-
-/* --- CÁPSULAS (COLUMNAS) --- */
-.col-titulo {
-  background-color: #7986cb;
-  margin-left: 150px;
-  color: #1a1a1a;
-  z-index: 3;
-  width: 110px;
-  height: 110px;
-  display: flex;
-  border-radius: 1000px;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.col-titulo img.img-curso {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-}
-
-.col-info {
-  background-color: #9fa8da;
-  margin-left: -110px;
-  z-index: 2;
-  width: 350px;
-  height: 110px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding-left: 30px;
-  border-radius: 250px;
-}
-
-.text-info {
-  font-weight: bold;
-  margin-left: 30%;
-  margin-top: 40px;
-  font-size: 0.85rem;
-}
-
-.btn-detalls {
-  background-color: #c5cae9;
-  margin-left: -100px;
-  z-index: 1;
-  width: 140px;
-  height: 110px;
-  border: none;
-  border-radius: 200px;
-  cursor: pointer;
-  text-align: right;
-  padding-right: 25px;
-  transition: all 0.3s ease;
-}
-
-.btn-detalls:hover {
-  background-color: #d2d7f7;
-  width: 150px;
-}
-
-.btn-detalls-text {
-  color: #1a1a1a;
-  font-size: 1.5rem;
-  font-weight: bold;
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-.btn-detalls-text.rotar {
-  transform: rotate(45deg);
-}
-
-.desplegable {
-  margin-left: auto;
-  margin-right: 30px;
-  width: 45px;
-}
-
-/* --- DESPLEGABLE DE INFORMACIÓN --- */
-.info-desplegable {
-  margin-left: 153px;
-  background-color: #f5f6ff;
-  width: 34%;
-  margin-top: -60px;
-  padding: 50px 20px 15px 40px;
-  border-radius: 0 0 30px 30px;
-  border: 1px solid #c5cae9;
-  z-index: 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.contenido-detalle {
-  color: #3949ab;
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-/* --- OTROS --- */
-.mes-titulo {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: #1a1a1a;
-  margin: 25px 0px 10px 70px;
-}
-
-.icon {
-  width: 14px;
-  height: 14px;
-  vertical-align: middle;
-}
-
-/* TRANSICIÓN VUE */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.3s ease-out;
-}
-
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-/* --- BOTÓN GUARDAR --- */
-.btn-guardar {
-  background-color: #3949ab;
-  border: 2px solid #3949ab;
-  border-radius: 20px;
-  color: white;
-  font-weight: bold;
-  padding: 6px 12px;
-  margin-top: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.btn-guardar:hover {
-  background-color: #7986cb;
-  border-color: #7986cb;
-}
-
-.btn-guardar[disabled] {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* --- FILTROS --- */
 #popup-filter {
   position: absolute;
   top: 150px;
@@ -945,5 +620,211 @@ h3{
 
 #btn-filtro:hover {
   background-color: #6b75c2;
+}
+
+/* --- LISTA Y SCROLL --- */
+.lista-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 20px;
+}
+
+.lista-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 10px;
+}
+
+.lista-container::-webkit-scrollbar-thumb {
+  background: #878787;
+  border-radius: 10px;
+}
+
+/* --- ESTRUCTURA DE FILAS --- */
+.bloque-curso {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.fila-curso {
+  display: flex;
+  align-items: center;
+  height: 110px;
+  position: relative;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  transition: 0.3ms;
+}
+
+/* --- CÁPSULAS (COLUMNAS) --- */
+.col-titulo {
+  background-color: #7986cb;
+  margin-left: 150px;
+  color: #1a1a1a;
+  z-index: 3;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  border-radius: 1000px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.col-titulo img.img-curso {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.col-info {
+  background-color: #9fa8da;
+  margin-left: -110px;
+  z-index: 2;
+  width: 350px;
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-left: 30px;
+  border-radius: 250px;
+}
+
+.text-info {
+  font-weight: bold;
+  margin-left: 30%;
+  margin-top: 40px;
+  font-size: 0.85rem;
+}
+
+.btn-detalls {
+  background-color: #c5cae9;
+  margin-left: -100px;
+  z-index: 1;
+  width: 140px;
+  height: 110px;
+  border: none;
+  border-radius: 200px;
+  cursor: pointer;
+  text-align: right;
+  padding-right: 25px;
+  transition: all 0.3s ease;
+}
+
+.btn-detalls:hover {
+  background-color: #d2d7f7;
+  width: 150px;
+}
+
+.btn-detalls-text {
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.btn-detalls-text.rotar {
+  transform: rotate(45deg);
+}
+
+.desplegable {
+  margin-left: auto;
+  margin-right: 30px;
+  width: 45px;
+}
+
+/* --- COLUMNA ESTADO --- */
+.col-estado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 100px;
+  margin-right: 20px;
+  width: auto;
+  z-index: 4;
+}
+
+.estado-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.estado-aprovada {
+  background-color: #AECAAF;
+  border-color: #8DA88D;
+  border-style: solid;
+  border-width: 4px;
+  color: #1D1D1D;
+}
+
+.estado-pendent {
+  background-color: #FFBA94;
+  border-color: #D39D80;
+  border-style: solid;
+  border-width: 4px;
+  color: #1D1D1D;
+}
+
+.estado-denegado{
+  background-color: #EB7A7A;
+  border-color: #B26060;
+  border-style: solid;
+  border-width: 4px;
+  color: #1D1D1D;
+}
+
+/* --- DESPLEGABLE DE INFORMACIÓN --- */
+.info-desplegable {
+  margin-left: 153px;
+  background-color: #f5f6ff;
+  width: 34%;
+  margin-top: -60px;
+  padding: 50px 20px 15px 40px;
+  border-radius: 0 0 30px 30px;
+  border: 1px solid #c5cae9;
+  z-index: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.contenido-detalle {
+  color: #3949ab;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* --- OTROS --- */
+.mes-titulo {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  margin: 25px 0px 10px 70px;
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+/* TRANSICIÓN VUE */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

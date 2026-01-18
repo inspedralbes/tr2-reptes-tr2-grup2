@@ -5,7 +5,7 @@ export async function getAllInstitucions() {
   try {
     const prisma = await getPrisma();
     return await prisma.institucions.findMany({
-      include: { id_responsable: true, tallers: true, institucions: true },
+      include: { tallers: true, institucions: true, usuaris: true },
     });
   } catch (error) {
     throw new Error(`Error al obtenir institucions: ${error.message}`);
@@ -18,7 +18,7 @@ export async function getInstitucioById(id) {
     const prisma = await getPrisma();
     return await prisma.institucions.findUnique({
       where: { id: parseInt(id) },
-      include: { id_responsable: true, tallers: true, institucions: true },
+      include: { tallers: true, institucions: true, usuaris: true },
     });
   } catch (error) {
     throw new Error(`Error al obtenir institució: ${error.message}`);
@@ -31,7 +31,7 @@ export async function createInstitucio(data) {
     const prisma = await getPrisma();
     return await prisma.institucions.create({
       data,
-      include: { id_responsable: true },
+      include: { usuaris: true },
     });
   } catch (error) {
     throw new Error(`Error al crear institució: ${error.message}`);
@@ -46,7 +46,7 @@ export async function updateInstitucio(data) {
     return await prisma.institucions.update({
       where: { id: parseInt(id) },
       data: updateData,
-      include: { id_responsable: true },
+      include: { usuaris: true },
     });
   } catch (error) {
     throw new Error(`Error al actualitzar institució: ${error.message}`);
