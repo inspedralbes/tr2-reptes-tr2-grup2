@@ -285,6 +285,8 @@ const getMesNum = (mes) => {
         </button>
       </div>
     </div>
+
+    <div v-if="!viendoInscripciones" class="lista-container">
       <div v-if="tallersGrouped.length === 0" class="loading-state">
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
@@ -347,6 +349,7 @@ const getMesNum = (mes) => {
           </Transition>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
