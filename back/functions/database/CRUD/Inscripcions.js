@@ -65,6 +65,8 @@ export async function deleteInscripcio(id) {
   }
 }
 
+
+
 /* ------------------------------- FUNCIONALIDADES ------------------------------ */
 
 export async function procesarInscripcio(selections, docentRef, comentari) {

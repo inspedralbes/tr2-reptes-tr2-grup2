@@ -16,6 +16,7 @@ import {
   getUsuariForAuth,
   updateUsuariToken,
 } from "./functions/database/CRUD/Usuaris.js";
+import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -370,6 +371,17 @@ app.post("/tallers", async (req, res) => {
   } catch (error) {
     console.error("Error al crear taller:", error);
     res.status(500).json({ error: error.message || "Error al crear taller" });
+  }
+});
+
+app.get("/tallers/:id/inscripcions", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const inscripcions = await getInscripciosByTallerId(id);
+    res.json(inscripcions);
+  } catch (error) {
+    console.error("Error al obtenir inscripcions del taller:", error);
+    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
   }
 });
 

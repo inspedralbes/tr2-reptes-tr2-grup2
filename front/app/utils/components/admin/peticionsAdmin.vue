@@ -1,116 +1,255 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { getAllInstitucions } from "~/services/communicationManagerDatabase";
+// SelectorAlumnos removed from this component to hide numeric dropdown
+import { getAllTallers } from "@/services/communicationManagerDatabase";
+import "@fortawesome/fontawesome-free/css/all.css";
 
-const instituts = ref([]);
+// Estados reactivos
+const tallersGrouped = ref([]);
+const cursoExpandido = ref(null);
 const filaActiva = ref(null);
+const cargando = ref(true);
+const viendoInscripciones = ref(false);
+const tallerNomActual = ref("");
 
+// Funciones de UI
+const toggleDetalles = (id) => {
+  cursoExpandido.value = cursoExpandido.value === id ? null : id;
+};
+
+// actualizarPrioridad removed for this view (no numeric selector here)
+
+const vereuInscripcions = (tallerId, tallerNom) => {
+  viendoInscripciones.value = true;
+  tallerNomActual.value = tallerNom;
+  console.log("Viendo inscripciones del taller ID:", tallerId);
+};
+
+const volverALista = () => {
+  viendoInscripciones.value = false;
+  tallerNomActual.value = "";
+};
+
+// Lógica de procesamiento de datos
+const processTallers = (data) => {
+  const mesesNombres = [
+    "Gener",
+    "Febrer",
+    "Març",
+    "Abril",
+    "Maig",
+    "Juny",
+    "Juliol",
+    "Agost",
+    "Setembre",
+    "Octubre",
+    "Novembre",
+    "Desembre",
+  ];
+
+  const grouped = {};
+
+  data.forEach((t) => {
+    let horari = {};
+    try {
+      horari =
+        typeof t.horari === "string" && t.horari.trim() !== ""
+          ? JSON.parse(t.horari)
+          : t.horari || {};
+    } catch (e) {
+      horari = {};
+    }
+
+    // Parseamos la fecha DATAINI (formato "01/10/2024")
+    const parts = (horari.DATAINI || "").split("/");
+    const year = parts[2] ? parseInt(parts[2], 10) : null;
+    const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+    const day = parts[0] ? parseInt(parts[0], 10) : null;
+    const dateObj = year && month >= 0 ? new Date(year, month, day) : null;
+    const mesNombre = dateObj ? mesesNombres[dateObj.getMonth()] : "";
+    const diaNum = dateObj ? dateObj.getDate() : day || null;
+
+    // Si el mes no existe en nuestro objeto agrupador, lo creamos
+    if (!grouped[mesNombre]) {
+      grouped[mesNombre] = {
+        mes: mesNombre,
+        diaNum: diaNum,
+        cursos: [],
+      };
+    }
+
+    // Añadimos el taller al grupo de su mes
+    grouped[mesNombre].cursos.push({
+      id: t.id,
+      titulo: t.nom,
+      hora: horari.TORNS?.[0]?.HORAINICI || "00:00",
+      imagen: "/img/centro/image.png",
+      descripcio: t.descripcio,
+      direccio: t.direccio,
+      mesNum: parts[1] || null,
+      rawHorari: horari,
+    });
+  });
+
+  // Convertimos el objeto en un array para el v-for
+  return Object.values(grouped);
+};
+
+// Carga inicial
 onMounted(async () => {
-  instituts.value = await getAllInstitucions();
-  console.log(instituts.value);
+  try {
+    const rawData = await getAllTallers();
+    tallersGrouped.value = processTallers(rawData);
+  } catch (error) {
+    console.error("Error cargando talleres:", error);
+  } finally {
+    cargando.value = false;
+  }
 });
 
-// const actualizarPrioridad = (id, isOpen) => {
-//   filaActiva.value = isOpen ? id : null;
-// };
-
-const toggleDetalls = (id) => {
-  filaActiva.value = filaActiva.value === id ? null : id;
+// Helper para el número de mes en el calendario visual
+const getMesNum = (mes) => {
+  const meses = {
+    Gener: "01",
+    Febrer: "02",
+    Març: "03",
+    Abril: "04",
+    Maig: "05",
+    Juny: "06",
+    Juliol: "07",
+    Agost: "08",
+    Setembre: "09",
+    Octubre: "10",
+    Novembre: "11",
+    Desembre: "12",
+  };
+  return meses[mes] || "00";
 };
 </script>
 
 <template>
   <div id="container">
-    <div class="header-lista">
-      <div class="botones-izquierda">
-        <button class="btn-peticions">Centres</button>
-        <button class="btn-peticions">Tallers</button>
-      </div>
-      <button id="btn-filtres">Filtres</button>
+    <div v-if="!viendoInscripciones" class="header-lista">
+      <button class="btn-filter-style">Tallers</button>
+      <button class="btn-filter-style">Centres</button>
     </div>
-    <div class="lista-container">
+
+    <div v-if="viendoInscripciones" class="header-inscripciones">
+      <button class="btn-volver" @click="volverALista">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+      <div class="titulo-inscripciones">
+        {{ tallerNomActual }}
+      </div>
+    </div>
+
+    <div v-if="!viendoInscripciones" class="lista-container">
+      <div v-if="tallersGrouped.length === 0" class="loading-state">
+        {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
+      </div>
+
       <div
-        v-for="institut in instituts"
-        :key="institut.id"
-        class="curso-item"
-        :class="{ abierto: filaActiva === institut.id }"
-        :style="{ zIndex: filaActiva === institut.id ? 100 : 1 }"
+        v-for="seccion in tallersGrouped"
+        :key="seccion.mes"
+        class="seccion-mes"
       >
-        <!-- FILA (barra superior) -->
-        <div class="fila-curso">
-          <!--Nom institut-->
-          <div class="col-titulo">
-            <span class="texto-titulo">{{ institut.nom }}</span>
-          </div>
-          <!--Nombre del centre-->
-          <div class="col-info">
-            <span>{{ institut.direccio }}, {{ institut.codi_postal }}</span>
+        <h2 class="mes-titulo">{{ seccion.mes }}</h2>
+
+        <div
+          v-for="curso in seccion.cursos"
+          :key="curso.id"
+          class="bloque-curso"
+        >
+          <div
+            class="fila-curso"
+            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
+          >
+            <div class="col-titulo">
+              <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
+            </div>
+
+            <div class="col-info">
+              <div class="text-info">
+                <span class="texto-titulo">{{ curso.titulo }}</span
+                ><br />
+                <span class="info-item">
+                  <img src="/img/centro/calendar.png" class="icon" />
+                  {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
+                  <img src="/img/centro/clock.png" class="icon" />
+                  {{ curso.hora }}
+                </span>
+              </div>
+            </div>
+
+            <button class="btn-detalls" @click="toggleDetalles(curso.id)">
+              <span
+                class="btn-detalls-text"
+                :class="{ rotar: cursoExpandido === curso.id }"
+                >+</span
+              >
+            </button>
+
+            <button class="btn-veure-inscripcions" @click="vereuInscripcions(curso.id, curso.titulo)">
+              Veure inscripcions
+            </button>
+
+            <div class="desplegable-placeholder"></div>
           </div>
 
-          <button class="btn-detalls" @click="toggleDetalls(institut.id)">
-            <span class="btn-detalls-text">
-              {{ filaActiva === institut.id ? "− Detalls" : "+ Detalls" }}
-            </span>
-          </button>
-          <button id="btn-revisar">Revisar</button>
+          <Transition name="fade-slide">
+            <div v-if="cursoExpandido === curso.id" class="info-desplegable">
+              <div class="contenido-detalle">
+                <p><strong>Descripció:</strong> {{ curso.descripcio }}</p>
+                <p><strong>Ubicació:</strong> {{ curso.direccio }}</p>
+              </div>
+            </div>
+          </Transition>
         </div>
-
-        <!-- DESPLEGABLE HACIA ABAJO -->
-        <transition name="slide">
-          <div v-if="filaActiva === institut.id" class="desplegable">
-            <p>Responsable: {{ institut.responsable }}</p>
-            <p>Contacte: {{ institut.contacte }} | {{ institut.telefon }}</p>
-            <p>Codi: {{ institut.codi_centre }}</p>
-          </div>
-        </transition>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* --- CONTENEDOR PRINCIPAL --- */
 #container {
+  margin-top: -25px;
   font-family: Arial, Helvetica, sans-serif;
-  width: 100%;
-  height: 100%;
+  background-color: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #87878779;
+  padding: 25px;
+  width: 1050px;
+  height: 420px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
 }
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #7986cb;
+  font-weight: bold;
+}
+
 .header-lista {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 10px;
-  margin-right: 40px;
-  margin-left: 40px;
+  gap: 40px;
+  margin-bottom: 15px;
+  padding-right: 0;
 }
+
 .header-lista p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: bold;
   color: #333;
+  margin: 0;
 }
 
-.botones-izquierda {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-peticions {
-  background-color: #e0e0e0;
-  color: #1f1f1f;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 8px 22px;
-  border: 2px solid #bdbdbd;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-#btn-filtres,
-.btn-peticions {
+.btn-filter-style {
   background-color: #7986cb;
   color: #1f1f1f;
   font-weight: 600;
@@ -124,136 +263,232 @@ const toggleDetalls = (id) => {
     box-shadow 0.2s ease;
 }
 
-#btn-filtres:hover {
+.btn-filter-style:hover {
   background-color: #aab4e9;
   transform: translateY(-1px);
   border: 2px solid #5064cd70;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
 }
 
+/* --- LISTA Y SCROLL --- */
 .lista-container {
-  max-width: 100%;
-  width: 1100px;
-  height: 300px;
+  flex: 1;
   overflow-y: auto;
-  overflow-x: visible;
-  padding: 10px 20px;
+  padding-right: 20px;
 }
 
-#btn-revisar {
-  font-weight: 600;
-  font-size: 16px;
-  padding: 8px 22px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  margin-left: auto;
-  transition: background-color 0.2s ease, transform 0.2s ease,
-    box-shadow 0.2s ease;
+.lista-container::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* contenedor por item (fila + desplegable) */
-.curso-item {
-  position: relative;
+.lista-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 10px;
+}
+
+.lista-container::-webkit-scrollbar-thumb {
+  background: #878787;
+  border-radius: 10px;
+}
+
+/* --- ESTRUCTURA DE FILAS --- */
+.bloque-curso {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 10px;
-}
-
-.curso-item.abierto {
-  background: #d7dbff;
-  border-radius: 25px;
-  padding-bottom: 12px;
-  margin-top: 0px;
-  overflow: visible;
-}
-
-p {
-  padding: 0 25px 15px 25px;
-  margin: 0;
 }
 
 .fila-curso {
   display: flex;
   align-items: center;
-  margin-bottom: 0px;
-  height: 45px;
+  height: 110px;
   position: relative;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  transition: 0.3ms;
 }
 
+/* --- CÁPSULAS (COLUMNAS) --- */
 .col-titulo {
   background-color: #7986cb;
+  margin-left: 150px;
   color: #1a1a1a;
   z-index: 3;
-  flex: 1;
-  min-height: 35px;
+  width: 110px;
+  height: 110px;
   display: flex;
+  border-radius: 1000px;
   align-items: center;
-  padding-left: 15px;
-  border-radius: 25px;
-  font-weight: bold;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.col-titulo img.img-curso {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
 }
 
 .col-info {
   background-color: #9fa8da;
-  margin-left: -50px;
+  margin-left: -110px;
   z-index: 2;
-  flex: 2;
-  min-height: 35px;
+  width: 350px;
+  height: 110px;
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 0 15px;
-  border-radius: 25px;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-left: 30px;
+  border-radius: 250px;
+}
+
+.text-info {
+  font-weight: bold;
+  margin-left: 30%;
+  margin-top: 40px;
+  font-size: 0.85rem;
 }
 
 .btn-detalls {
   background-color: #c5cae9;
-  margin-left: -30px;
+  margin-left: -100px;
   z-index: 1;
-  width: 120px;
-  min-height: 35px;
+  width: 140px;
+  height: 110px;
   border: none;
-  border-radius: 25px;
+  border-radius: 200px;
   cursor: pointer;
-  font-weight: bold;
+  text-align: right;
+  padding-right: 25px;
+  transition: all 0.3s ease;
 }
+
+.btn-detalls:hover {
+  background-color: #d2d7f7;
+  width: 150px;
+}
+
+.btn-veure-inscripcions {
+  background-color: #5064cd;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 40px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-veure-inscripcions:hover {
+  background-color: #3949ab;
+  transform: translateY(-2px);
+}
+
 .btn-detalls-text {
-  margin-left: 30px;
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: inline-block;
+  transition: transform 0.3s ease;
 }
 
-/* Desplegable */
-.desplegable {
-  background-color: #d5dafb;
-  margin-left: 0;
-  position: relative;
-  width: 90%;
-  padding: 0px 0 0 0;
+.btn-detalls-text.rotar {
+  transform: rotate(45deg);
 }
 
-/* Animación del desplegable */
-.slide-enter-active,
-.slide-leave-active {
-  transition: max-height 0.25s ease, opacity 0.25s ease;
-  overflow: hidden;
+  /* dropdown removed: placeholder keeps layout if needed */
+  .desplegable-placeholder {
+    width: 45px;
+    margin-left: auto;
+    margin-right: 30px;
+  }
+
+.titulo-inscripciones {
+  color: #283593;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 30px;
+  padding-left: 70px;
 }
-.slide-enter-from,
-.slide-leave-to {
-  max-height: 0;
-  opacity: 0;
+
+.header-inscripciones {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
 }
-.slide-enter-to,
-.slide-leave-from {
-  max-height: 500px;
-  opacity: 1;
+
+.btn-volver {
+  background-color: #7986cb;
+  color: #1f1f1f;
+  font-weight: 600;
+  font-size: 18px;
+  width: 45px;
+  height: 45px;
+  padding: 0;
+  border: 2px solid #3949ab70;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-volver:hover {
+  background-color: #aab4e9;
+  transform: translateY(-1px);
+}
+
+/* --- DESPLEGABLE DE INFORMACIÓN --- */
+.info-desplegable {
+  margin-left: 153px;
+  background-color: #f5f6ff;
+  width: 34%;
+  margin-top: -60px;
+  padding: 50px 20px 15px 40px;
+  border-radius: 0 0 30px 30px;
+  border: 1px solid #c5cae9;
+  z-index: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.contenido-detalle {
+  color: #3949ab;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* --- OTROS --- */
+.mes-titulo {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1a1a1a;
+  margin: 25px 0px 10px 70px;
 }
 
 .icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
 }
-.mes-titulo {
-  font-size: 1.5rem;
-  color: #333;
-  margin: 20px 0 10px 0;
+
+/* TRANSICIÓN VUE */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.3s ease-out;
 }
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+
 </style>
