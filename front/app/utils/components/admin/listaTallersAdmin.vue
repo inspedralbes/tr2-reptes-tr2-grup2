@@ -297,7 +297,6 @@ const crearTaller = async () => {
               id="placesMax"
               v-model="placesMax"
               type="number"
-              placeholder="45"
               min="1"
               required
             />
@@ -344,13 +343,7 @@ const crearTaller = async () => {
             <label for="periode">Periode *</label>
             <select id="periode" v-model="periodeSeleccionado" required>
               <option value="">Selecciona un periode</option>
-              <option
-                v-for="periode in periodes"
-                :key="periode.id"
-                :value="periode.id"
-              >
-                {{ periode.id }}
-              </option>
+              <option v-for="n in 6" :key="n" :value="n">{{ n }}</option>
             </select>
           </div>
 

@@ -16,6 +16,7 @@ const PRIORITY_WEIGHTS = {
   DIVERSITY: weights.DIVERSITY ?? 15,
   MIN_ASSIST: weights.MIN_ASSIST ?? 0.8,
   NO_CAPACITY: weights.NO_CAPACITY ?? -30,
+  NE: weights.NE ?? 30,
 };
 
 let score = 50;
@@ -80,6 +81,9 @@ export async function validateCapacity(tallerId, inscripcioId) {
     score += PRIORITY_WEIGHTS.NO_CAPACITY;
   }
 }
+
+
+     
 
 export async function calcularPuntuacion(inscripcioId, tallerId) {
   score = 50;

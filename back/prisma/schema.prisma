@@ -72,6 +72,7 @@ model Inscripcions {
   autoritzat        Boolean  @default(false)
   estat             Boolean?
   puntuacio         Float?
+  NE               Boolean  @default(false)
 
   // relación opcional al taller (campo mapeado a columna `taller_id`)
   tallerId Int?    @map("taller_id")
