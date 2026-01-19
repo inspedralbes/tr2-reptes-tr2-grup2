@@ -3,7 +3,8 @@
   "ATTENDANCE_RISK": -30,
   "DIVERSITY": 15,
   "MIN_ASSIST": 80,
-  "NO_CAPACITY": -30
+  "NO_CAPACITY": -30,
+  "NE": 30
 
   
 }

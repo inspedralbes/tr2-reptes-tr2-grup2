@@ -20,10 +20,10 @@ model Tallers {
   nom         String
   descripcio  String    @db.Text // Actual Text
   institucio  Int
-  tallerista  String
+  tallerista  String //quien lo hace 
   places_max  Int
   places_disp Int
-  modalitat   Modalitat
+  modalitat   Modalitat // C
   direccio    String
   horari      String    @db.Text
   periode     Int
@@ -72,10 +72,11 @@ model Inscripcions {
   autoritzat        Boolean  @default(false)
   estat             Boolean?
   puntuacio         Float?
+  NE               Boolean  @default(false)
 
-  // relación obligatoria al taller (campo mapeado a columna `taller_id`)
-  tallerId Int     @map("taller_id")
-  taller   Tallers @relation(fields: [tallerId], references: [id])
+  // relación opcional al taller (campo mapeado a columna `taller_id`)
+  tallerId Int?    @map("taller_id")
+  taller   Tallers? @relation(fields: [tallerId], references: [id])
 
   // Intern relations
   id_institucio   Institucions @relation(fields: [institucio], references: [id])
