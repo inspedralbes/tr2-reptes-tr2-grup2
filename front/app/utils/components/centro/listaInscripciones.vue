@@ -555,7 +555,7 @@ const getMesNum = (mes) => {
   border: 1px solid #87878779;
   padding: 25px;
   width: 1050px;
-  height: 420px;
+  height: 380px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
@@ -1073,6 +1073,7 @@ h3 {
 
 #btn-filtro:hover {
   background-color: #6b75c2;
+}
 /* --- MODAL --- */
 .modal-overlay {
   position: fixed;

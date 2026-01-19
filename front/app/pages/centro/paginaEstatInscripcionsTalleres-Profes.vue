@@ -17,11 +17,14 @@ import llistaEstados from "@/utils/components/centro/listaEstadoInscripciones.vu
 <style scoped>
 #cuerpo {
   display: flex;
+  height: calc(100vh - 85px);
+  overflow: hidden;
 }
 #contenido {
   margin-top: 20px;
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
+  height: 300px;
 }
 </style>
