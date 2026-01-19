@@ -78,7 +78,8 @@ ALTER TABLE `Tallers` DROP COLUMN `curs`,
     MODIFY `modalitat` ENUM('A', 'B', 'C') NOT NULL;
 
 -- AlterTable
-ALTER TABLE `Usuaris` ADD COLUMN `telefon` INTEGER NOT NULL,
+ALTER TABLE `Usuaris` ADD COLUMN `responsable` BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN `telefon` INTEGER NOT NULL,
     MODIFY `id` INTEGER NOT NULL AUTO_INCREMENT,
     MODIFY `rol` ENUM('Admin', 'Professorat') NOT NULL,
     MODIFY `institucio` INTEGER NULL;

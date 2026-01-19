@@ -2,6 +2,12 @@
 import Encabezado from "@/layouts/encabezado.vue";
 import navProfes from "@/layouts/navBarProfes.vue";
 import tallerSliders from "@/utils/components/centro/tallersSlider.vue";
+function functionToFetchData() {
+  const userName = localStorage.getItem("userName");
+}
+onMounted(() => {
+  functionToFetchData();
+});
 </script>
 
 <template>
@@ -9,7 +15,10 @@ import tallerSliders from "@/utils/components/centro/tallersSlider.vue";
   <div id="cuerpo">
     <navProfes />
     <div id="contenido">
-      <h2>Bon día, <span id="user">*UserName*</span>:</h2>
+      <h2>
+        Bon día, <span id="user" >{{ userName }}</span
+        >:
+      </h2>
       <br />
       <h3>Tallers actius:</h3>
       <div id="slider">
