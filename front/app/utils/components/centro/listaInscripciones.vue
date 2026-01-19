@@ -68,11 +68,21 @@ const enviarTodasSeleccionadas = async () => {
 
 //Para los filtros
 const meses = [
-  "Gener", "Febrer", "Març", "Abril", "Maig", "Juny",
-  "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"
+  "Gener",
+  "Febrer",
+  "Març",
+  "Abril",
+  "Maig",
+  "Juny",
+  "Juliol",
+  "Agost",
+  "Setembre",
+  "Octubre",
+  "Novembre",
+  "Desembre",
 ];
 
-function toggleMonthSelection(mes){
+function toggleMonthSelection(mes) {
   const index = selectedMonths.value.indexOf(mes);
   if (index === -1) {
     selectedMonths.value.push(mes);
@@ -81,10 +91,10 @@ function toggleMonthSelection(mes){
   }
 }
 function removeMonth(mes) {
-  selectedMonths.value = selectedMonths.value.filter(m => m !== mes);
+  selectedMonths.value = selectedMonths.value.filter((m) => m !== mes);
 }
 
-function toggleHorariSelection(horari){
+function toggleHorariSelection(horari) {
   const index = selectedHoraris.value.indexOf(horari);
   if (index === -1) {
     selectedHoraris.value.push(horari);
@@ -94,29 +104,50 @@ function toggleHorariSelection(horari){
 }
 
 function removeHorari(horari) {
-  selectedHoraris.value = selectedHoraris.value.filter(h => h !== horari);
+  selectedHoraris.value = selectedHoraris.value.filter((h) => h !== horari);
 }
 
-function toggleFilter(){
+function toggleFilter() {
   isMenuOpen.value = !isMenuOpen.value;
 }
 
-// Obtener lista de horarios únicos
 function extractHoraris(data) {
-  const horarisSet = new Set();
-  data.forEach(t => {
+  const listaHoras = [];
+
+  for (let i = 0; i < data.length; i++) {
+    const t = data[i];
     let horari = {};
+
+    // Intento de parsear el horario
     try {
-      horari = typeof t.horari === "string" && t.horari.trim() !== "" 
-        ? JSON.parse(t.horari) 
-        : t.horari || {};
+      if (typeof t.horari === "string" && t.horari.trim() !== "") {
+        horari = JSON.parse(t.horari);
+      } else if (t.horari) {
+        horari = t.horari;
+      }
     } catch (e) {
       horari = {};
     }
-    const hora = horari.TORNS?.[0]?.HORAINICI || "00:00";
-    horarisSet.add(hora);
-  });
-  return Array.from(horarisSet).sort();
+
+    // Acceso seguro a la hora de inicio
+    let hora = "00:00";
+    if (horari.TORNS && horari.TORNS[0] && horari.TORNS[0].HORAINICI) {
+      hora = horari.TORNS[0].HORAINICI;
+    }
+
+    // Evitar duplicados manualmente
+    let existe = false;
+    for (let j = 0; j < listaHoras.length; j++) {
+      if (listaHoras[j] === hora) {
+        existe = true;
+        break;
+      }
+    }
+    if (!existe) {
+      listaHoras.push(hora);
+    }
+  }
+  return listaHoras.sort();
 }
 
 // Lógica de procesamiento de datos
@@ -188,11 +219,11 @@ onMounted(async () => {
   try {
     const rawData = await getAllTallers();
     console.log("Datos crudos de talleres:", rawData);
-    
+
     // Extraer horarios únicos
     horaris.value = extractHoraris(rawData);
     console.log("Horarios disponibles:", horaris.value);
-    
+
     tallersGrouped.value = processTallers(rawData);
   } catch (error) {
     console.error("Error cargando talleres:", error);
@@ -203,34 +234,70 @@ onMounted(async () => {
 
 // Función para filtrar talleres según criterios
 const filteredTallers = computed(() => {
-  return tallersGrouped.value.map(seccion => {
-    let cursosFiltrados = seccion.cursos;
-    
-    // Filtro por mes
+  const resultadoFinal = [];
+
+  for (let i = 0; i < tallersGrouped.value.length; i++) {
+    const seccion = tallersGrouped.value[i];
+
+    // 1. Filtro por mes (manual)
     if (selectedMonths.value.length > 0) {
-      // Si hay meses seleccionados, solo mostrar esa sección si coincide
-      if (!selectedMonths.value.includes(seccion.mes)) {
-        return { ...seccion, cursos: [] };
+      let mesEncontrado = false;
+      for (let m = 0; m < selectedMonths.value.length; m++) {
+        if (selectedMonths.value[m] === seccion.mes) {
+          mesEncontrado = true;
+          break;
+        }
+      }
+      // Si el mes no está en los seleccionados, pasamos a la siguiente sección
+      if (!mesEncontrado) {
+        continue;
       }
     }
-    
-    // Filtro por horario
-    if (selectedHoraris.value.length > 0) {
-      cursosFiltrados = cursosFiltrados.filter(curso => 
-        selectedHoraris.value.includes(curso.hora)
-      );
+
+    // 2. Filtrar los cursos de esta sección
+    const cursosValidos = [];
+    for (let j = 0; j < seccion.cursos.length; j++) {
+      const curso = seccion.cursos[j];
+
+      // Filtro de horario
+      let horarioPasa = true;
+      if (selectedHoraris.value.length > 0) {
+        horarioPasa = false;
+        for (let h = 0; h < selectedHoraris.value.length; h++) {
+          if (selectedHoraris.value[h] === curso.hora) {
+            horarioPasa = true;
+            break;
+          }
+        }
+      }
+
+      // Filtro de búsqueda por título
+      let busquedaPasa = true;
+      if (searchTaller.value.trim() !== "") {
+        const busqueda = searchTaller.value.toLowerCase();
+        const titulo = curso.titulo.toLowerCase();
+        if (titulo.indexOf(busqueda) === -1) {
+          busquedaPasa = false;
+        }
+      }
+
+      // Si cumple ambos filtros, lo guardamos
+      if (horarioPasa && busquedaPasa) {
+        cursosValidos.push(curso);
+      }
     }
-    
-    // Filtro por búsqueda de título
-    if (searchTaller.value.trim() !== "") {
-      const searchLower = searchTaller.value.toLowerCase();
-      cursosFiltrados = cursosFiltrados.filter(curso =>
-        curso.titulo.toLowerCase().includes(searchLower)
-      );
+
+    // 3. Solo añadir la sección al resultado si tiene cursos válidos
+    if (cursosValidos.length > 0) {
+      const nuevaSeccion = {
+        mes: seccion.mes,
+        cursos: cursosValidos,
+      };
+      resultadoFinal.push(nuevaSeccion);
     }
-    
-    return { ...seccion, cursos: cursosFiltrados };
-  }).filter(seccion => seccion.cursos.length > 0); // Eliminar secciones vacías
+  }
+
+  return resultadoFinal;
 });
 
 // Helper para el número de mes en el calendario visual
@@ -241,7 +308,7 @@ const getMesNum = (mes) => {
     Març: "03",
     Abril: "04",
     Maig: "05",
-    Juny: "06", 
+    Juny: "06",
     Juliol: "07",
     Agost: "08",
     Setembre: "09",
@@ -265,90 +332,92 @@ const getMesNum = (mes) => {
         Guardar selecciones
       </button>
       <p>Alumnes</p>
-
     </div>
     <div v-if="filterOpen" id="popup-filter">
-  <button @click="filterOpen = false">x</button>
+      <button @click="filterOpen = false">x</button>
 
-  <!-- Filtro de MES -->
-  <h3>MES</h3>
-  <div>
-    <div @click="openMonthFilter = !openMonthFilter" class="select-header">
-      <span v-if="selectedMonths.length === 0">Escull el mes...</span>
-      <span v-else>{{ selectedMonths.length }} meses seleccionats</span>
-      <span>▲</span>
-    </div>
+      <!-- Filtro de MES -->
+      <h3>MES</h3>
+      <div>
+        <div @click="openMonthFilter = !openMonthFilter" class="select-header">
+          <span v-if="selectedMonths.length === 0">Escull el mes...</span>
+          <span v-else>{{ selectedMonths.length }} meses seleccionats</span>
+          <span>▲</span>
+        </div>
 
-    <div v-if="openMonthFilter" class="months-grid">
-      <button 
-        v-for="mes in meses" 
-        :key="mes"
-        class="month-chip"
-        @click="toggleMonthSelection(mes)" 
-        :class="{ 'is-active': selectedMonths.includes(mes) }"
-      >
-        {{ mes }}
-      </button>
-      <button class="btn-aplicar" @click="openMonthFilter = false">Aplicar</button>
-    </div>
+        <div v-if="openMonthFilter" class="months-grid">
+          <button
+            v-for="mes in meses"
+            :key="mes"
+            class="month-chip"
+            @click="toggleMonthSelection(mes)"
+            :class="{ 'is-active': selectedMonths.includes(mes) }"
+          >
+            {{ mes }}
+          </button>
+          <button class="btn-aplicar" @click="openMonthFilter = false">
+            Aplicar
+          </button>
+        </div>
 
-    <div class="selected-tags-container">
-      <div 
-        v-for="mes in selectedMonths" 
-        :key="mes" 
-        class="selected-tag"
-      >
-        {{ mes }}
-        <span class="remove-icon" @click="removeMonth(mes)">×</span>
+        <div class="selected-tags-container">
+          <div v-for="mes in selectedMonths" :key="mes" class="selected-tag">
+            {{ mes }}
+            <span class="remove-icon" @click="removeMonth(mes)">×</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtro de BÚSQUEDA -->
+      <h3>TALLER</h3>
+      <div>
+        <input
+          v-model="searchTaller"
+          type="text"
+          class="search-input"
+          placeholder="Cercar taller..."
+        />
+      </div>
+
+      <!-- Filtro de HORARI -->
+      <h3>HORARI</h3>
+      <div>
+        <div
+          @click="openHorariFilter = !openHorariFilter"
+          class="select-header"
+        >
+          <span v-if="selectedHoraris.length === 0">Escull el horari...</span>
+          <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
+          <span>▲</span>
+        </div>
+
+        <div v-if="openHorariFilter" class="horaris-grid">
+          <button
+            v-for="horari in horaris"
+            :key="horari"
+            class="horari-chip"
+            @click="toggleHorariSelection(horari)"
+            :class="{ 'is-active': selectedHoraris.includes(horari) }"
+          >
+            {{ horari }}
+          </button>
+          <button class="btn-aplicar" @click="openHorariFilter = false">
+            Aplicar
+          </button>
+        </div>
+
+        <div class="selected-tags-container">
+          <div
+            v-for="horari in selectedHoraris"
+            :key="horari"
+            class="selected-tag"
+          >
+            {{ horari }}
+            <span class="remove-icon" @click="removeHorari(horari)">×</span>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Filtro de BÚSQUEDA -->
-  <h3>TALLER</h3>
-  <div>
-    <input 
-      v-model="searchTaller"
-      type="text" 
-      class="search-input"
-      placeholder="Cercar taller..." 
-    />
-  </div>
-
-  <!-- Filtro de HORARI -->
-  <h3>HORARI</h3>
-  <div>
-    <div @click="openHorariFilter = !openHorariFilter" class="select-header">
-      <span v-if="selectedHoraris.length === 0">Escull el horari...</span>
-      <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
-      <span>▲</span>
-    </div>
-
-    <div v-if="openHorariFilter" class="horaris-grid">
-      <button 
-        v-for="horari in horaris" 
-        :key="horari"
-        class="horari-chip"
-        @click="toggleHorariSelection(horari)" 
-        :class="{ 'is-active': selectedHoraris.includes(horari) }"
-      >
-        {{ horari }}
-      </button>
-      <button class="btn-aplicar" @click="openHorariFilter = false">Aplicar</button>
-    </div>
-
-    <div class="selected-tags-container">
-      <div 
-        v-for="horari in selectedHoraris" 
-        :key="horari" 
-        class="selected-tag"
-      >
-        {{ horari }}
-        <span class="remove-icon" @click="removeHorari(horari)">×</span>
-      </div>
-    </div>
-  </div>
-</div>
     <div class="lista-container">
       <div v-if="filteredTallers.length === 0" class="loading-state">
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
@@ -433,7 +502,7 @@ const getMesNum = (mes) => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
 }
 
-#popup-filter{
+#popup-filter {
   position: absolute;
   top: 150px;
   right: 150px;
@@ -447,7 +516,7 @@ const getMesNum = (mes) => {
 }
 .months-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); 
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-top: 15px;
 }
@@ -507,7 +576,7 @@ const getMesNum = (mes) => {
   border-radius: 5px;
   cursor: pointer;
 }
-h3{
+h3 {
   grid-column: span 2;
   margin-bottom: 10px;
   border-bottom: 1px solid #7987cb8a;

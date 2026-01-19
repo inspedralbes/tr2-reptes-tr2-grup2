@@ -58,20 +58,45 @@ function removeHorari(horari) {
 
 // Obtener lista de horarios únicos
 function extractHoraris(data) {
-  const horarisSet = new Set();
-  data.forEach(t => {
+  const listaHoras = [];
+
+  for (let i = 0; i < data.length; i++) {
+    const t = data[i];
     let horari = {};
+
+    // Intento de parsear el horario
     try {
-      horari = typeof t.horari === "string" && t.horari.trim() !== "" 
-        ? JSON.parse(t.horari) 
-        : t.horari || {};
+      if (typeof t.horari === "string" && t.horari.trim() !== "") {
+        horari = JSON.parse(t.horari);
+      } else if (t.horari) {
+        horari = t.horari;
+      }
     } catch (e) {
       horari = {};
     }
-    const hora = horari.TORNS?.[0]?.HORAINICI || "00:00";
-    horarisSet.add(hora);
-  });
-  return Array.from(horarisSet).sort();
+
+    // Acceso seguro a la hora de inicio
+    let hora = "00:00";
+    if (horari.TORNS && horari.TORNS[0] && horari.TORNS[0].HORAINICI) {
+      hora = horari.TORNS[0].HORAINICI;
+    }
+
+    // Evitar duplicados manualmente
+    let existe = false;
+    for (let j = 0; j < listaHoras.length; j++) {
+      if (listaHoras[j] === hora) {
+        existe = true;
+        break;
+      }
+    }
+
+    if (!existe) {
+      listaHoras.push(hora);
+    }
+  }
+
+  // Ordenar alfabéticamente
+  return listaHoras.sort();
 }
 
 // Lógica de procesamiento de datos
@@ -150,41 +175,30 @@ const processTallers = (data, inscritos) => {
 // Carga inicial
 onMounted(async () => {
   try {
-    // Obtener todos los talleres
     const rawData = await getAllTallers();
-    console.log("Datos crudos de talleres:", rawData);
-    
-    // Extraer horarios únicos
     horaris.value = extractHoraris(rawData);
-    console.log("Horarios disponibles:", horaris.value);
     
-    // Obtener las inscripciones
     const inscripciones = await getAllInscripcions();
-    console.log("Todas las inscripciones:", inscripciones);
-    
-    const token = localStorage.getItem("auth_token");
-    
     const usuarioInstitucionId = localStorage.getItem("user_institution_id");
-    
-    // Filtrar inscripciones por institución
-    const inscripcionesFiltridas = inscripciones.filter(i => {
-      // Si tenemos un ID de institución, filtrar por él
+    const inscripcionesFiltridas = [];
+    for (const i of inscripciones) {
       if (usuarioInstitucionId) {
-        return i.institucio === parseInt(usuarioInstitucionId);
+        if (i.institucio === parseInt(usuarioInstitucionId)) {
+          inscripcionesFiltridas.push(i);
+        }
+      } else {
+        // Si no hay ID de institución, las añadimos todas
+        inscripcionesFiltridas.push(i);
       }
-      // Si no, mostrar todas
-      return true;
-    });
-    
-    console.log("Inscripciones filtradas:", inscripcionesFiltridas);
+    }
     inscripcionsMap.value = {};
-    inscripcionesFiltridas.forEach(i => {
+    for (const i of inscripcionesFiltridas) {
       inscripcionsMap.value[i.tallerId] = i;
-    });
+    }
     
     tallersGrouped.value = processTallers(rawData, inscripcionesFiltridas);
   } catch (error) {
-    console.error("Error cargando talleres o inscripciones:", error);
+    console.error("Error cargando talleres:", error);
   } finally {
     cargando.value = false;
   }
@@ -192,34 +206,66 @@ onMounted(async () => {
 
 // Función para filtrar talleres según criterios
 const filteredTallers = computed(() => {
-  return tallersGrouped.value.map(seccion => {
-    let cursosFiltrados = seccion.cursos;
-    
-    // Filtro por mes
+  const resultadoFinal = [];
+
+  for (const seccion of tallersGrouped.value) {
+    // 1. Filtro de Mes
+    let mesCoincide = true;
     if (selectedMonths.value.length > 0) {
-      // Si hay meses seleccionados, solo mostrar esa sección si coincide
-      if (!selectedMonths.value.includes(seccion.mes)) {
-        return { ...seccion, cursos: [] };
+      mesCoincide = false;
+      for (const m of selectedMonths.value) {
+        if (m === seccion.mes) {
+          mesCoincide = true;
+          break;
+        }
       }
     }
-    
-    // Filtro por horario
-    if (selectedHoraris.value.length > 0) {
-      cursosFiltrados = cursosFiltrados.filter(curso => 
-        selectedHoraris.value.includes(curso.hora)
-      );
+
+    // Si el mes no coincide, saltamos a la siguiente sección
+    if (!mesCoincide) continue;
+
+    // 2. Filtrar cursos dentro de la sección
+    const cursosFiltrados = [];
+    for (const curso of seccion.cursos) {
+      
+      // Filtro de Horario
+      let horarioValido = true;
+      if (selectedHoraris.value.length > 0) {
+        horarioValido = false;
+        for (const h of selectedHoraris.value) {
+          if (h === curso.hora) {
+            horarioValido = true;
+            break;
+          }
+        }
+      }
+
+      // Filtro de Búsqueda
+      let busquedaValida = true;
+      if (searchTaller.value.trim() !== "") {
+        const searchLower = searchTaller.value.toLowerCase();
+        const tituloLower = curso.titulo.toLowerCase();
+        if (tituloLower.indexOf(searchLower) === -1) {
+          busquedaValida = false;
+        }
+      }
+
+      // Si pasa ambos filtros, lo añadimos
+      if (horarioValido && busquedaValida) {
+        cursosFiltrados.push(curso);
+      }
     }
-    
-    // Filtro por búsqueda de título
-    if (searchTaller.value.trim() !== "") {
-      const searchLower = searchTaller.value.toLowerCase();
-      cursosFiltrados = cursosFiltrados.filter(curso =>
-        curso.titulo.toLowerCase().includes(searchLower)
-      );
+
+    // 3. Solo añadir la sección si tiene cursos que pasaron los filtros
+    if (cursosFiltrados.length > 0) {
+      resultadoFinal.push({
+        mes: seccion.mes,
+        cursos: cursosFiltrados
+      });
     }
-    
-    return { ...seccion, cursos: cursosFiltrados };
-  }).filter(seccion => seccion.cursos.length > 0); // Eliminar secciones vacías
+  }
+
+  return resultadoFinal;
 });
 
 // Helper para el número de mes en el calendario visual
