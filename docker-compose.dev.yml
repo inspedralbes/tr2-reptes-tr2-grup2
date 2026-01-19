@@ -1,13 +1,11 @@
 # Per iniciar l'entorn de desenvolupament, executeu:
-# docker compose -f docker-compose.dev.yml up
+# docker compose -f docker-compose.dev.yml up --build
 
 # Per executar les migracions de la base de dades:
 # docker compose -f docker-compose.dev.yml exec tr2g2-back npx prisma migrate dev
 
 # Per executar la inicialització de la base de dades:
 # docker compose -f docker-compose.dev.yml exec tr2g2-back npx prisma db seed
-
-version: "3.9"
 
 services:
   tr2g2-front:
@@ -31,9 +29,15 @@ services:
     command: sh -c "rm -rf ./generated/prisma && cp .env.DEV .env && npm install && npx prisma generate && npm run dev"
     volumes:
       - ./back:/usr/src/app
+      - /usr/src/app/node_modules # SOLUCIÓN 1: Evita conflictos de archivos en Windows
     working_dir: /usr/src/app
     ports:
       - 8000:8000
+    depends_on:
+      - tr2g2-mysql
+    environment:
+      # SOLUCIÓN 2: Conexión directa para que Prisma la detecte sin depender del .env
+      DATABASE_URL: "mysql://root:root@tr2g2-mysql:3306/GESTIO-CURSOS"
 
   tr2g2-mysql:
     image: mysql

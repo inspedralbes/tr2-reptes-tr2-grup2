@@ -19,6 +19,9 @@ const searchTaller = ref("");
 const horaris = ref([]);
 
 const selecciones = ref({});
+const mostrarModalInsc = ref(false);
+const docentRef = ref("");
+const comentari = ref("");
 
 // Funciones de UI
 const toggleDetalles = (id) => {
@@ -38,19 +41,30 @@ const guardarSeleccion = (tallerId, numeroSeleccionado) => {
 // Devuelve true si hay al menos una selección guardada
 const hasSelections = () => Object.keys(selecciones.value).length > 0;
 
-// Paula: funcion para enviar todas las selecciones guardadas al backend en un solo POST
-const enviarTodasSeleccionadas = async () => {
+// Paula: funcion para abrir el modal de inscripciones
+const enviarTodasSeleccionadas = () => {
   if (Object.keys(selecciones.value).length === 0) {
     console.log("No hay selecciones para enviar");
     return;
   }
+  mostrarModalInsc.value = true;
+};
+
+// Paula: funcion para enviar datos al backend desde el modal
+const confirmarEnvio = async () => {
   try {
-    const payload = Object.entries(selecciones.value).map(
+    const selectionsArray = Object.entries(selecciones.value).map(
       ([tallerId, numAlumnos]) => ({
         tallerId: Number(tallerId),
         numAlumnos: Number(numAlumnos),
       })
     );
+
+    const payload = {
+      selecciones: selectionsArray,
+      "docents-ref": docentRef.value.trim() || null,
+      comentari: comentari.value.trim() || null,
+    };
 
     const backendBase = import.meta.env.VITE_URL_BACK || "";
     const res = await fetch(`${backendBase}/inscripcions/dadesinsc`, {
@@ -60,7 +74,10 @@ const enviarTodasSeleccionadas = async () => {
     });
     if (!res.ok) throw new Error("Error al guardar selecciones");
     console.log("Guardadas todas las selecciones");
+
+    // Limpiar y cerrar
     selecciones.value = {};
+    cerrarModal();
   } catch (err) {
     console.log("Error al guardar selecciones:", err.message);
   }
@@ -149,6 +166,12 @@ function extractHoraris(data) {
   }
   return listaHoras.sort();
 }
+// Paula: funcion para cerrar el modal sin enviar
+const cerrarModal = () => {
+  mostrarModalInsc.value = false;
+  docentRef.value = "";
+  comentari.value = "";
+};
 
 // Lógica de procesamiento de datos
 const processTallers = (data) => {
@@ -480,6 +503,42 @@ const getMesNum = (mes) => {
               </div>
             </div>
           </Transition>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Inscripció -->
+    <div v-if="mostrarModalInsc" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Dades de la Inscripció</h3>
+
+        <div class="form-group">
+          <label for="docent-ref">Docent de Referència (opcional):</label>
+          <input
+            id="docent-ref"
+            v-model="docentRef"
+            type="text"
+            class="input-field"
+            placeholder="Nom del docent"
+            maxlength="100"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="comentari">Comentari (opcional):</label>
+          <textarea
+            id="comentari"
+            v-model="comentari"
+            class="textarea-field"
+            placeholder="Afegeix un comentari..."
+            maxlength="191"
+          ></textarea>
+          <span class="char-count">{{ comentari.length }}/191</span>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="btn-cancel" @click="cerrarModal">Cancelar</button>
+          <button class="btn-send" @click="confirmarEnvio">Enviar</button>
         </div>
       </div>
     </div>
@@ -1014,5 +1073,115 @@ h3 {
 
 #btn-filtro:hover {
   background-color: #6b75c2;
+/* --- MODAL --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 15px;
+  padding: 30px;
+  width: 400px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  border: 2px solid #3949ab;
+}
+
+.modal-content h3 {
+  color: #3949ab;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #3949ab;
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.input-field,
+.textarea-field {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #c5cae9;
+  border-radius: 8px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.input-field:focus,
+.textarea-field:focus {
+  outline: none;
+  border-color: #7986cb;
+  box-shadow: 0 0 5px rgba(121, 134, 203, 0.3);
+}
+
+.textarea-field {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.char-count {
+  display: block;
+  font-size: 0.8rem;
+  color: #7986cb;
+  margin-top: 5px;
+  text-align: right;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 25px;
+}
+
+.btn-cancel,
+.btn-send {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel {
+  background-color: #e0e0e0;
+  color: #333;
+  border: 1px solid #b0b0b0;
+}
+
+.btn-cancel:hover {
+  background-color: #d0d0d0;
+}
+
+.btn-send {
+  background-color: #3949ab;
+  color: white;
+  border: 2px solid #3949ab;
+}
+
+.btn-send:hover {
+  background-color: #7986cb;
+  border-color: #7986cb;
 }
 </style>
