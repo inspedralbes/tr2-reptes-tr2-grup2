@@ -43,7 +43,7 @@ const cargarPeriodes = async () => {
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
     if (!response.ok) throw new Error("Error al cargar periodes");
     periodes.value = await response.json();
@@ -171,7 +171,7 @@ const crearTaller = async () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataTaller),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -198,9 +198,6 @@ const crearTaller = async () => {
       <button id="btn-crear" @click="abrirModal">+ Crear Taller</button>
     </div>
     <div class="lista-container">
-      <!-- <div v-for="taller in tallers" :key="taller.id" class="seccion-mes">
-        <h2 class="mes-titulo">{{ taller.target }}</h2> -->
-
       <!-- CONTENEDOR: fila + desplegable debajo -->
       <div
         v-for="taller in tallers"
@@ -241,7 +238,6 @@ const crearTaller = async () => {
           </div>
         </transition>
       </div>
-      <!-- </div> -->
     </div>
 
     <!-- MODAL CREAR TALLER -->
@@ -364,7 +360,7 @@ const crearTaller = async () => {
 #container {
   font-family: Arial, Helvetica, sans-serif;
   width: 100%;
-  height: 100%;
+  max-height: 550px;
   display: flex;
   flex-direction: column;
 }
@@ -393,7 +389,9 @@ const crearTaller = async () => {
   border-radius: 20px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease,
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
@@ -414,7 +412,9 @@ const crearTaller = async () => {
   border-radius: 20px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease,
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
@@ -515,7 +515,9 @@ p {
 /* Animación del desplegable */
 .slide-enter-active,
 .slide-leave-active {
-  transition: max-height 0.25s ease, opacity 0.25s ease;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.25s ease;
   overflow: hidden;
 }
 .slide-enter-from,

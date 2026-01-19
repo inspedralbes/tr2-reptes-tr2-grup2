@@ -52,138 +52,144 @@ function exportCSV() {
     <h2>Gestió informes</h2>
     <button id="btn-filtres" @click="toggleFilters">Filtres</button>
   </div>
-  <div class="container-informs">
-    <!-- PANEL FLOTANTE DE FILTROS -->
-    <div v-if="showFilters" class="filters-overlay" @click.self="cancelFilters">
-      <div class="filters-pop">
-        <div class="filters-head">
-          <h3>Filtres</h3>
-          <button class="btn-close" @click="cancelFilters">✕</button>
-        </div>
-
-        <div class="filters-grid">
-          <div class="field">
-            <label>Taller</label>
-            <select v-model="filters.taller">
-              <option>Tots</option>
-              <option>Curs de Vela</option>
-              <option>Curs de Teatre</option>
-            </select>
+  <div id="container">
+    <div class="container-informs">
+      <!-- PANEL FLOTANTE DE FILTROS -->
+      <div
+        v-if="showFilters"
+        class="filters-overlay"
+        @click.self="cancelFilters"
+      >
+        <div class="filters-pop">
+          <div class="filters-head">
+            <h3>Filtres</h3>
+            <button class="btn-close" @click="cancelFilters">✕</button>
           </div>
 
-          <div class="field">
-            <label>Centre educatiu</label>
-            <select v-model="filters.centre">
-              <option>Tots</option>
-              <option>Institut X</option>
-              <option>Escola Y</option>
-            </select>
-          </div>
+          <div class="filters-grid">
+            <div class="field">
+              <label>Taller</label>
+              <select v-model="filters.taller">
+                <option>Tots</option>
+                <option>Curs de Vela</option>
+                <option>Curs de Teatre</option>
+              </select>
+            </div>
 
-          <div class="field">
-            <label>Modalitat</label>
-            <div class="segmented">
-              <button
-                class="seg"
-                :class="{ active: filters.modalitat === 'Totes' }"
-                @click="filters.modalitat = 'Totes'"
-                type="button"
-              >
-                Totes
-              </button>
-              <button
-                class="seg"
-                :class="{ active: filters.modalitat === 'A' }"
-                @click="filters.modalitat = 'A'"
-                type="button"
-              >
-                A
-              </button>
-              <button
-                class="seg"
-                :class="{ active: filters.modalitat === 'B' }"
-                @click="filters.modalitat = 'B'"
-                type="button"
-              >
-                B
-              </button>
-              <button
-                class="seg"
-                :class="{ active: filters.modalitat === 'C' }"
-                @click="filters.modalitat = 'C'"
-                type="button"
-              >
-                C
-              </button>
+            <div class="field">
+              <label>Centre educatiu</label>
+              <select v-model="filters.centre">
+                <option>Tots</option>
+                <option>Institut X</option>
+                <option>Escola Y</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Modalitat</label>
+              <div class="segmented">
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'Totes' }"
+                  @click="filters.modalitat = 'Totes'"
+                  type="button"
+                >
+                  Totes
+                </button>
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'A' }"
+                  @click="filters.modalitat = 'A'"
+                  type="button"
+                >
+                  A
+                </button>
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'B' }"
+                  @click="filters.modalitat = 'B'"
+                  type="button"
+                >
+                  B
+                </button>
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'C' }"
+                  @click="filters.modalitat = 'C'"
+                  type="button"
+                >
+                  C
+                </button>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Dates</label>
+              <div class="dates">
+                <input type="date" v-model="filters.dateFrom" />
+                <span class="dash">—</span>
+                <input type="date" v-model="filters.dateTo" />
+              </div>
             </div>
           </div>
 
-          <div class="field">
-            <label>Dates</label>
-            <div class="dates">
-              <input type="date" v-model="filters.dateFrom" />
-              <span class="dash">—</span>
-              <input type="date" v-model="filters.dateTo" />
-            </div>
+          <div class="filters-actions">
+            <button class="btn-ghost" @click="clearFilters" type="button">
+              Netejar
+            </button>
+            <button class="btn-ghost" @click="cancelFilters" type="button">
+              Cancel·lar
+            </button>
+            <button class="btn-primary" @click="applyFilters" type="button">
+              Aplicar
+            </button>
           </div>
         </div>
+      </div>
 
-        <div class="filters-actions">
-          <button class="btn-ghost" @click="clearFilters" type="button">
-            Netejar
-          </button>
-          <button class="btn-ghost" @click="cancelFilters" type="button">
-            Cancel·lar
-          </button>
-          <button class="btn-primary" @click="applyFilters" type="button">
-            Aplicar
-          </button>
+      <!-- AQUÍ IRÍAN LOS INFORMES (solo estructura visual) -->
+      <div class="reports-grid">
+        <div class="card">
+          <div class="card-title">Tallers sol·licitats vs assignats</div>
+          <div class="chart-placeholder">Gràfic (placeholder)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Estadístiques de participació</div>
+          <div class="chart-placeholder">Gràfic (placeholder)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Estat dels checklists</div>
+          <div class="chart-placeholder">Gràfic (placeholder)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Satisfacció general</div>
+          <div class="chart-placeholder">Mitjanes (placeholder)</div>
         </div>
       </div>
-    </div>
 
-    <!-- AQUÍ IRÍAN LOS INFORMES (solo estructura visual) -->
-    <div class="reports-grid">
-      <div class="card">
-        <div class="card-title">Tallers sol·licitats vs assignats</div>
-        <div class="chart-placeholder">Gràfic (placeholder)</div>
+      <div class="card card-wide">
+        <div class="card-title">Comparatives entre edicions o períodes</div>
+        <div class="chart-placeholder wide">Comparativa (placeholder)</div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Estadístiques de participació</div>
-        <div class="chart-placeholder">Gràfic (placeholder)</div>
+      <!-- EXPORTACIÓN -->
+      <div class="export-section">
+        <span class="export-label">Exportar informes:</span>
+        <button class="btn-export" @click="exportPDF">PDF</button>
+        <button class="btn-export secondary" @click="exportCSV">CSV</button>
       </div>
 
-      <div class="card">
-        <div class="card-title">Estat dels checklists</div>
-        <div class="chart-placeholder">Gràfic (placeholder)</div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Satisfacció general</div>
-        <div class="chart-placeholder">Mitjanes (placeholder)</div>
-      </div>
+      <!-- mini texto para confirmar filtros aplicados -->
+      <p class="filters-summary">
+        Filtres aplicats:
+        <strong>{{ filters.taller }}</strong> ·
+        <strong>{{ filters.centre }}</strong> ·
+        <strong>{{ filters.modalitat }}</strong>
+      </p>
     </div>
-
-    <div class="card card-wide">
-      <div class="card-title">Comparatives entre edicions o períodes</div>
-      <div class="chart-placeholder wide">Comparativa (placeholder)</div>
-    </div>
-
-    <!-- EXPORTACIÓN -->
-    <div class="export-section">
-      <span class="export-label">Exportar informes:</span>
-      <button class="btn-export" @click="exportPDF">PDF</button>
-      <button class="btn-export secondary" @click="exportCSV">CSV</button>
-    </div>
-
-    <!-- mini texto para confirmar filtros aplicados -->
-    <p class="filters-summary">
-      Filtres aplicats:
-      <strong>{{ filters.taller }}</strong> ·
-      <strong>{{ filters.centre }}</strong> ·
-      <strong>{{ filters.modalitat }}</strong>
-    </p>
   </div>
 </template>
 
@@ -192,10 +198,16 @@ function exportCSV() {
   display: flex;
 }
 
-#content {
-  margin-left: 50px;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: lighter;
+#container {
+  background-color: #ffffff;
+  /* border-radius: 20px; */
+  padding: 24px;
+  width: 1050px;
+  max-width: 1050px;
+  margin: 0 auto;
+  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); */
+  overflow-y: auto;
+  max-height: 550px;
 }
 
 .header-Centres {

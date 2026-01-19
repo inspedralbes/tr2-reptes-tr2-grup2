@@ -96,7 +96,7 @@ const volverALista = () => {
 const cargarInscripciones = async (tallerId) => {
   try {
     const response = await fetch(
-      `http://localhost:8000/tallers/${tallerId}/inscripcions-ordenadas`
+      `http://localhost:8000/tallers/${tallerId}/inscripcions-ordenadas`,
     );
     const data = await response.json();
     inscripciones.value = data.inscripciones;
@@ -124,7 +124,7 @@ const selectInscripcion = (id, alumnos) => {
 const alumnosSeleccionados = () => {
   return Object.values(inscripcionesSeleccionadas.value).reduce(
     (sum, alumnos) => sum + alumnos,
-    0
+    0,
   );
 };
 
@@ -138,7 +138,7 @@ const puedeSeleccionar = (alumnos) => {
 
 const guardarSeleccion = () => {
   const idsSeleccionados = Object.keys(inscripcionesSeleccionadas.value).map(
-    (id) => Number(id)
+    (id) => Number(id),
   );
   const resultado = {
     tallerId: tallerIdActual.value,
@@ -146,7 +146,9 @@ const guardarSeleccion = () => {
     alumnosAprobados: alumnosSeleccionados(),
   };
   console.log("Inscripciones aprobadas:", resultado);
-  alert(`Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`);
+  alert(
+    `Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`,
+  );
 };
 
 // Lógica de procesamiento de datos
@@ -265,10 +267,13 @@ const getMesNum = (mes) => {
     <!-- Vista de inscripciones -->
     <div v-if="viendoInscripciones" class="inscripciones-container">
       <div class="info-plazas">
-        <p>Plazas disponibles: <strong>{{ alumnosSeleccionados() }} / {{ placesMax }}</strong></p>
+        <p>
+          Plazas disponibles:
+          <strong>{{ alumnosSeleccionados() }} / {{ placesMax }}</strong>
+        </p>
         <div class="progress-bar">
-          <div 
-            class="progress-fill" 
+          <div
+            class="progress-fill"
             :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"
           ></div>
         </div>
@@ -277,24 +282,31 @@ const getMesNum = (mes) => {
       <table class="tabla-inscripciones">
         <thead>
           <tr>
-            <th style="width: 40px;">✓</th>
+            <th style="width: 40px">✓</th>
             <th>Institució</th>
-            <th style="width: 80px;">Alumnes</th>
-            <th style="width: 100px;">Puntuació</th>
-            <th style="width: 60px;"></th>
+            <th style="width: 80px">Alumnes</th>
+            <th style="width: 100px">Puntuació</th>
+            <th style="width: 60px"></th>
           </tr>
         </thead>
         <tbody>
           <template v-for="insc in inscripciones" :key="insc.id">
-            <tr 
-              :class="{ 'disabled-row': !puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id] }"
+            <tr
+              :class="{
+                'disabled-row':
+                  !puedeSeleccionar(insc.alumnos) &&
+                  !inscripcionesSeleccionadas[insc.id],
+              }"
             >
               <td>
-                <input 
+                <input
                   type="checkbox"
                   :checked="!!inscripcionesSeleccionadas[insc.id]"
                   @change="selectInscripcion(insc.id, insc.alumnos)"
-                  :disabled="!puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id]"
+                  :disabled="
+                    !puedeSeleccionar(insc.alumnos) &&
+                    !inscripcionesSeleccionadas[insc.id]
+                  "
                 />
               </td>
               <td>{{ insc.institucion }}</td>
@@ -302,7 +314,7 @@ const getMesNum = (mes) => {
               <td>
                 <div class="puntuacion-cell">
                   <span class="score">{{ insc.puntuacion }}</span>
-                  <button 
+                  <button
                     class="btn-expandir"
                     @click="toggleInscripcionExpandida(insc.id)"
                   >
@@ -316,12 +328,27 @@ const getMesNum = (mes) => {
             <tr v-if="inscripcionesExpandidas[insc.id]" class="fila-desglose">
               <td colspan="5">
                 <div class="desglose">
-                  <div class="desglose-item" v-for="item in insc.aceptadas" :key="item.criterio">
+                  <div
+                    class="desglose-item"
+                    v-for="item in insc.aceptadas"
+                    :key="item.criterio"
+                  >
                     <span class="criterio">{{ item.criterio }}</span>
-                    <span 
-                      :class="['puntos', { 'positivo': item.puntos > 0, 'negativo': item.puntos < 0, 'no-aplicat': !item.aplicat }]"
+                    <span
+                      :class="[
+                        'puntos',
+                        {
+                          positivo: item.puntos > 0,
+                          negativo: item.puntos < 0,
+                          'no-aplicat': !item.aplicat,
+                        },
+                      ]"
                     >
-                      {{ item.aplicat ? (item.puntos > 0 ? '+' : '') + item.puntos : 'No aplicat' }}
+                      {{
+                        item.aplicat
+                          ? (item.puntos > 0 ? "+" : "") + item.puntos
+                          : "No aplicat"
+                      }}
                     </span>
                   </div>
                 </div>
@@ -384,7 +411,10 @@ const getMesNum = (mes) => {
               >
             </button>
 
-            <button class="btn-veure-inscripcions" @click="vereuInscripcions(curso.id, curso.titulo)">
+            <button
+              class="btn-veure-inscripcions"
+              @click="vereuInscripcions(curso.id, curso.titulo)"
+            >
               Veure inscripcions
             </button>
 
@@ -407,7 +437,7 @@ const getMesNum = (mes) => {
 
 <style scoped>
 /* --- CONTENEDOR PRINCIPAL --- */
-#container {
+/* #container {
   margin-top: -25px;
   font-family: Arial, Helvetica, sans-serif;
   background-color: #ffffff;
@@ -419,7 +449,7 @@ const getMesNum = (mes) => {
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
-}
+} */
 
 .loading-state {
   text-align: center;
@@ -454,7 +484,9 @@ const getMesNum = (mes) => {
   border-radius: 20px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease,
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
@@ -574,7 +606,9 @@ const getMesNum = (mes) => {
   border-radius: 8px;
   cursor: pointer;
   margin-left: 40px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-veure-inscripcions:hover {
@@ -594,12 +628,12 @@ const getMesNum = (mes) => {
   transform: rotate(45deg);
 }
 
-  /* dropdown removed: placeholder keeps layout if needed */
-  .desplegable-placeholder {
-    width: 45px;
-    margin-left: auto;
-    margin-right: 30px;
-  }
+/* dropdown removed: placeholder keeps layout if needed */
+.desplegable-placeholder {
+  width: 45px;
+  margin-left: auto;
+  margin-right: 30px;
+}
 
 .titulo-inscripciones {
   color: #283593;
@@ -631,7 +665,9 @@ const getMesNum = (mes) => {
   align-items: center;
   justify-content: center;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -794,7 +830,9 @@ const getMesNum = (mes) => {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-expandir:hover {
@@ -874,12 +912,13 @@ const getMesNum = (mes) => {
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-guardar:hover {
   background-color: #3949ab;
   transform: translateY(-2px);
 }
-
 </style>
