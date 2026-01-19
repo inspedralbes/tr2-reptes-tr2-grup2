@@ -13,7 +13,7 @@ import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
       </div>
       <div class="container-courses">
         <br />
-        <listaPeticions></listaPeticions>
+        
       </div>
     </div>
   </div>
