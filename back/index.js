@@ -59,10 +59,14 @@ app.get("/", (req, res) => {
 
 // Ruta de login
 app.post("/login", async (req, res) => {
-  const { id, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const user = await getUsuariForAuth(parseInt(id));
+    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
+    
+    const user = await prisma.usuaris.findUnique({
+      where: { email },
+    });
 
     if (!user) {
       return res.status(400).json({ error: "Usuari no trobat" });
@@ -80,7 +84,10 @@ app.post("/login", async (req, res) => {
     const { accessToken, refreshToken } = generateTokens(user);
 
     // Guardar el refresh token en la base de datos
-    await updateUsuariToken(parseInt(id), refreshToken);
+    await prisma.usuaris.update({
+      where: { email },
+      data: { token: refreshToken },
+    });
 
     res.status(200).json({
       message: "Login correcte",
@@ -89,57 +96,84 @@ app.post("/login", async (req, res) => {
       user: {
         id: user.id,
         nom: user.nom,
+        email: user.email,
         rol: user.rol,
+        institucio: user.institucio,
       },
     });
   } catch (error) {
     console.error("Error de base de dades:", error);
-    res.status(500).json({ error: "Error de base de dades" });
+    res.status(500).json({ error: "Error de base de dades: " + error.message });
   }
 });
 
 // Ruta de registre
 app.post("/register", async (req, res) => {
-  const { id, nom, password, rol, institucioId } = req.body;
+  const { nom, email, password, rol, responsable } = req.body;
 
   // Validar camps obligatoris
-  if (!id || !nom || !password) {
+  if (!nom || !email || !password) {
     return res
       .status(400)
-      .json({ error: "Falten camps obligatoris (id, nom, password)" });
+      .json({ error: "Falten camps obligatoris (nom, email, password)" });
   }
 
   try {
+    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
+    
     // Verificar si l'usuari ja existeix
-    const existingUser = await getUsuariForAuth(parseInt(id));
+    const existingUser = await prisma.usuaris.findUnique({
+      where: { email },
+    });
     if (existingUser) {
-      return res.status(409).json({ error: "L'usuari ja existeix" });
+      return res.status(409).json({ error: "L'email ja existeix" });
     }
 
     // Hashear la contrasenya
     const hashedPassword = await hashPassword(password);
 
+    let newInstitucio = null;
+    
+    // Si s'envia dades de responsable, crear la institució
+    if (responsable && responsable.nom && responsable.codi_centre) {
+      newInstitucio = await prisma.institucions.create({
+        data: {
+          nom: responsable.nom,
+          codi_centre: responsable.codi_centre,
+          direccio: responsable.direccio || "",
+          codi_postal: responsable.codi_postal || "",
+        },
+      });
+    }
+
     // Crear el nou usuari
-    const newUser = await createUsuari({
-      id: parseInt(id),
-      nom,
-      password: hashedPassword,
-      rol: rol || "Professorat",
-      autoritzat: false, // Per defecte no autoritzat fins que un admin l'aprovi
-      institucioId: institucioId ? parseInt(institucioId) : null,
+    const newUser = await prisma.usuaris.create({
+      data: {
+        nom,
+        email,
+        password: hashedPassword,
+        telefon: 0,
+        rol: rol || "Professorat",
+        autoritzat: false, // Per defecte no autoritzat fins que un admin l'aprovi
+        responsable: !!newInstitucio, // Si s'ha creat institució, és responsable
+        institucio: newInstitucio ? newInstitucio.id : null,
+      },
     });
 
     res.status(201).json({
-      message: "Usuari registrat correctament",
+      message: "Usuari i institució registrats correctament",
       user: {
         id: newUser.id,
         nom: newUser.nom,
+        email: newUser.email,
         rol: newUser.rol,
+        responsable: newUser.responsable,
       },
+      institucio: newInstitucio ? { id: newInstitucio.id, nom: newInstitucio.nom } : null,
     });
   } catch (error) {
     console.error("Error al registrar usuari:", error);
-    res.status(500).json({ error: "Error al registrar l'usuari" });
+    res.status(500).json({ error: "Error al registrar l'usuari: " + error.message });
   }
 });
 

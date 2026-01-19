@@ -93,6 +93,7 @@ model Usuaris {
   rol        Rol
   institucio Int?
   autoritzat Boolean
+  responsable Boolean @default(false)
 
   // Relación a institución
   id_institucio Institucions? @relation(fields: [institucio], references: [id])
