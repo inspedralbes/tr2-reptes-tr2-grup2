@@ -18,6 +18,7 @@ import {
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
+import { updateInscripcionesiTalleres } from "./functions/database/CRUD/Inscripcions.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -428,6 +429,44 @@ app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
   } catch (error) {
     console.error("Error al obtenir inscripcions ordenadas:", error);
     res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+  }
+});
+
+app.post("/inscripcions/actualizar-estado", async (req, res) => {
+  try {
+    const tallerId = req.body.tallerId;
+    const inscripcionesAprobadas = req.body.inscripcionesAprobadas;
+    const alumnosAprobados = req.body.alumnosAprobados;
+
+    if (!tallerId || !Array.isArray(inscripcionesAprobadas) || inscripcionesAprobadas.length === 0) {
+      return res.status(400).json({
+        error: "Faltan datos obligatorios: tallerId e inscripcionesAprobadas (array no vacío)"
+      });
+    }
+
+    const resultado = await updateInscripcionesiTalleres(
+      tallerId,
+      inscripcionesAprobadas,
+      alumnosAprobados
+    );
+
+    res.json({
+      success: true,
+      tallerId: tallerId,
+      inscripcionesActualizadas: inscripcionesAprobadas.length,
+      alumnosAprobados: alumnosAprobados,
+      mensaje: resultado.mensaje
+    });
+  } catch (error) {
+    console.error("Error al aprobar inscripciones:", error);
+    
+    let mensajeError = "Error al aprobar inscripciones";
+    if (error.message) {
+      mensajeError = error.message;
+    }
+    res.status(500).json({ 
+      error: mensajeError
+    });
   }
 });
 

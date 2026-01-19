@@ -140,3 +140,31 @@ export async function procesarInscripcio(selections, docentRef, comentari) {
     throw new Error(`Error al procesar inscripció: ${error.message}`);
   }
 }
+
+export async function updateInscripcionesiTalleres( tallerId,inscAp, alumnosAprobados) { 
+
+  try {
+    const prisma = await getPrisma();
+    for (let i = 0; i < inscAp.length; i++) {
+      const inscripcionId = inscAp[i];
+      
+      const inscripcio = await prisma.inscripcions.update({
+      where: { id: Number(inscripcionId) },
+        data: {
+          estat: "ACCEPTADA" 
+        }
+      });
+    }
+   await prisma.tallers.update({
+      where: { id: Number(tallerId) },
+      data: {
+        places_disp: {
+          decrement: Number(alumnosAprobados) 
+        }
+      }
+    });
+
+  } catch (error) {
+      throw new Error(`Error al actualizar inscripciones: ${error.message}`);
+  }     
+}

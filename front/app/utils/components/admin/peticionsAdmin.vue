@@ -14,7 +14,7 @@
   - inscripcionesSeleccionadas: objeto {inscripcionId: alumnosCount} para saber qué está checked
   - inscripcionesExpandidas: objeto {inscripcionId: boolean} para las filas expandidas
   
-  FUNCIONES (mini explicacion por si no se entienden):
+  FUNCIONES (mini explicacion por si no se entienden, la logica de algunas esta tope complicada se podrian simplificar):
   - selectInscripcion(id, alumnos): actualiza inscripcionesSeleccionadas on/off
   - alumnosSeleccionados(): suma el total de alumnos seleccionados (se usa para validar plazas)
   - placesRestantes(): calcula placesMax - alumnosSeleccionados()
@@ -136,20 +136,45 @@ const puedeSeleccionar = (alumnos) => {
   return placesRestantes() >= alumnos;
 };
 
-const guardarSeleccion = () => {
-  const idsSeleccionados = Object.keys(inscripcionesSeleccionadas.value).map(
-    (id) => Number(id)
-  );
-  const resultado = {
-    tallerId: tallerIdActual.value,
-    inscripcionesAprobadas: idsSeleccionados,
-    alumnosAprobados: alumnosSeleccionados(),
-  };
-  console.log("Inscripciones aprobadas:", resultado);
-  alert(`Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`);
-};
+async function guardarSeleccion() {
+  try {
+    const tallerId = tallerIdActual.value;
+    
+    const idsSeleccionados = [];
+    for (const id in inscripcionesSeleccionadas.value) {
+      const cantidadAlumnos = inscripcionesSeleccionadas.value[id];
+      if (cantidadAlumnos > 0) {
+        idsSeleccionados.push(Number(id));
+      }
+    }
+    
+    const totalAlumnos = alumnosSeleccionados();
+    const datosEnviar = {
+      tallerId: tallerId,
+      inscripcionesAprobadas: idsSeleccionados,
+      alumnosAprobados: totalAlumnos
+    };
+    const response = await fetch("http://localhost:8000/inscripcions/actualizar-estado", {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json" 
+      },
+      body: JSON.stringify(datosEnviar)
+    });
+    const resultado = await response.json();
+    if (resultado.success === true) {
+      const mensaje = "oki " + resultado.inscripcionesActualizadas + " inscripciones aprobadas";
+      alert(mensaje);
+      volverALista();
+    } else {
+      alert(" Error: " + resultado.error);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error al guardar: " + error.message);
+  }
+}
 
-// Lógica de procesamiento de datos
 const processTallers = (data) => {
   const mesesNombres = [
     "Gener",
