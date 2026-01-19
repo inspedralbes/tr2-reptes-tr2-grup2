@@ -63,6 +63,7 @@ jobs:
             echo "EMAIL_PASS_SMTP=${{ secrets.EMAIL_PASS_SMTP }}" >> .env
             echo "EMAIL_HOST_SMTP=smtp.gmail.com" >> .env
             echo "EMAIL_PORT_SMTP=465" >> .env
+            cd ../../..
 
             # 5. Aixecar contenidors reconstruint la imatge
             echo " Construint i aixecant contenidors..."
