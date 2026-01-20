@@ -65,46 +65,85 @@ export async function deleteInscripcio(id) {
   }
 }
 
+// UPDATE estat inscripcions per taller
+export async function updateEstatInscripcions(
+  inscripcionesAprobadas,
+  tallerId,
+) {
+  try {
+    const prisma = await getPrisma();
+    const tallerIdNum = Number.parseInt(tallerId);
+
+    // Climent: Aqui tenim que filtrar amb quin periode es... pero de moment ho deixem aixi
+    const todasInscripciones = await prisma.inscripcions.findMany();
+
+    for (const inscripcion of todasInscripciones) {
+      let alumnes = JSON.parse(inscripcion.alumnes || "[]");
+      let actualizado = false;
+
+      for (let i = 0; i < alumnes.length; i++) {
+        if (alumnes[i].TALLER === tallerIdNum) {
+          if (inscripcionesAprobadas.includes(inscripcion.id)) {
+            alumnes[i].ESTAT = "APROBADA";
+          } else {
+            alumnes[i].ESTAT = "DENEGADA";
+          }
+          actualizado = true;
+        }
+      }
+
+      if (actualizado) {
+        await prisma.inscripcions.update({
+          where: { id: inscripcion.id },
+          data: { alumnes: JSON.stringify(alumnes) },
+        });
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    throw new Error(`Error al actualizar inscripcions: ${error.message}`);
+  }
+}
+
 export async function getInscripciosByTallerId(tallerId) {
   try {
     const prisma = await getPrisma();
     const inscripcions = await prisma.inscripcions.findMany({
-      include: { 
-        id_institucio: true, 
-        periode_relacio: true 
+      include: {
+        id_institucio: true,
+        periode_relacio: true,
       },
     });
 
     const resultado = [];
-    
+
     for (let i = 0; i < inscripcions.length; i++) {
       const inscripcion = inscripcions[i];
-      
+
       try {
         const alumnes = JSON.parse(inscripcion.alumnes || "[]");
-        
+
         let encontrado = false;
         for (let j = 0; j < alumnes.length; j++) {
           if (alumnes[j].TALLER === parseInt(tallerId)) {
             encontrado = true;
-            break; 
+            break;
           }
         }
-        
+
         if (encontrado) {
           resultado.push(inscripcion);
         }
-        
       } catch (e) {
         continue;
       }
     }
-    
+
     return resultado;
-    
   } catch (error) {
     throw new Error(
-      `Error al obtenir inscripcions del taller: ${error.message}`
+      `Error al obtenir inscripcions del taller: ${error.message}`,
     );
   }
 }
@@ -130,7 +169,7 @@ export async function procesarInscripcio(selections, docentRef, comentari) {
       institucio: institucioId,
       primera_vegada: primera_vegada,
       periode: periode,
-      alumnes: JSON.stringify(alumnes), 
+      alumnes: JSON.stringify(alumnes),
       docents_referents: docentRef || null,
       comentari: comentari || null,
     });

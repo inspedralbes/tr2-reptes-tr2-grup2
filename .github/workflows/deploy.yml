@@ -25,12 +25,17 @@ jobs:
           command_timeout: 30m
           envs: API_URL, DB_PASSWORD, SERVER_USERNAME
           script: |
+            set -e
             # 1. Anar a la carpeta del projecte
             cd /tr2-reptes-tr2-grup2
 
             # 2. Baixar els últims canvis del codi
             echo "Baixant canvis de Git..."
             git pull origin main
+
+            # 3. Crear .env principal
+            echo "Creant .env principal..."
+            echo "DB_PASSWORD=$DB_PASSWORD" > .env
 
             # 3. Crear .env.PROD FRONT
             # Nota: Fem servir les variables d'entorn ($VAR) en lloc de la interpolació de GitHub
@@ -42,24 +47,36 @@ jobs:
             # 4. Crear .env.PROD BACK
             echo "Creant .env.PROD BACK..."
             cd back
-            echo "PORT=8000" > .env
-            echo "HOST=tr2g2-mysql" >> .env
-            echo "USER=root" >> .env
-            echo "PASSWORD=$DB_PASSWORD" >> .env
+            echo "PORT=8000" > .env.PROD
+            echo "HOST=tr2g2-mysql" >> .env.PROD
+            echo "USER=root" >> .env.PROD
+            echo "PASSWORD=$DB_PASSWORD" >> .env.PROD
             # Construïm la URL fent servir les variables segures
-            echo "DATABASE_URL=mysql://$SERVER_USERNAME:$DB_PASSWORD@tr2g2-mysql:3306/GESTIO-CURSOS?charset=utf8mb4" >> .env
-            echo "DATABASE_USER=$SERVER_USERNAME" >> .env
-            echo "DATABASE_PASSWORD=$DB_PASSWORD" >> .env
-            echo "DATABASE_NAME=GESTIO-CURSOS" >> .env
-            echo "DATABASE_HOST=tr2g2-mysql" >> .env
-            echo "DATABASE_PORT=3306" >> .env
+            echo "DATABASE_URL=mysql://$SERVER_USERNAME:$DB_PASSWORD@tr2g2-mysql:3306/GESTIO-CURSOS?charset=utf8mb4" >> .env.PROD
+            echo "DATABASE_USER=$SERVER_USERNAME" >> .env.PROD
+            echo "DATABASE_PASSWORD=$DB_PASSWORD" >> .env.PROD
+            echo "DATABASE_NAME=GESTIO-CURSOS" >> .env.PROD
+            echo "DATABASE_HOST=tr2g2-mysql" >> .env.PROD
+            echo "DATABASE_PORT=3306" >> .env.PROD
             cd ..
+
+            # Crear .env de SMTP
+            echo "Creant .env SMTP..."
+            cd back/functions/smtp
+            echo "EMAIL_USER_SMTP=${{ secrets.EMAIL_USER_SMTP }}" > .env
+            echo "EMAIL_PASS_SMTP=${{ secrets.EMAIL_PASS_SMTP }}" >> .env
+            echo "EMAIL_HOST_SMTP=smtp.gmail.com" >> .env
+            echo "EMAIL_PORT_SMTP=465" >> .env
+            cd ../../..
 
             # 5. Aixecar contenidors reconstruint la imatge
             echo " Construint i aixecant contenidors..."
             docker compose -f docker-compose.prod.yml up --build -d
 
-            # 6. Executar migracions i seed dins del contenidor
+            # 6. Reiniciar el servei de back per assegurar el generate de prisma
+            docker compose -f docker-compose.prod.yml restart tr2g2-back
+
+            # 7. Executar migracions i seed dins del contenidor
             echo " Executant migracions i seed..."
             # El flag -T és vital per evitar errors de "interactive terminal"
             docker compose -f docker-compose.prod.yml exec -T tr2g2-back sh -c "npx prisma migrate deploy && npx prisma db seed"

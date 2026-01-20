@@ -36,7 +36,7 @@ app.use(
   cors({
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use((req, res, next) => {
@@ -62,8 +62,10 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
-    
+    const prisma = await import("./generated/prisma/index.js").then(
+      (m) => m.default || m,
+    );
+
     const user = await prisma.usuaris.findUnique({
       where: { email },
     });
@@ -119,8 +121,10 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
-    
+    const prisma = await import("./generated/prisma/index.js").then(
+      (m) => m.default || m,
+    );
+
     // Verificar si l'usuari ja existeix
     const existingUser = await prisma.usuaris.findUnique({
       where: { email },
@@ -133,7 +137,7 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await hashPassword(password);
 
     let newInstitucio = null;
-    
+
     // Si s'envia dades de responsable, crear la institució
     if (responsable && responsable.nom && responsable.codi_centre) {
       newInstitucio = await prisma.institucions.create({
@@ -169,11 +173,15 @@ app.post("/register", async (req, res) => {
         rol: newUser.rol,
         responsable: newUser.responsable,
       },
-      institucio: newInstitucio ? { id: newInstitucio.id, nom: newInstitucio.nom } : null,
+      institucio: newInstitucio
+        ? { id: newInstitucio.id, nom: newInstitucio.nom }
+        : null,
     });
   } catch (error) {
     console.error("Error al registrar usuari:", error);
-    res.status(500).json({ error: "Error al registrar l'usuari: " + error.message });
+    res
+      .status(500)
+      .json({ error: "Error al registrar l'usuari: " + error.message });
   }
 });
 
@@ -197,7 +205,7 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     res.json({ accessToken: newAccessToken });
@@ -268,6 +276,7 @@ import {
   updateInscripcio,
   deleteInscripcio,
   procesarInscripcio,
+  updateEstatInscripcions,
 } from "./functions/database/CRUD/Inscripcions.js";
 
 app.get("/inscripcions", async (req, res) => {
@@ -302,7 +311,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null
+      comentari || null,
     );
 
     return res.status(200).json({
@@ -315,6 +324,23 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     return res.status(500).json({
       message: `Error al procesar inscripcions: ${err.message}`,
     });
+  }
+});
+
+// Confirmar inscripcions per a un taller
+app.post("/inscripcions/confirmar", async (req, res) => {
+  try {
+    const { tallerId, inscripcionesAprobadas } = req.body;
+
+    if (!tallerId || !inscripcionesAprobadas?.length) {
+      return res.status(400).json({ error: "Faltan parámetros" });
+    }
+
+    await updateEstatInscripcions(inscripcionesAprobadas, tallerId);
+    res.status(200).json({ message: "Inscripciones confirmadas" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -393,14 +419,23 @@ app.get("/tallers/:id", async (req, res) => {
 app.post("/tallers", async (req, res) => {
   try {
     const data = req.body;
-    
+
     // Validaciones básicas
-    if (!data.nom || !data.descripcio || !data.tallerista || !data.direccio || !data.horari || !data.periode || !data.admin) {
-      return res.status(400).json({ 
-        error: "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)" 
+    if (
+      !data.nom ||
+      !data.descripcio ||
+      !data.tallerista ||
+      !data.direccio ||
+      !data.horari ||
+      !data.periode ||
+      !data.admin
+    ) {
+      return res.status(400).json({
+        error:
+          "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)",
       });
     }
-    
+
     const newTaller = await createTaller(data);
     res.status(201).json(newTaller);
   } catch (error) {
@@ -416,7 +451,9 @@ app.get("/tallers/:id/inscripcions", async (req, res) => {
     res.json(inscripcions);
   } catch (error) {
     console.error("Error al obtenir inscripcions del taller:", error);
-    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+    res
+      .status(500)
+      .json({ error: error.message || "Error al obtenir inscripcions" });
   }
 });
 
@@ -427,7 +464,9 @@ app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
     res.json(resultado);
   } catch (error) {
     console.error("Error al obtenir inscripcions ordenadas:", error);
-    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+    res
+      .status(500)
+      .json({ error: error.message || "Error al obtenir inscripcions" });
   }
 });
 
