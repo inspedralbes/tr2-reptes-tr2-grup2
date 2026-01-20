@@ -419,7 +419,6 @@ const getMesNum = (mes) => {
                 ><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
-                  <img src="/img/centro/calendar.png" class="icon" />
                   {{ curso.diaNum }}/{{ getMesNum(seccion.mes) }}
                   <img src="/img/centro/clock.png" class="icon" />
                   {{ curso.hora }}
@@ -439,6 +438,11 @@ const getMesNum = (mes) => {
               <span class="estado-badge" :class="{ 'estado-aprovada': curso.estadoInscripcion === 'Aprovada', 'estado-pendent': curso.estadoInscripcion === 'Pendent', 'estado-denegado': curso.estadoInscripcion === 'Denegada' }">
                 {{ curso.estadoInscripcion }}
               </span>
+            </div>
+            <div id="col-btn">
+              <button id="btn-inscripcion">Inscripció</button>
+              <button id="btn-update">Actualitzar</button>
+              <button id="btn-delete">Eliminar</button>
             </div>
           </div>
 
@@ -887,5 +891,48 @@ const getMesNum = (mes) => {
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+/* --- BOTONES --- */
+#btn-inscripcion {
+  background-color: #1D1D1D;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#btn-inscripcion:hover {
+  background-color: #3949ab;
+}
+
+#btn-update {
+  background-color: #1D1D1D;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#btn-update:hover {
+  background-color: #3949ab;
+}
+
+#btn-delete {
+  background-color: #1D1D1D;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#btn-delete:hover {
+  background-color: #3949ab;
 }
 </style>

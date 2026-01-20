@@ -164,7 +164,7 @@ onMounted(async () => {
 <style scoped>
 .lista-container {
   height: 100%;
-  overflow-y: auto; /* Scroll interno */
+  overflow-y: auto;
   padding-right: 10px;
 }
 
