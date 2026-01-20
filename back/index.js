@@ -18,6 +18,8 @@ import {
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
+import { getInstitucioByCodiCentre } from "./functions/database/CRUD/Institucions.js";
+import { getUsuariByEmail } from "./functions/database/CRUD/Usuaris.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -60,41 +62,36 @@ app.get("/", (req, res) => {
 // Ruta de login
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
-    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
-    
-    const user = await prisma.usuaris.findUnique({
-      where: { email },
-    });
+    const existingUser = await getUsuariByEmail(email, true);
 
-    if (!user) {
-      return res.status(400).json({ error: "Usuari no trobat" });
+    if (!existingUser) {
+      return res
+        .status(409)
+        .json({ error: "Ja existeix un usuari amb el correu donat." });
     }
 
-    if (!user.autoritzat) {
+    if (!existingUser.autoritzat) {
       return res.status(403).json({ error: "Usuari no autoritzat" });
     }
 
-    if (await !comparePassword(password, user.password)) {
+    const comparingPassword = await comparePassword(
+      password,
+      existingUser.password,
+    );
+
+    if (!comparingPassword) {
       return res.status(400).json({ error: "Contrasenya incorrecta" });
     }
 
-    const { accessToken, refreshToken } = generateTokens(user);
-    await updateUsuariToken(parseInt(id), refreshToken);
+    const { accessToken, refreshToken } = generateTokens(existingUser);
+    await updateUsuariToken(parseInt(existingUser.id), refreshToken);
 
     res.status(200).json({
       message: "Login correcte",
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        userName: user.nom,
-        nom: user.nom,
-        email: user.email,
-        rol: user.rol,
-        institucio: user.institucio,
-      },
+      user: existingUser,
     });
   } catch (error) {
     console.error("Error de base de dades:", error);
@@ -106,7 +103,6 @@ app.post("/login", async (req, res) => {
 app.post("/register", async (req, res) => {
   const { nom, email, password, rol, responsable } = req.body;
 
-  // Validar camps obligatoris
   if (!nom || !email || !password) {
     return res
       .status(400)
@@ -114,39 +110,37 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
-    
-    // Verificar si l'usuari ja existeix
-    const existingUser = await getUsuariForAuth(parseInt(id));
+    const existingUser = await getUsuariByEmail(email, false);
     if (existingUser) {
-      return res.status(409).json({ error: "L'email ja existeix" });
+      return res
+        .status(409)
+        .json({ error: "Ja existeix un usuari amb el correu donat." });
     }
 
-    // Hashear la contrasenya
-    const hashedPassword = await hashPassword(password);
-
-    let newInstitucio = null;
-    
-    // Si s'envia dades de responsable, crear la institució
-    if (responsable && responsable.nom && responsable.codi_centre) {
-      newInstitucio = await prisma.institucions.create({
-        data: {
-          nom: responsable.nom,
-          codi_centre: responsable.codi_centre,
-          direccio: responsable.direccio || "",
-          codi_postal: responsable.codi_postal || "",
-        },
+    const codi_centre = responsable.codi_centre;
+    if (!codi_centre) {
+      return res.status(400).json({
+        error: "Falta el codi del centre a la informació de responsable.",
       });
     }
+    const existingInstitucio = await getInstitucioByCodiCentre(codi_centre);
+    if (existingInstitucio === false) {
+      return res
+        .status(409)
+        .json({ error: "No existeix una institució amb el codi donat." });
+    }
 
-    // Crear el nou usuari
+    const hashedPassword = await hashPassword(password);
+
     await createUsuari({
-      id: parseInt(id),
       nom,
+      email,
       password: hashedPassword,
       rol: rol || "Professorat",
-      autoritzat: false, // Per defecte no autoritzat fins que un admin l'aprovi
-      institucioId: institucioId ? parseInt(institucioId) : null,
+      autoritzat: false,
+      institucio: existingInstitucio.id,
+      telefon: 0,
+      responsable: true,
     });
 
     res.status(201).json({
@@ -154,7 +148,9 @@ app.post("/register", async (req, res) => {
     });
   } catch (error) {
     console.error("Error al registrar usuari:", error);
-    res.status(500).json({ error: "Error al registrar l'usuari: " + error.message });
+    res
+      .status(500)
+      .json({ error: "Error al registrar l'usuari: " + error.message });
   }
 });
 
@@ -283,7 +279,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null
+      comentari || null,
     );
 
     return res.status(200).json({
@@ -374,14 +370,23 @@ app.get("/tallers/:id", async (req, res) => {
 app.post("/tallers", async (req, res) => {
   try {
     const data = req.body;
-    
+
     // Validaciones básicas
-    if (!data.nom || !data.descripcio || !data.tallerista || !data.direccio || !data.horari || !data.periode || !data.admin) {
-      return res.status(400).json({ 
-        error: "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)" 
+    if (
+      !data.nom ||
+      !data.descripcio ||
+      !data.tallerista ||
+      !data.direccio ||
+      !data.horari ||
+      !data.periode ||
+      !data.admin
+    ) {
+      return res.status(400).json({
+        error:
+          "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)",
       });
     }
-    
+
     const newTaller = await createTaller(data);
     res.status(201).json(newTaller);
   } catch (error) {
@@ -397,7 +402,9 @@ app.get("/tallers/:id/inscripcions", async (req, res) => {
     res.json(inscripcions);
   } catch (error) {
     console.error("Error al obtenir inscripcions del taller:", error);
-    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+    res
+      .status(500)
+      .json({ error: error.message || "Error al obtenir inscripcions" });
   }
 });
 
@@ -408,7 +415,9 @@ app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
     res.json(resultado);
   } catch (error) {
     console.error("Error al obtenir inscripcions ordenadas:", error);
-    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+    res
+      .status(500)
+      .json({ error: error.message || "Error al obtenir inscripcions" });
   }
 });
 

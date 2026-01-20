@@ -12,7 +12,6 @@ export async function getAllUsuaris() {
         rol: true,
         tallers: true,
         responsable: true,
-        coordinador: true,
       },
     });
   } catch (error) {
@@ -33,9 +32,37 @@ export async function getUsuariById(id) {
         rol: true,
         tallers: true,
         responsable: true,
-        coordinador: true,
       },
     });
+  } catch (error) {
+    throw new Error(`Error al obtenir usuari: ${error.message}`);
+  }
+}
+
+export async function getUsuariByEmail(email, login) {
+  try {
+    const prisma = await getPrisma();
+    const userFinder = await prisma.usuaris.findUnique({
+      where: { email: email },
+      select: {
+        id: true,
+        nom: true,
+        email: true,
+        password: true,
+        rol: true,
+        tallers: true,
+        autoritzat: true,
+        responsable: true,
+      },
+    });
+
+    if (login) {
+      if (userFinder) return userFinder;
+      throw new Error(`No existeix el usuari especificat`);
+    }
+
+    if (userFinder) return true;
+    return false;
   } catch (error) {
     throw new Error(`Error al obtenir usuari: ${error.message}`);
   }
@@ -47,7 +74,6 @@ export async function createUsuari(data) {
     const prisma = await getPrisma();
     return await prisma.usuaris.create({
       data,
-      include: { tallers: true, responsable: true, coordinador: true },
     });
   } catch (error) {
     throw new Error(`Error al crear usuari: ${error.message}`);

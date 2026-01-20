@@ -1,12 +1,15 @@
 <script setup>
+import { ref } from "vue";
 import Encabezado from "@/layouts/encabezado.vue";
+import { registerUsuari } from "~/services/communicationManagerDatabase";
+
 const pantalla = ref("primero");
-const newUser = ref([]);
 
 //Variables para formulario del centre
 const input_sch_name = ref("");
 const input_sch_id = ref("");
 const input_sch_map = ref("");
+const input_sch_cp = ref("");
 //Variables para formulario persona de contacte
 const input_name = ref("");
 const input_surname = ref("");
@@ -22,7 +25,7 @@ function reviewForm1() {
   pantalla.value = "segundo";
 }
 
-function reviewForm2() {
+async function reviewForm2() {
   const camposCompletos =
     input_name.value &&
     input_surname.value &&
@@ -39,7 +42,8 @@ function reviewForm2() {
     alert("Les contrasenyes no coincideixen.");
     return;
   }
-  sendForm();
+  await sendForm();
+  pantalla.value = "finalitzat";
 }
 
 //Función para enviar la info del usuario al backend después de validar el formulario
@@ -53,40 +57,20 @@ async function sendForm() {
       nom: input_sch_name.value,
       codi_centre: input_sch_id.value,
       direccio: input_sch_map.value,
-      codi_postal: ""
-    }
+      codi_postal: input_sch_cp.value,
+    },
   };
 
   try {
-    const response = await fetch(`${BACK_URL}/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json' 
-      },
-      body: JSON.stringify(datosParaEnviar)
-    });
+    const data = await registerUsuari(datosParaEnviar);
 
-    // Control de errores
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Error en el registre');
-    }
-
-    //Esperamos la respuesta de el back y si todo va bien se registrara
-    const data = await response.json();
     console.log("Èxit:", data);
     alert("Registre completat amb èxit!");
-    
-    // Redirigir al login después del éxito
-    window.location.href = '/forms/log-in';
-
   } catch (error) {
     console.error("Error detallat:", error);
     alert("No s'ha pogut fer el registre: " + error.message);
   }
 }
-
-onMounted(() => {});
 </script>
 
 <template>
@@ -112,6 +96,11 @@ onMounted(() => {});
         <div class="form-group">
           <label for="sch-map">Adreça: (Opcional)</label>
           <input v-model="input_sch_map" id="sch-map" type="text" />
+        </div>
+
+        <div class="form-group">
+          <label for="sch-map">Codi Postal: (Opcional)</label>
+          <input v-model="input_sch_cp" id="sch-cp" type="text" />
         </div>
 
         <div class="button-container single-btn">
@@ -153,6 +142,10 @@ onMounted(() => {});
           <button class="btn-back" @click="pantalla = 'primero'">Tornar</button>
           <button class="btn-next" @click="reviewForm2">Registrar</button>
         </div>
+      </div>
+      <div v-else-if="pantalla === 'finalitzat'">
+        <h3>Gràcies per omplir la sol·licitut</h3>
+        <p>Quan l'administrador gestioni la sol·licitut podràs accedir.</p>
       </div>
     </div>
   </div>

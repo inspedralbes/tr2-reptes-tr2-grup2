@@ -1,4 +1,4 @@
-const BACK_URL = import.meta.env.VITE_URL_BACK;
+const BACK_URL = import.meta.env.VITE_URL_BACK || "http://localhost:8000";
 
 /* ------------------------------- ASSISTENCIA ------------------------------ */
 
@@ -301,7 +301,7 @@ export async function getUsuariById(id) {
     },
   });
   if (!response.ok) {
-    throw new Error(`Error al obtenir usuari per ID: ${response.statusText}`);
+    throw new Error(`Error al obtenir usuari per ID: ${response.error}`);
   }
   return await response.json();
 }
@@ -315,7 +315,7 @@ export async function registerUsuari(usuariData) {
     body: JSON.stringify(usuariData),
   });
   if (!response.ok) {
-    throw new Error(`Error al crear usuari: ${response.statusText}`);
+    throw new Error(`Error al crear usuari: ${response.error}`);
   }
   return await response.json();
 }
@@ -363,11 +363,11 @@ export async function loginUsuari(credentials) {
   if (!response.ok) {
     throw new Error(`Error al iniciar sessió: ${response.statusText}`);
   }
-  
-  const data = await response.json();
 
+  const data = await response.json();
   localStorage.setItem("accessToken", data.accessToken);
   localStorage.setItem("refreshToken", data.refreshToken);
+
   return { message: data.message, user: data.user };
 }
 
