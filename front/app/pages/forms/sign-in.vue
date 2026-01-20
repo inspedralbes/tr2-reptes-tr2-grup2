@@ -43,7 +43,6 @@ async function reviewForm2() {
     return;
   }
   await sendForm();
-  pantalla.value = "finalitzat";
 }
 
 //Función para enviar la info del usuario al backend después de validar el formulario
@@ -63,12 +62,11 @@ async function sendForm() {
 
   try {
     const data = await registerUsuari(datosParaEnviar);
-
-    console.log("Èxit:", data);
-    alert("Registre completat amb èxit!");
+    pantalla.value = "finalitzat";
   } catch (error) {
     console.error("Error detallat:", error);
     alert("No s'ha pogut fer el registre: " + error.message);
+    pantalla.value = "error";
   }
 }
 </script>
@@ -78,7 +76,9 @@ async function sendForm() {
   <div id="cuerpo">
     <div id="contenidor">
       <h2>Registre del Centre</h2>
-      <h4>Introdueix la següent informació:</h4>
+      <h4 v-if="(pantalla === 'primero') | 'segundo'">
+        Introdueix la següent informació:
+      </h4>
 
       <div v-if="pantalla === 'primero'" id="prim-part">
         <h3>Informació del centre:</h3>
@@ -146,6 +146,10 @@ async function sendForm() {
       <div v-else-if="pantalla === 'finalitzat'">
         <h3>Gràcies per omplir la sol·licitut</h3>
         <p>Quan l'administrador gestioni la sol·licitut podràs accedir.</p>
+      </div>
+      <div v-else-if="pantalla === 'error'">
+        <h3>Ha succeit un problema amb la sol·licitut</h3>
+        <p>Si us plau, torna a omplir-la amb valors correctes</p>
       </div>
     </div>
   </div>
