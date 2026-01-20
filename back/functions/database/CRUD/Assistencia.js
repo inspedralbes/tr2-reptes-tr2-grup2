@@ -25,6 +25,20 @@ export async function getAssistenciaById(id) {
   }
 }
 
+// SELECT assistències per taller ID
+export async function getAssistenciesByTallerId(tallerId) {
+  try {
+    const prisma = await getPrisma();
+    return await prisma.assistencia.findMany({
+      where: { id_taller: parseInt(tallerId) },
+      include: { taller: true },
+      orderBy: { dia: 'asc' },
+    });
+  } catch (error) {
+    throw new Error(`Error al obtenir assistències del taller: ${error.message}`);
+  }
+}
+
 // INSERT nova assistència
 export async function createAssistencia(data) {
   try {

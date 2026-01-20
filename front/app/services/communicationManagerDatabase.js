@@ -35,6 +35,21 @@ export async function getAssistenciaById(id) {
   return await response.json();
 }
 
+export async function getAssistenciesByTallerId(tallerId) {
+  const response = await fetch(`${BACK_URL}/assistencies/taller/${tallerId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir assistències del taller: ${response.statusText}`,
+    );
+  }
+  return await response.json();
+}
+
 export async function createAssistencia(assistenciaData) {
   const response = await fetch(`${BACK_URL}/assistencies`, {
     method: "POST",
@@ -50,8 +65,8 @@ export async function createAssistencia(assistenciaData) {
   return await response.json();
 }
 
-export async function updateAssistencia(id, assistenciaData) {
-  const response = await fetch(`${BACK_URL}/assistencies/${id}`, {
+export async function updateAssistencia(assistenciaData) {
+  const response = await fetch(`${BACK_URL}/assistencies`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

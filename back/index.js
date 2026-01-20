@@ -234,6 +234,7 @@ app.post("/logout", async (req, res) => {
 import {
   getAllAssistencies,
   getAssistenciaById,
+  getAssistenciesByTallerId,
   createAssistencia,
   updateAssistencia,
   deleteAssistencia,
@@ -241,6 +242,12 @@ import {
 
 app.get("/assistencies", async (req, res) => {
   const assistencies = await getAllAssistencies();
+  res.json(assistencies);
+});
+
+app.get("/assistencies/taller/:tallerId", async (req, res) => {
+  const { tallerId } = req.params;
+  const assistencies = await getAssistenciesByTallerId(tallerId);
   res.json(assistencies);
 });
 
