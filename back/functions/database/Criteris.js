@@ -7,7 +7,7 @@ import { getPrisma } from "./dbConn.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const weights = JSON.parse(
-  fs.readFileSync(join(__dirname, "../../data/priority_weights.json"), "utf-8")
+  fs.readFileSync(join(__dirname, "../../data/priority_weights.json"), "utf-8"),
 );
 
 const PRIORITY_WEIGHTS = {
@@ -132,9 +132,6 @@ export async function validateCapacity(tallerId, inscripcioId) {
   }
 }
 
-
-     
-
 export async function calcularPuntuacion(inscripcioId, tallerId) {
   score = 50;
   aceptadas = [];
@@ -174,18 +171,21 @@ export async function calcularPuntuacionesDelTaller(tallerId) {
         });
 
         const alumnesData = JSON.parse(insc.alumnes || "[]");
-        const alumnesDelTaller = alumnesData.find(
-          (a) => a.TALLER === Number(tallerId)
-        )?.QUANTITAT || 0;
+        const alumnesDelTaller =
+          alumnesData.find((a) => a.TALLER === Number(tallerId)) || {};
+        // Extraer QUANTITAT i ESTAT
+        const alumnesCount = alumnesDelTaller.QUANTITAT || 0;
+        const estatAlumnes = alumnesDelTaller.ESTAT || "ESPERA";
 
         return {
           id: insc.id,
           institucion: institucion?.nom || "Desconegut",
-          alumnos: alumnesDelTaller,
+          alumnos: alumnesCount,
           puntuacion: puntuacion.score,
           aceptadas: puntuacion.aceptadas,
+          estat: estatAlumnes,
         };
-      })
+      }),
     );
 
     // Ordenar por puntuación descendente
@@ -200,7 +200,7 @@ export async function calcularPuntuacionesDelTaller(tallerId) {
     };
   } catch (error) {
     throw new Error(
-      `Error al calcular puntuaciones del taller: ${error.message}`
+      `Error al calcular puntuaciones del taller: ${error.message}`,
     );
   }
 }

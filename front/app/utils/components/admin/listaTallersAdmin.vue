@@ -36,6 +36,17 @@ const cargarTallers = async () => {
   }
 };
 
+const formatHorari = (horariJSON) => {
+  try {
+    const horari = JSON.parse(horariJSON);
+    return horari.TORNS.map(torn => 
+      `${torn.DIA}: ${torn.HORAINICI} - ${torn.HORAFI}`
+    ).join(", ");
+  } catch {
+    return "No disponible";
+  }
+};
+
 const cargarPeriodes = async () => {
   try {
     const response = await fetch(
@@ -195,8 +206,6 @@ const crearTaller = async () => {
             <span class="info-item">
               <img src="/img/centro/calendar.png" class="icon" alt="icon" />
               {{ taller.direccio }}
-              <img src="/img/centro/clock.png" class="icon" alt="icon" />
-              {{ taller.horari }}
             </span>
           </div>
 
@@ -212,6 +221,7 @@ const crearTaller = async () => {
           <div v-if="filaActiva === taller.id" class="desplegable">
             <p>{{ taller.descripcio }}</p>
             <p>Tallerista: {{ taller.tallerista }}</p>
+            <p><img src="/img/centro/clock.png" class="icon" alt="icon" />Horari: {{ formatHorari(taller.horari) }}</p>
             <p>Places disponibles: {{ taller.places_disp }}</p>
             <p>Modalitat: {{ taller.modalitat }}</p>
           </div>

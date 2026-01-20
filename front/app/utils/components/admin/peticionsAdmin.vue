@@ -53,7 +53,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 // SelectorAlumnos removed from this component to hide numeric dropdown
-import { getAllTallers } from "@/services/communicationManagerDatabase";
+import { getAllTallers, confirmarInscripciones, pointsTallers } from "@/services/communicationManagerDatabase";
 import "@fortawesome/fontawesome-free/css/all.css";
 
 // Estados reactivos
@@ -95,13 +95,24 @@ const volverALista = () => {
 
 const cargarInscripciones = async (tallerId) => {
   try {
+<<<<<<< HEAD
     const response = await fetch(
       `http://localhost:8000/tallers/${tallerId}/inscripcions-ordenadas`,
     );
     const data = await response.json();
+=======
+    const data = await pointsTallers(tallerId);
+>>>>>>> origin/dev
     inscripciones.value = data.inscripciones;
     placesMax.value = data.taller.placesMax;
     placesDisp.value = data.taller.placesDisp;
+
+    // Cargar checkboxes de inscripciones ya aprobadas
+    data.inscripciones.forEach((insc) => {
+      if (insc.estat === "APROBADA") {
+        inscripcionesSeleccionadas.value[insc.id] = insc.alumnos;
+      }
+    });
   } catch (error) {
     console.error("Error al cargar inscripciones:", error);
   }
@@ -246,6 +257,20 @@ const getMesNum = (mes) => {
   };
   return meses[mes] || "00";
 };
+
+async function guardarInscripciones() {
+  try {
+    const inscripcionesAprobadas = Object.keys(inscripcionesSeleccionadas.value).map(Number);
+
+    await confirmarInscripciones(tallerIdActual.value, inscripcionesAprobadas);
+
+    alert(`${inscripcionesAprobadas.length} inscripciones aprobadas`);
+    await cargarInscripciones(tallerIdActual.value);
+  } catch (error) {
+    console.error(error);
+    alert("Error al guardar");
+  }
+}
 </script>
 
 <template>
@@ -272,10 +297,14 @@ const getMesNum = (mes) => {
           <strong>{{ alumnosSeleccionados() }} / {{ placesMax }}</strong>
         </p>
         <div class="progress-bar">
+<<<<<<< HEAD
           <div
             class="progress-fill"
             :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"
           ></div>
+=======
+          <div class="progress-fill" :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"></div>
+>>>>>>> origin/dev
         </div>
       </div>
 
@@ -291,6 +320,7 @@ const getMesNum = (mes) => {
         </thead>
         <tbody>
           <template v-for="insc in inscripciones" :key="insc.id">
+<<<<<<< HEAD
             <tr
               :class="{
                 'disabled-row':
@@ -308,16 +338,27 @@ const getMesNum = (mes) => {
                     !inscripcionesSeleccionadas[insc.id]
                   "
                 />
+=======
+            <tr :class="{ 'disabled-row': !puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id] }">
+              <td>
+                <input type="checkbox" :checked="!!inscripcionesSeleccionadas[insc.id]"
+                  @change="selectInscripcion(insc.id, insc.alumnos)"
+                  :disabled="!puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id]" />
+>>>>>>> origin/dev
               </td>
               <td>{{ insc.institucion }}</td>
               <td>{{ insc.alumnos }}</td>
               <td>
                 <div class="puntuacion-cell">
                   <span class="score">{{ insc.puntuacion }}</span>
+<<<<<<< HEAD
                   <button
                     class="btn-expandir"
                     @click="toggleInscripcionExpandida(insc.id)"
                   >
+=======
+                  <button class="btn-expandir" @click="toggleInscripcionExpandida(insc.id)">
+>>>>>>> origin/dev
                     +
                   </button>
                 </div>
@@ -335,6 +376,7 @@ const getMesNum = (mes) => {
                   >
                     <span class="criterio">{{ item.criterio }}</span>
                     <span
+<<<<<<< HEAD
                       :class="[
                         'puntos',
                         {
@@ -349,6 +391,10 @@ const getMesNum = (mes) => {
                           ? (item.puntos > 0 ? "+" : "") + item.puntos
                           : "No aplicat"
                       }}
+=======
+                      :class="['puntos', { 'positivo': item.puntos > 0, 'negativo': item.puntos < 0, 'no-aplicat': !item.aplicat }]">
+                      {{ item.aplicat ? (item.puntos > 0 ? '+' : '') + item.puntos : 'No aplicat' }}
+>>>>>>> origin/dev
                     </span>
                   </div>
                 </div>
@@ -359,7 +405,7 @@ const getMesNum = (mes) => {
       </table>
 
       <div class="acciones">
-        <button class="btn-guardar" @click="guardarSeleccion">
+        <button class="btn-guardar" @click="guardarInscripciones">
           Guardar selecció
         </button>
       </div>
@@ -370,30 +416,18 @@ const getMesNum = (mes) => {
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
 
-      <div
-        v-for="seccion in tallersGrouped"
-        :key="seccion.mes"
-        class="seccion-mes"
-      >
+      <div v-for="seccion in tallersGrouped" :key="seccion.mes" class="seccion-mes">
         <h2 class="mes-titulo">{{ seccion.mes }}</h2>
 
-        <div
-          v-for="curso in seccion.cursos"
-          :key="curso.id"
-          class="bloque-curso"
-        >
-          <div
-            class="fila-curso"
-            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
-          >
+        <div v-for="curso in seccion.cursos" :key="curso.id" class="bloque-curso">
+          <div class="fila-curso" :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }">
             <div class="col-titulo">
               <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
             </div>
 
             <div class="col-info">
               <div class="text-info">
-                <span class="texto-titulo">{{ curso.titulo }}</span
-                ><br />
+                <span class="texto-titulo">{{ curso.titulo }}</span><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
                   {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
@@ -404,11 +438,7 @@ const getMesNum = (mes) => {
             </div>
 
             <button class="btn-detalls" @click="toggleDetalles(curso.id)">
-              <span
-                class="btn-detalls-text"
-                :class="{ rotar: cursoExpandido === curso.id }"
-                >+</span
-              >
+              <span class="btn-detalls-text" :class="{ rotar: cursoExpandido === curso.id }">+</span>
             </button>
 
             <button
