@@ -268,7 +268,7 @@ async function main() {
           institucio: inst.id,
           primera_vegada: true,
           periode: period,
-          alumnes: JSON.stringify([{ TALLER: taller.id, QUANTITAT: 15 }]),
+          alumnes: JSON.stringify([{ TALLER: taller.id, QUANTITAT: 15, ESTAT:"ESPERA" }]),
           referents: "Cap d'Estudis",
           docents_referents: "docent@centre.cat",
           autoritzat: true,

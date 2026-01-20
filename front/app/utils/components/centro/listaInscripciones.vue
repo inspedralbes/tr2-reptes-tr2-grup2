@@ -1075,6 +1075,7 @@ h3 {
 #btn-filtro:hover {
   background-color: #6b75c2;
 }
+
 /* --- MODAL --- */
 .modal-overlay {
   position: fixed;
