@@ -25,7 +25,7 @@ const isActive = (path) => {
       <NuxtLink to="/admin/gestioTallers-Admin" custom v-slot="{ navigate }">
         <button
           @click="navigate"
-          data-tooltip="Gestió de Tallers"
+          data-tooltip="Gestió Tallers"
           :class="{ 'btn-activo': isActive('/admin/gestioTallers-Admin') }"
         >
           <img src="/img/navBarAdmin/backpack.png" alt="" />
@@ -35,7 +35,7 @@ const isActive = (path) => {
       <NuxtLink to="/admin/gestioPeticions-Admin" custom v-slot="{ navigate }">
         <button
           @click="navigate"
-          data-tooltip="Gestió de Peticions"
+          data-tooltip="Gestió Peticions"
           :class="{ 'btn-activo': isActive('/admin/gestioPeticions-Admin') }"
         >
           <img src="/img/navBarAdmin/clipboard.png" alt="" />
@@ -45,7 +45,7 @@ const isActive = (path) => {
       <NuxtLink to="/admin/gestioCentres-Admin" custom v-slot="{ navigate }">
         <button
           @click="navigate"
-          data-tooltip="Gestió de Centres"
+          data-tooltip="Gestió Centres"
           :class="{ 'btn-activo': isActive('/admin/gestioCentres-Admin') }"
         >
           <img src="/img/navBarAdmin/academic-cap.png" alt="" />
@@ -55,7 +55,7 @@ const isActive = (path) => {
       <NuxtLink to="/admin/gestioInformes-Admin" custom v-slot="{ navigate }">
         <button
           @click="navigate"
-          data-tooltip="Gestió d'Informes"
+          data-tooltip="Gestió Informes"
           :class="{ 'btn-activo': isActive('/admin/gestioInformes-Admin') }"
         >
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
