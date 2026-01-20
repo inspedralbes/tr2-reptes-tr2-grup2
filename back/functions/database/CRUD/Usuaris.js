@@ -12,7 +12,6 @@ export async function getAllUsuaris() {
         rol: true,
         tallers: true,
         responsable: true,
-        coordinador: true,
       },
     });
   } catch (error) {
@@ -33,7 +32,7 @@ export async function getUsuariById(id) {
         rol: true,
         tallers: true,
         responsable: true,
-        coordinador: true,
+        responsable: true,
       },
     });
   } catch (error) {
@@ -47,7 +46,7 @@ export async function createUsuari(data) {
     const prisma = await getPrisma();
     return await prisma.usuaris.create({
       data,
-      include: { tallers: true, responsable: true, coordinador: true },
+      include: { tallers: true, responsable: true },
     });
   } catch (error) {
     throw new Error(`Error al crear usuari: ${error.message}`);
@@ -62,7 +61,7 @@ export async function updateUsuari(data) {
     return await prisma.usuaris.update({
       where: { id: parseInt(id) },
       data: updateData,
-      include: { tallers: true, responsable: true, coordinador: true },
+      include: { tallers: true, responsable: true },
     });
   } catch (error) {
     throw new Error(`Error al actualizar usuari: ${error.message}`);

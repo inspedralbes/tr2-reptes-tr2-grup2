@@ -2,7 +2,7 @@
 import { ref } from "vue";
 
 const emit = defineEmits(["toggle", "select"]);
-const options = [0, 1, 2, 3];
+const options = [0, 1, 2, 3, 4];
 const isOpen = ref(false);
 const selected = ref(0);
 
@@ -99,7 +99,11 @@ const getStackStyle = (index) => {
   color: #283593;
 }
 .bg-level-3 {
-  background-color: #7986cb;
+  background-color: rgba(121, 134, 203, 1);
+  color: #ffffff;
+}
+.bg-level-4 {
+  background-color: rgba(105, 118, 179, 1);
   color: #ffffff;
 }
 

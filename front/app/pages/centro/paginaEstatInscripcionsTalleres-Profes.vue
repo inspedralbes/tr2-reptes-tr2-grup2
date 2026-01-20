@@ -15,6 +15,10 @@ import llistaEstados from "@/utils/components/centro/listaEstadoInscripciones.vu
   </div>
 </template>
 <style scoped>
+@font-face {
+  font-family: "Coolvetica";
+  src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
+}
 #cuerpo {
   display: flex;
   height: calc(100vh - 85px);
@@ -23,7 +27,7 @@ import llistaEstados from "@/utils/components/centro/listaEstadoInscripciones.vu
 #contenido {
   margin-top: 20px;
   margin-left: 50px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Coolvetica";
   font-weight: lighter;
   height: 300px;
 }

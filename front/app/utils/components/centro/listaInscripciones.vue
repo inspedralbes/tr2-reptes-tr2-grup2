@@ -57,7 +57,7 @@ const confirmarEnvio = async () => {
       ([tallerId, numAlumnos]) => ({
         tallerId: Number(tallerId),
         numAlumnos: Number(numAlumnos),
-      })
+      }),
     );
 
     const payload = {
@@ -203,13 +203,34 @@ const processTallers = (data) => {
       horari = {};
     }
 
-    const parts = (horari.DATAINI || "").split("/");
-    const year = parts[2] ? parseInt(parts[2], 10) : null;
-    const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
-    const day = parts[0] ? parseInt(parts[0], 10) : null;
-    const dateObj = year && month >= 0 ? new Date(year, month, day) : null;
+    const dataStr = horari.DATAINI || "";
+    let year = null,
+      month = null,
+      day = null;
+
+    if (dataStr.includes("/")) {
+      const parts = dataStr.split("/");
+      day = parts[0] ? parseInt(parts[0], 10) : null;
+      month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+      year = parts[2] ? parseInt(parts[2], 10) : null;
+    } else if (dataStr.includes("-")) {
+      const parts = dataStr.split("-");
+      year = parts[0] ? parseInt(parts[0], 10) : null;
+      month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+      day = parts[2] ? parseInt(parts[2], 10) : null;
+    }
+
+    const dateObj =
+      year && month !== null && month >= 0 && day
+        ? new Date(year, month, day)
+        : null;
     const mesNombre = dateObj ? mesesNombres[dateObj.getMonth()] : "Desconegut";
     const diaNum = dateObj ? dateObj.getDate() : day || null;
+    const mesNum = dateObj
+      ? dateObj.getMonth() + 1
+      : month !== null
+        ? month + 1
+        : null;
 
     // Si el mes no existe en nuestro objeto agrupador, lo creamos
     if (!grouped[mesNombre]) {
@@ -228,7 +249,8 @@ const processTallers = (data) => {
       imagen: "/img/centro/image.png",
       descripcio: t.descripcio,
       direccio: t.direccio,
-      mesNum: parts[1] || null,
+      mesNum: mesNum,
+      diaNum: diaNum,
       rawHorari: horari,
     });
   });
@@ -472,7 +494,7 @@ const getMesNum = (mes) => {
                 ><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
-                  {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
+                  {{ curso.diaNum }}/{{ getMesNum(seccion.mes) }}
                   <img src="/img/centro/clock.png" class="icon" />
                   {{ curso.hora }}
                 </span>
