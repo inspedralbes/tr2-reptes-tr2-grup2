@@ -28,7 +28,7 @@ export async function getAssistenciaById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir assistència per ID: ${response.statusText}`
+      `Error al obtenir assistència per ID: ${response.statusText}`,
     );
   }
 
@@ -152,7 +152,7 @@ export async function getInstitucionById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir institució per ID: ${response.statusText}`
+      `Error al obtenir institució per ID: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -306,12 +306,11 @@ export async function getUsuariById(id) {
   return await response.json();
 }
 
-export async function createUsuari(usuariData) {
-  const response = await fetch(`${BACK_URL}/usuaris`, {
+export async function registerUsuari(usuariData) {
+  const response = await fetch(`${BACK_URL}/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify(usuariData),
   });
@@ -321,12 +320,11 @@ export async function createUsuari(usuariData) {
   return await response.json();
 }
 
-export async function updateUsuari(id, usuariData) {
-  const response = await fetch(`${BACK_URL}/usuaris/${id}`, {
+export async function acceptUsuari(usuariData) {
+  const response = await fetch(`${BACK_URL}/usuaris/acceptat/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify(usuariData),
   });
@@ -336,16 +334,55 @@ export async function updateUsuari(id, usuariData) {
   return await response.json();
 }
 
-export async function deleteUsuari(id) {
-  const response = await fetch(`${BACK_URL}/usuaris/${id}`, {
+export async function declineUsuari(id) {
+  const response = await fetch(`${BACK_URL}/usuaris/denegat/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
   if (!response.ok) {
-    throw new Error(`Error al eliminar usuari: ${response.statusText}`);
+    throw new Error(`Error al denegar usuari: ${response.statusText}`);
   }
+  return await response.json();
+}
+
+export async function loginUsuari(credentials) {
+  // Truca a l'API de login i en cas d'error de token el refresca
+  // automàticament, en cas de altres errors llença una excepció,
+  // agafa el token donant prioritat al antic token, guarda els tokens
+  // i retorna les dades de l'usuari.
+  const response = await fetch(`${BACK_URL}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al iniciar sessió: ${response.statusText}`);
+  }
+  
+  const data = await response.json();
+
+  localStorage.setItem("accessToken", data.accessToken);
+  localStorage.setItem("refreshToken", data.refreshToken);
+  return { message: data.message, user: data.user };
+}
+
+async function handleTokenRefresh(refreshToken, userId) {
+  const response = await fetch(`${BACK_URL}/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken: refreshToken, id: userId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al refrescar el token: ${response.statusText}`);
+  }
+
   return await response.json();
 }

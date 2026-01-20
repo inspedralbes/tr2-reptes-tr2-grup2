@@ -34,7 +34,7 @@ app.use(
   cors({
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use((req, res, next) => {
@@ -70,14 +70,11 @@ app.post("/login", async (req, res) => {
       return res.status(403).json({ error: "Usuari no autoritzat" });
     }
 
-    const match = await comparePassword(password, user.password);
-    if (!match) {
+    if (await !comparePassword(password, user.password)) {
       return res.status(400).json({ error: "Contrasenya incorrecta" });
     }
 
     const { accessToken, refreshToken } = generateTokens(user);
-
-    // Guardar el refresh token en la base de datos
     await updateUsuariToken(parseInt(id), refreshToken);
 
     res.status(200).json({
@@ -86,7 +83,7 @@ app.post("/login", async (req, res) => {
       refreshToken,
       user: {
         id: user.id,
-        nom: user.nom,
+        userName: user.nom,
         rol: user.rol,
       },
     });
@@ -110,6 +107,7 @@ app.post("/register", async (req, res) => {
   try {
     // Verificar si l'usuari ja existeix
     const existingUser = await getUsuariForAuth(parseInt(id));
+
     if (existingUser) {
       return res.status(409).json({ error: "L'usuari ja existeix" });
     }
@@ -118,7 +116,7 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await hashPassword(password);
 
     // Crear el nou usuari
-    const newUser = await createUsuari({
+    await createUsuari({
       id: parseInt(id),
       nom,
       password: hashedPassword,
@@ -128,12 +126,7 @@ app.post("/register", async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Usuari registrat correctament",
-      user: {
-        id: newUser.id,
-        nom: newUser.nom,
-        rol: newUser.rol,
-      },
+      message: "Petició d'usuari registrat correctament",
     });
   } catch (error) {
     console.error("Error al registrar usuari:", error);
@@ -161,7 +154,7 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     res.json({ accessToken: newAccessToken });
@@ -255,7 +248,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const selections = req.body;
     console.log("/inscripcions/dadesinsc received:", selections);
     // TODO: funcion con la que implementar los datos necesarios para el insert
-    
+
     res.json({ ok: true, received: selections });
   } catch (err) {
     console.error("Error en /inscripcions/dadesinsc:", err);
@@ -374,19 +367,21 @@ app.get("/usuaris/:id", async (req, res) => {
   res.json(usuari);
 });
 
-app.post("/usuaris", async (req, res) => {
+app.put("/usuaris/aceptat", async (req, res) => {
   const data = req.body;
-  const newUsuari = await createUsuari(data);
-  res.json(newUsuari);
+  data = { ...data, autoritzat: true };
+  try {
+    await updateUsuari(data.id, data);
+    // EN UN FUTUR AFEGIR L'ENVIO DEL CORREU ELECTRONIC AQUÍ
+    return res.json({
+      message: "Usuari actualitzat correctament",
+    });
+  } catch (error) {
+    return res.json({ message: "Error al actualizar usuari:", error });
+  }
 });
 
-app.put("/usuaris", async (req, res) => {
-  const data = req.body;
-  const updatedUsuari = await updateUsuari(data);
-  res.json(updatedUsuari);
-});
-
-app.delete("/usuaris/:id", async (req, res) => {
+app.delete("/usuaris/denegat/:id", async (req, res) => {
   const { id } = req.params;
   const deletedUsuari = await deleteUsuari(id);
   res.json(deletedUsuari);

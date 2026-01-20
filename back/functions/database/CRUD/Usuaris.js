@@ -55,13 +55,12 @@ export async function createUsuari(data) {
 }
 
 // UPDATE usuari
-export async function updateUsuari(data) {
+export async function updateUsuari(id, data) {
   try {
     const prisma = await getPrisma();
-    const { id, ...updateData } = data;
     return await prisma.usuaris.update({
       where: { id: parseInt(id) },
-      data: updateData,
+      data: data,
       include: { tallers: true, responsable: true, coordinador: true },
     });
   } catch (error) {
