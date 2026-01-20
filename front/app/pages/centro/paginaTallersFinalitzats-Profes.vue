@@ -17,6 +17,10 @@ import listaFinalizados from "@/utils/components/centro/listaFinalizados.vue";
   </div>
 </template>
 <style scoped>
+@font-face {
+  font-family: "Coolvetica";
+  src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
+}
 #cuerpo {
   display: flex;
   background-color: #f5f5f5;

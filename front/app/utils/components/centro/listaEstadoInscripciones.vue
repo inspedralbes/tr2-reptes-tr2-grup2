@@ -136,13 +136,25 @@ const processTallers = (data, inscritos) => {
       horari = {};
     }
 
-    const parts = (horari.DATAINI || "").split("/");
-    const year = parts[2] ? parseInt(parts[2], 10) : null;
-    const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
-    const day = parts[0] ? parseInt(parts[0], 10) : null;
-    const dateObj = year && month >= 0 ? new Date(year, month, day) : null;
+    const dataStr = horari.DATAINI || "";
+    let year = null, month = null, day = null;
+
+    if (dataStr.includes("/")) {
+      const parts = dataStr.split("/");
+      day = parts[0] ? parseInt(parts[0], 10) : null;
+      month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+      year = parts[2] ? parseInt(parts[2], 10) : null;
+    } else if (dataStr.includes("-")) {
+      const parts = dataStr.split("-");
+      year = parts[0] ? parseInt(parts[0], 10) : null;
+      month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+      day = parts[2] ? parseInt(parts[2], 10) : null;
+    }
+
+    const dateObj = year && month !== null && month >= 0 && day ? new Date(year, month, day) : null;
     const mesNombre = dateObj ? mesesNombres[dateObj.getMonth()] : "Desconegut";
     const diaNum = dateObj ? dateObj.getDate() : day || null;
+    const mesNum = dateObj ? dateObj.getMonth() + 1 : (month !== null ? month + 1 : null);
 
     // Si el mes no existe en nuestro objeto agrupador, lo creamos
     if (!grouped[mesNombre]) {
@@ -161,8 +173,8 @@ const processTallers = (data, inscritos) => {
       imagen: "/img/centro/image.png",
       descripcio: t.descripcio,
       direccio: t.direccio,
-      mesNum: parts[1] || null,
-      diaNum: parts[0] || null, // Guardamos el día específico del curso
+      mesNum: mesNum,
+      diaNum: diaNum,
       rawHorari: horari,
       estadoInscripcion: inscripcion.estat !== null ? (inscripcion.estat ? "Aprovada" : "Pendent") : "Pendent",
       autoritzat: inscripcion.autoritzat || false,

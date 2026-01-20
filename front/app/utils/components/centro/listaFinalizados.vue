@@ -9,47 +9,110 @@ const tallersFinalitzats = ref([]);
 const isLoading = ref(true);
 
 function processTallers(allTallers, allInscripcions) {
-  // 1. Obtener ID de institucion
-  const myInstId = parseInt(localStorage.getItem("user_institution_id"));
-  if (!myInstId) return [];
+  // 1. Obtener ID de institución
+  const rawId = localStorage.getItem("user_institution_id");
+  const myInstId = parseInt(rawId);
 
-  // 2. IDs de talleres de mi insti
-  const misTalleresIds = allInscripcions
-    .filter((i) => i.institucio === myInstId)
-    .map((i) => i.tallerId);
+  if (!myInstId) {
+    return [];
+  }
 
-  // 3. Filtrar talleres (Míos + Finalizados)
-  return allTallers.filter((taller) => {
-    // A. ¿Es mío?
-    if (!misTalleresIds.includes(taller.id)) return false;
+  // 2. Obtener IDs de talleres de mi institución (Sustituye filter y map)
+  const misTalleresIds = [];
+  for (let i = 0; i < allInscripcions.length; i++) {
+    const inscripcion = allInscripcions[i];
+    if (inscripcion.institucio === myInstId) {
+      misTalleresIds.push(inscripcion.tallerId);
+    }
+  }
 
-    // B. ¿Ya pasó?
+  // 3. Filtrar talleres: Que sean míos Y que ya hayan pasado
+  const resultado = [];
+  const hoy = new Date();
+
+  for (let j = 0; j < allTallers.length; j++) {
+    const taller = allTallers[j];
+
+    // A. ¿Es mío? (Sustituye .includes)
+    let esMio = false;
+    for (let k = 0; k < misTalleresIds.length; k++) {
+      if (misTalleresIds[k] === taller.id) {
+        esMio = true;
+        break;
+      }
+    }
+
+    // Si no es mío, pasamos al siguiente taller inmediatamente
+    if (!esMio) {
+      continue;
+    }
+
+    // B. ¿Ya pasó? (Lógica de fecha)
     let fechaTaller = null;
     try {
-      // Parsear JSON del horario
-      const obj =
-        typeof taller.horari === "string"
-          ? JSON.parse(taller.horari)
-          : taller.horari;
+      let obj = taller.horari;
+      if (typeof taller.horari === "string") {
+        obj = JSON.parse(taller.horari);
+      }
 
-      const parts = (obj.DATAINI || "").split("/");
-      const year = parts[2] ? parseInt(parts[2], 10) : null;
-      const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
-      const day = parts[0] ? parseInt(parts[0], 10) : null;
+      const dataStr = obj.DATAINI || "";
+      let year = null,
+        month = null,
+        day = null;
+
+      if (dataStr.indexOf("/") !== -1) {
+        const parts = dataStr.split("/");
+        day = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10) - 1;
+        year = parseInt(parts[2], 10);
+      } else if (dataStr.indexOf("-") !== -1) {
+        const parts = dataStr.split("-");
+        year = parseInt(parts[0], 10);
+        month = parseInt(parts[1], 10) - 1;
+        day = parseInt(parts[2], 10);
+      }
 
       if (year && month !== null && day) {
         fechaTaller = new Date(year, month, day);
       }
     } catch (e) {
-      return false;
+      continue;
     }
 
-    // Si existe fechaTaller y es menor que hoy... true.
-    return fechaTaller && fechaTaller < new Date();
-  });
+    if (fechaTaller && fechaTaller < hoy) {
+      resultado.push(taller);
+    }
+  }
+
+  return resultado;
 }
 
 onMounted(async () => {
+  // DATOS ESTÁTICOS DE PRUEBA (TEMPORAL)
+  tallersFinalitzats.value = [
+    {
+      id: 9991,
+      nom: "Taller de Cocina Mediterránea (Demo)",
+      descripcio: "Un taller demostrativo sobre cocina tradicional.",
+      direccio: "Aula Gastronómica 1",
+    },
+    {
+      id: 9992,
+      nom: "Introducción a Vue.js (Demo)",
+      descripcio: "Aprende los fundamentos del framework progresivo.",
+      direccio: "Lab de Informática 2",
+    },
+    {
+      id: 9993,
+      nom: "Mecánica Básica (Demo)",
+      descripcio: "Mantenimiento preventivo para tu vehículo.",
+      direccio: "Taller de Automoción",
+    },
+  ];
+  isLoading.value = false;
+
+  /* 
+  // LÓGICA ORIGINAL COMENTADA TEMPORALMENTE
   try {
     const [fetchedTallers, fetchedInscripcions] = await Promise.all([
       getAllTallers(),
@@ -65,6 +128,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
+  */
 });
 </script>
 
@@ -87,7 +151,10 @@ onMounted(async () => {
         </div>
         <div class="card-body">
           <p class="desc">{{ taller.descripcio }}</p>
-          <p class="ubicacion">📍 {{ taller.direccio }}</p>
+          <p class="ubicacion">{{ taller.direccio }}</p>
+          <NuxtLink :to="`/paginaReviewTaller-Profes/${taller.id}`">
+            <button>Avaluar taller</button>
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -167,5 +234,13 @@ onMounted(async () => {
   margin-top: 40px;
   font-size: 1.2rem;
   color: #666;
+}
+button {
+  background-color: #5c6bc0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
