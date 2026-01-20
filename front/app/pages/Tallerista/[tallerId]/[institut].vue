@@ -6,6 +6,7 @@ import {
   getTallerById,
   getAssistenciesByTallerId,
   updateAssistencia,
+  updateTaller,
   getAllInstitucions,
 } from "@/services/communicationManagerDatabase";
 
@@ -29,6 +30,7 @@ const diaSeleccionat = ref(null);
 const alumnesDelDia = ref([]);
 const professorsDelDia = ref([]);
 const guardant = ref(false);
+const comentari = ref("");
 
 const horariParsed = computed(() => {
   if (!taller.value || !taller.value.horari) return null;
@@ -59,6 +61,7 @@ const getInfoTorn = (diaStr) => {
 
 const obrirModal = (assistencia) => {
   diaSeleccionat.value = assistencia;
+  comentari.value = taller.value?.comentari_tallerista || "";
   // Procesar alumnos
   try {
     const alumnesParsed = JSON.parse(assistencia.llista_alumnes || "[]");
@@ -112,6 +115,7 @@ const tancarModal = () => {
   diaSeleccionat.value = null;
   alumnesDelDia.value = [];
   professorsDelDia.value = [];
+  comentari.value = "";
 };
 
 const toggleAssistenciaAlumne = (index) => {
@@ -148,15 +152,6 @@ const toggleJustificatProfe = (index) => {
 const guardarAssistencia = async () => {
   if (!diaSeleccionat.value) return;
   
-  // Validar que tots els noms estiguin plens
-  const alumnesVacios = alumnesDelDia.value.some(a => !a.NOM || a.NOM.trim() === "");
-  const profsVacios = professorsDelDia.value.some(p => !p.NOM || p.NOM.trim() === "");
-  
-  if (alumnesVacios || profsVacios) {
-    alert("Tots els noms són obligatoris");
-    return;
-  }
-  
   guardant.value = true;
   try {
     // Preparar arrays sense ID i convertir el nom de institució back a ID
@@ -187,6 +182,17 @@ const guardarAssistencia = async () => {
     if (index !== -1) {
       assistencies.value[index].llista_alumnes = dataToUpdate.llista_alumnes;
       assistencies.value[index].llista_professors = dataToUpdate.llista_professors;
+    }
+    
+    // Guardar el comentari del tallerista
+    if (comentari.value !== (taller.value?.comentari_tallerista || "")) {
+      await updateTaller(TALLER_ID, {
+        comentari_tallerista: comentari.value
+      });
+      // Actualizar el taller localmente
+      if (taller.value) {
+        taller.value.comentari_tallerista = comentari.value;
+      }
     }
     
     tancarModal();
@@ -293,14 +299,7 @@ onMounted(async () => {
             </thead>
             <tbody>
               <tr v-for="(alumne, index) in alumnesDelDia" :key="index">
-                <td>
-                  <input
-                    v-model="alumne.NOM"
-                    type="text"
-                    placeholder="Escriu el nom..."
-                    class="input-nom"
-                  />
-                </td>
+                <td>{{ alumne.NOM }}</td>
                 <td>{{ alumne.INSTITUT }}</td>
                 <td>
                   <input
@@ -337,14 +336,7 @@ onMounted(async () => {
             </thead>
             <tbody>
               <tr v-for="(profe, index) in professorsDelDia" :key="index">
-                <td>
-                  <input
-                    v-model="profe.NOM"
-                    type="text"
-                    placeholder="Escriu el nom..."
-                    class="input-nom"
-                  />
-                </td>
+                <td>{{ profe.NOM }}</td>
                 <td>{{ profe.INSTITUT }}</td>
                 <td>
                   <input
@@ -365,6 +357,18 @@ onMounted(async () => {
             </tbody>
           </table>
           <p v-else class="no-dades">No hi ha professors registrats.</p>
+        </div>
+
+        <!-- Comentaris -->
+        <div class="comentaris-section">
+          <h4>Comentaris</h4>
+          <textarea
+            v-model="comentari"
+            placeholder="Afegeix comentaris sobre el taller (màxim 300 caràcters)"
+            maxlength="300"
+            class="textarea-comentari"
+          ></textarea>
+          <div class="char-counter">{{ comentari.length }}/300</div>
         </div>
       </div>
 
@@ -559,6 +563,44 @@ onMounted(async () => {
   font-weight: normal;
   margin: 0 0 12px 0;
   color: #555;
+}
+
+.comentaris-section {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.comentaris-section h4 {
+  font-size: 0.95rem;
+  font-weight: normal;
+  margin: 0 0 12px 0;
+  color: #555;
+}
+
+.textarea-comentari {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.textarea-comentari:focus {
+  outline: none;
+  border-color: #5C6BC0;
+  box-shadow: 0 0 4px rgba(92, 107, 192, 0.2);
+}
+
+.char-counter {
+  text-align: right;
+  font-size: 0.8rem;
+  color: #999;
+  margin-top: 4px;
 }
 
 table {

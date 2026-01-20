@@ -29,6 +29,7 @@ model Tallers {
   periode     Int
   autoritzat  Boolean   @default(false)
   comentari_profe String? @db.Text // JSON array: [{id_inst: int, comentari: string}, ...]
+  comentari_tallerista String?
   mailTallerista String?
 
   admin Int

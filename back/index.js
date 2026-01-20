@@ -484,6 +484,13 @@ app.put("/tallers", async (req, res) => {
   res.json(updatedTaller);
 });
 
+app.put("/tallers/:id", async (req, res) => {
+  const { id } = req.params;
+  const data = { ...req.body, id: parseInt(id) };
+  const updatedTaller = await updateTaller(data);
+  res.json(updatedTaller);
+});
+
 app.delete("/tallers/:id", async (req, res) => {
   const { id } = req.params;
   const deletedTaller = await deleteTaller(id);
