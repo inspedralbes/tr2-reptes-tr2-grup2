@@ -26,7 +26,7 @@ const workshopsData = [
 async function main() {
   prisma = await getPrisma();
   console.log(
-    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)..."
+    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)...",
   );
 
   const periodsIds = [];
@@ -131,7 +131,7 @@ async function main() {
   const csvFilePath = path.join(
     process.cwd(),
     "prisma",
-    "totcat-centres-educatius.csv"
+    "totcat-centres-educatius.csv",
   );
 
   if (fs.existsSync(csvFilePath)) {
@@ -203,7 +203,7 @@ async function main() {
             });
 
             console.log(
-              `   🌟 [VIP] Institució i Profesor creats: ${nomCentre}`
+              `   🌟 [VIP] Institució i Profesor creats: ${nomCentre}`,
             );
           }
         }
@@ -212,10 +212,10 @@ async function main() {
       }
     }
     console.log(
-      `\n   ✅ Importació CSV finalitzada. Total processats: ${count}`
+      `\n   ✅ Importació CSV finalitzada. Total processats: ${count}`,
     );
     console.log(
-      `   ✅ Institucions VIP seleccionades: ${vipInstitutions.length}`
+      `   ✅ Institucions VIP seleccionades: ${vipInstitutions.length}`,
     );
   } else {
     console.error("   ⛔ NO S'HA TROBAT EL CSV.");
@@ -254,6 +254,8 @@ async function main() {
           modalitat: "A",
           direccio: inst.direccio,
           horari: JSON.stringify({
+            DATAINI: "2025-09-05",
+            DATAFI: "2025-12-22",
             TORNS: [{ DIA: "Dilluns", HORAINICI: "10:00", HORAFI: "12:00" }],
           }),
           periode: period,
@@ -268,7 +270,9 @@ async function main() {
           institucio: inst.id,
           primera_vegada: true,
           periode: period,
-          alumnes: JSON.stringify([{ TALLER: taller.id, QUANTITAT: 15, ESTAT:"ESPERA" }]),
+          alumnes: JSON.stringify([
+            { TALLER: taller.id, QUANTITAT: 15, ESTAT: "ESPERA" },
+          ]),
           referents: "Cap d'Estudis",
           docents_referents: "docent@centre.cat",
           autoritzat: true,
@@ -282,10 +286,10 @@ async function main() {
           id_taller: taller.id,
           dia: new Date(),
           llista_alumnes: JSON.stringify([
-            { NOM: "Alumne 1", ASSISTENCIA: true },
+            { NOM: "Alumne 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: true },
           ]),
           llista_professors: JSON.stringify([
-            { NOM: "Profe 1", ASSISTENCIA: true },
+            { NOM: "Profe 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: flase },
           ]),
           autoritzat: false,
         },
@@ -325,4 +329,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-  

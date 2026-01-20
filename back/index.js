@@ -237,6 +237,7 @@ import {
   createAssistencia,
   updateAssistencia,
   deleteAssistencia,
+  getAssistenciaByTaller,
 } from "./functions/database/CRUD/Assistencia.js";
 
 app.get("/assistencies", async (req, res) => {
@@ -267,6 +268,101 @@ app.delete("/assistencies/:id", async (req, res) => {
   res.json(deletedAssistencia);
 });
 
+// Afegir alumnes i profesorat a l'assistència
+// {
+//   "institucioId": 1,
+//   "tallerID": 1,
+//   "alumnesAfegir": [
+//     "Paco Hernandez",
+//     "Manolito MM"
+//   ],
+//   "profesAfegir": [
+//     "Prof. López",
+//     "MAMDAMDMA"
+//   ]
+// }
+app.put("/assistencies/afegirPersonal", async (req, res) => {
+  const { institucioId, tallerID, alumnesAfegir, profesAfegir } = req.body;
+  try {
+    // Validar parámetros
+    if (!institucioId || !tallerID) {
+      return res.status(400).json({
+        error: "Falten paràmetres obligatoris (institucioId, tallerID)",
+      });
+    }
+
+    // Obtenir totes les assistències del taller
+    const assistencias = await getAssistenciaByTaller(tallerID);
+
+    if (!assistencias || assistencias.length === 0) {
+      return res.status(404).json({
+        error: "No s'han trobat assistències per aquest taller",
+      });
+    }
+
+    // Convertir arrays de strings a objectes amb format complet
+    const alumnesFormatejats =
+      alumnesAfegir && Array.isArray(alumnesAfegir)
+        ? alumnesAfegir.map((nom) => ({
+            NOM: typeof nom === "string" ? nom : nom.NOM,
+            INSTITUT: institucioId,
+            ASSISTENCIA: true,
+            JUSTIFICAT: false,
+          }))
+        : [];
+
+    const profesFormatejats =
+      profesAfegir && Array.isArray(profesAfegir)
+        ? profesAfegir.map((nom) => ({
+            NOM: typeof nom === "string" ? nom : nom.NOM,
+            INSTITUT: institucioId,
+            ASSISTENCIA: true,
+            JUSTIFICAT: false,
+          }))
+        : [];
+
+    // Processar cada assistència
+    for (const assistencia of assistencias) {
+      let llista_alumnes = JSON.parse(assistencia.llista_alumnes || "[]");
+      let llista_professors = JSON.parse(assistencia.llista_professors || "[]");
+
+      // Esborrar tots els alumnos/profes de la mateixa institució
+      llista_alumnes = llista_alumnes.filter(
+        (alumne) => alumne.INSTITUT !== institucioId,
+      );
+      llista_professors = llista_professors.filter(
+        (profe) => profe.INSTITUT !== institucioId,
+      );
+
+      // Afegir els nous alumnos
+      llista_alumnes = llista_alumnes.concat(alumnesFormatejats);
+
+      // Afegir els nous profes
+      llista_professors = llista_professors.concat(profesFormatejats);
+
+      // Actualizar la assistència
+      await updateAssistencia({
+        id: assistencia.id,
+        llista_alumnes: JSON.stringify(llista_alumnes),
+        llista_professors: JSON.stringify(llista_professors),
+      });
+    }
+
+    res.status(200).json({
+      message: "Alumnes i profes afegits correctament a les assistències",
+      tallerID,
+      institucioId,
+      alumnesAfegits: alumnesFormatejats.length,
+      profesAfegits: profesFormatejats.length,
+    });
+  } catch (error) {
+    console.error("Error al afegir alumnes a l'assistència:", error);
+    res.status(500).json({
+      error: "Error al afegir alumnes: " + error.message,
+    });
+  }
+});
+
 /* ------------------------------- INSCRIPCIONS ------------------------------ */
 
 import {
@@ -277,6 +373,7 @@ import {
   deleteInscripcio,
   procesarInscripcio,
   updateEstatInscripcions,
+  getInscripcionsByPeriode,
 } from "./functions/database/CRUD/Inscripcions.js";
 
 app.get("/inscripcions", async (req, res) => {
@@ -324,6 +421,120 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     return res.status(500).json({
       message: `Error al procesar inscripcions: ${err.message}`,
     });
+  }
+});
+
+// Procesar inscripcions i crear assistències
+// {
+//   "periode": 3
+// }
+app.post("/inscripcions/procesar", async (req, res) => {
+  try {
+    const { periode } = req.body;
+
+    // Obternir totes les inscripcions per periode
+    const inscripcions = await getInscripcionsByPeriode(periode);
+
+    // Processar inscripcions per a cada taller
+    for (const inscripcio of inscripcions) {
+      // Verificar que cap alumne estigui en estat "ESPERA"
+      if (inscripcio.alumnes) {
+        try {
+          const alumnes = JSON.parse(inscripcio.alumnes);
+
+          for (const alumne of alumnes) {
+            if (alumne.ESTAT === "ESPERA") {
+              return res.status(400).json({
+                error:
+                  "No es pot processar: existeixen alumnes en estat ESPERA",
+                inscripcioId: inscripcio.id,
+                alumneEnEspera: alumne,
+              });
+            }
+          }
+        } catch (parseError) {
+          console.error("Error al parsejar alumnes JSON:", parseError);
+          return res.status(400).json({
+            error: "Format invàlid en camp alumnes",
+            inscripcioId: inscripcio.id,
+          });
+        }
+      }
+    }
+
+    // Obtenir tots els tallers del període
+    const tallers = await getTallersByPeriode(periode);
+
+    for (const taller of tallers) {
+      try {
+        const horari = JSON.parse(taller.horari);
+
+        // Validar que horari té estructura correcta amb TORNS
+        if (!horari.TORNS || !Array.isArray(horari.TORNS)) {
+          console.warn(
+            `Horari no té estructura correcta per taller ${taller.id}:`,
+            horari,
+          );
+          continue;
+        }
+
+        const dataIni = new Date(horari.DATAINI);
+        const dataFi = new Date(horari.DATAFI);
+
+        // Generar dates per a cada dia de la setmana especificat en TORNS
+        for (const torn of horari.TORNS) {
+          const diaSemana = torn.DIA;
+
+          // Mapejar nom del dia a índex (0=diumenge, 1=dilluns, etc.)
+          const diesSetmana = {
+            Diumenge: 0,
+            Dilluns: 1,
+            Dimarts: 2,
+            Dimecres: 3,
+            Dijous: 4,
+            Divendres: 5,
+            Dissabte: 6,
+          };
+
+          const indexDia = diesSetmana[diaSemana];
+
+          if (indexDia === undefined) {
+            console.warn(
+              `Dia no reconegut: ${diaSemana} per taller ${taller.id}`,
+            );
+            continue;
+          }
+
+          // Generar totes les dates dins del periode que siguin d'aquest dia de la setmana
+          let dataActual = new Date(dataIni);
+          while (dataActual <= dataFi) {
+            if (dataActual.getDay() === indexDia) {
+              await createAssistencia({
+                id_taller: taller.id,
+                dia: new Date(dataActual),
+                llista_alumnes: JSON.stringify([]),
+                llista_professors: JSON.stringify([]),
+                autoritzat: false,
+              });
+            }
+            dataActual.setDate(dataActual.getDate() + 1);
+          }
+        }
+      } catch (parseError) {
+        console.error(
+          `Error processant horari del taller ${taller.id}:`,
+          parseError,
+        );
+        continue;
+      }
+    }
+
+    res.status(200).json({ message: "Assistències creades correctament" });
+  } catch (error) {
+    console.error("Error al crear assistències:", error);
+    res
+      .status(500)
+      .json({ error: "Error al crear assistències: " + error.message });
   }
 });
 
@@ -403,6 +614,7 @@ import {
   createTaller,
   updateTaller,
   deleteTaller,
+  getTallersByPeriode,
 } from "./functions/database/CRUD/Tallers.js";
 
 app.get("/tallers", async (req, res) => {
@@ -420,7 +632,7 @@ app.post("/tallers", async (req, res) => {
   try {
     const data = req.body;
 
-    // Validaciones básicas
+    // Validacions bàsiques
     if (
       !data.nom ||
       !data.descripcio ||

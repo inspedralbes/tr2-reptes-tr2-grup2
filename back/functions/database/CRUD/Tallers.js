@@ -35,6 +35,24 @@ export async function getTallerById(id) {
   }
 }
 
+//SELECT tots els tallers per periode
+export async function getTallersByPeriode(periodeId) {
+  try {
+    const prisma = await getPrisma();
+    return await prisma.tallers.findMany({
+      where: { periode: parseInt(periodeId) },
+      include: {
+        id_institucio: true,
+        id_admin: true,
+        id_periode: true,
+        llista_assistencia: true,
+      },
+    });
+  } catch (error) {
+    throw new Error(`Error al obtenir tallers per període: ${error.message}`);
+  }
+}
+
 // INSERT nou taller
 export async function createTaller(data) {
   try {
@@ -94,7 +112,7 @@ export async function getInscripciosByTallerId(tallerId) {
     });
   } catch (error) {
     throw new Error(
-      `Error al obtenir inscripcions del taller: ${error.message}`
+      `Error al obtenir inscripcions del taller: ${error.message}`,
     );
   }
 }
