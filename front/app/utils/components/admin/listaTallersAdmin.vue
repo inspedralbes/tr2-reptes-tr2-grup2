@@ -58,27 +58,6 @@ onMounted(async () => {
   await cargarPeriodes();
 });
 
-// const tallers = ref([
-//   {
-//     mes: "Septembre",
-//     diaNum: 23,
-//     cursos: [
-//       { titulo: "Curs de Vela", hora: "15:30" },
-//       { titulo: "Curs de Teatre", hora: "15:30" },
-//       { titulo: "Curs de Teatre", hora: "15:30" },
-//       { titulo: "Curs de Teatre", hora: "15:30" },
-//     ],
-//   },
-//   {
-//     mes: "Octubre",
-//     diaNum: 17,
-//     cursos: [
-//       { titulo: "Curs de Carpinteria", hora: "16:30" },
-//       { titulo: "Curs de Cosir", hora: "10:00" },
-//     ],
-//   },
-// ]);
-
 const filaActiva = ref(null);
 
 const actualizarPrioridad = (id, isOpen) => {
