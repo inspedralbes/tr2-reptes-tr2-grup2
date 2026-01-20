@@ -4,6 +4,7 @@ import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import graficaTallers from "@/utils/components/admin/graficaTallers.vue";
 import graficaInstitucions from "@/utils/components/admin/graficaInstitucions.vue";
 import calendari from "@/utils/components/admin/calendari.vue";
+import recordatorisAdmin from "@/utils/components/admin/recordatorisAdmin.vue";
 </script>
 <template>
   <Encabezado />
@@ -13,7 +14,7 @@ import calendari from "@/utils/components/admin/calendari.vue";
       <h2>Bon día, <span id="user">*AdminName*</span>:</h2>
       <div class="panell-admin">
         <div class="tarjetas-admin">
-          <p>Recordatoris</p>
+          <recordatorisAdmin />
         </div>
         <div class="tarjetas-admin">
           <graficaTallers />

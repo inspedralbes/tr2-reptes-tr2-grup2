@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import { getAllInstitucions } from "~/services/communicationManagerDatabase";
 
 const institucions = ref([]);
-const filaActiva = ref(null);
 
 const cargarInstitucions = async () => {
   try {
@@ -17,6 +16,8 @@ const cargarInstitucions = async () => {
 onMounted(async () => {
   await cargarInstitucions();
 });
+
+const filaActiva = ref(null);
 
 // Toggle del desplegable al clicar el botón
 const toggleDetalls = (id) => {
@@ -45,7 +46,7 @@ const toggleDetalls = (id) => {
 
           <div class="col-info">
             <span class="info-item">
-              <img src="/img/centro/clock.png" class="icon" alt="icon" />
+              <img src="/img/centro/location.png" class="icon" alt="icon" />
               {{ institucio.direccio }}
             </span>
           </div>
@@ -60,9 +61,9 @@ const toggleDetalls = (id) => {
         <!-- DESPLEGABLE HACIA ABAJO -->
         <transition name="slide">
           <div v-if="filaActiva === institucio.id" class="desplegable">
-            <p>Codi centre: {{ institucio.codi_centre }}</p>
-            <p>Direccio: {{ institucio.direccio }}</p>
-            <p>Codi Postal:{{ institucio.codi_postal }}</p>
+            <p><b>Codi centre:</b> {{ institucio.codi_centre }}</p>
+            <!-- <p><b>Direcció:</b> {{ institucio.direccio }}</p> -->
+            <p><b>Codi Postal:</b> {{ institucio.codi_postal }}</p>
           </div>
         </transition>
       </div>
@@ -178,6 +179,12 @@ p {
   border-radius: 25px;
 }
 
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
 .btn-detalls {
   background-color: #c5cae9;
   margin-left: -30px;
@@ -199,7 +206,9 @@ p {
   margin-left: 0;
   position: relative;
   width: 90%;
-  padding: 0px 0 0 0;
+  padding: 20px 0 0 0;
+  border-radius: 0 0 25px 25px;
+  box-sizing: border-box;
 }
 
 /* Animación del desplegable */

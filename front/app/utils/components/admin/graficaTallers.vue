@@ -37,6 +37,9 @@ const initChart = (processedData) => {
       text: "Top 3 Tallers per Any",
       left: "center",
       top: 10,
+      textStyle: {
+        fontSize: 17,
+      },
     },
     legend: {
       data: years,
@@ -125,7 +128,7 @@ onUnmounted(() => {
 <style scoped>
 .stats-container {
   width: 100%;
-  height: 20%;
+  height: 100%;
   display: flex;
   justify-content: center;
   padding: 20px;
@@ -142,6 +145,6 @@ onUnmounted(() => {
 
 .main-chart {
   width: 100%;
-  height: 500px;
+  height: 235px;
 }
 </style>

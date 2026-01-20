@@ -39,8 +39,8 @@ const cargarTallers = async () => {
 const formatHorari = (horariJSON) => {
   try {
     const horari = JSON.parse(horariJSON);
-    return horari.TORNS.map(torn => 
-      `${torn.DIA}: ${torn.HORAINICI} - ${torn.HORAFI}`
+    return horari.TORNS.map(
+      (torn) => `${torn.DIA}: ${torn.HORAINICI} - ${torn.HORAFI}`,
     ).join(", ");
   } catch {
     return "No disponible";
@@ -204,7 +204,7 @@ const crearTaller = async () => {
 
           <div class="col-info">
             <span class="info-item">
-              <img src="/img/centro/calendar.png" class="icon" alt="icon" />
+              <img src="/img/centro/location.png" class="icon" alt="icon" />
               {{ taller.direccio }}
             </span>
           </div>
@@ -219,11 +219,16 @@ const crearTaller = async () => {
         <!-- DESPLEGABLE HACIA ABAJO -->
         <transition name="slide">
           <div v-if="filaActiva === taller.id" class="desplegable">
-            <p>{{ taller.descripcio }}</p>
-            <p>Tallerista: {{ taller.tallerista }}</p>
-            <p><img src="/img/centro/clock.png" class="icon" alt="icon" />Horari: {{ formatHorari(taller.horari) }}</p>
-            <p>Places disponibles: {{ taller.places_disp }}</p>
-            <p>Modalitat: {{ taller.modalitat }}</p>
+            <p><strong>Descripció:</strong>{{ taller.descripcio }}</p>
+            <p><strong>Tallerista:</strong> {{ taller.tallerista }}</p>
+            <p><strong>Places disponibles:</strong> {{ taller.places_disp }}</p>
+            <p><strong>Modalitat:</strong> {{ taller.modalitat }}</p>
+            <p>
+              <img src="/img/centro/clock.png" class="icon" alt="icon" /><b
+                >Horari:</b
+              >
+              {{ formatHorari(taller.horari) }}
+            </p>
           </div>
         </transition>
       </div>
@@ -498,7 +503,9 @@ p {
   margin-left: 0;
   position: relative;
   width: 90%;
-  padding: 0px 0 0 0;
+  padding: 20px 0 0 0;
+  border-radius: 0 0 25px 25px;
+  box-sizing: border-box;
 }
 
 /* Animación del desplegable */
