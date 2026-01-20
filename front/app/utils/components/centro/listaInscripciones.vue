@@ -57,7 +57,7 @@ const confirmarEnvio = async () => {
       ([tallerId, numAlumnos]) => ({
         tallerId: Number(tallerId),
         numAlumnos: Number(numAlumnos),
-      })
+      }),
     );
 
     const payload = {
@@ -229,6 +229,7 @@ const processTallers = (data) => {
       descripcio: t.descripcio,
       direccio: t.direccio,
       mesNum: parts[1] || null,
+      diaNum: parts[0] || null,
       rawHorari: horari,
     });
   });
@@ -472,7 +473,7 @@ const getMesNum = (mes) => {
                 ><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
-                  {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
+                  {{ curso.diaNum }}/{{ getMesNum(seccion.mes) }}
                   <img src="/img/centro/clock.png" class="icon" />
                   {{ curso.hora }}
                 </span>
