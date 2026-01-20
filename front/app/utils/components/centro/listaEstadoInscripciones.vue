@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { getAllTallers, getAllInscripcions, getInstitucionById, getUsuariById } from "@/services/communicationManagerDatabase";
+import { getAllTallers, getAllInscripcions, getInstitucionById, getUsuariById, deleteInscripcion, updateInscripcion } from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
 const tallersGrouped = ref([]);
@@ -17,6 +17,7 @@ const searchTaller = ref("");
 const inscripcionsMap = ref({}); 
 const usuarioInstitucion = ref(null); 
 const horaris = ref([]);
+const inscripcionEditando = ref(false)
 
 const selecciones = ref({});
 
@@ -185,9 +186,40 @@ const processTallers = (data, inscritos) => {
   return Object.values(grouped);
 };
 
-// Carga inicial
-onMounted(async () => {
+//Funciones para botones de editar, eliminar e inscribirse
+const updateTaller = (id) => {
   try {
+    await
+  } catch (error) {
+    
+  }
+
+
+  console.log("Actualizar taller", id);
+};
+const deleteInscription = async (id) => {
+
+  //Pedimos que confirme la eliminación
+  if (!confirm("Estàs segur que vols eliminar aquesta inscripció?")) return;
+  
+  try {
+    //Si confirma, eliminamos la inscripción
+    await deleteInscripcion(id);
+    //Cargamos de nuevo los datos
+    await loadData();
+  } catch (error) {
+    console.error("Error eliminando inscripción:", error);
+  }
+};
+const inscripcionTaller = (id) => {
+  console.log("Inscribirse al taller", id);
+};  
+
+// Carga inicial
+// Función de carga de datos reutilizable
+const loadData = async () => {
+  try {
+    cargando.value = true;
     const rawData = await getAllTallers();
     horaris.value = extractHoraris(rawData);
     
@@ -215,6 +247,11 @@ onMounted(async () => {
   } finally {
     cargando.value = false;
   }
+};
+
+onMounted(() => {
+  //Cargamos los datos al montar el componente
+  loadData();
 });
 
 // Función para filtrar talleres según criterios
@@ -441,8 +478,18 @@ const getMesNum = (mes) => {
             </div>
             <div id="col-btn">
               <button id="btn-inscripcion">Inscripció</button>
-              <button id="btn-update">Actualitzar</button>
-              <button id="btn-delete">Eliminar</button>
+              <button @click="inscripcionEditando = true" id="btn-update">Actualitzar</button>
+              <button @click="deleteInscription(curso.id)" id="btn-delete">Eliminar</button>
+            </div>
+            <div v-if="inscripcionEditando === true" id="popup-update">
+              <h2>Actualitzar inscripció</h2>
+              <form>
+                <label>Nom</label>
+                <select>
+                  
+                </select>
+                <button type="submit">Actualitzar</button>
+              </form>
             </div>
           </div>
 
