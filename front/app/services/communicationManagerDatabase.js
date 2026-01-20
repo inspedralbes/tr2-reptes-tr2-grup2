@@ -28,7 +28,7 @@ export async function getAssistenciaById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir assistència per ID: ${response.statusText}`
+      `Error al obtenir assistència per ID: ${response.statusText}`,
     );
   }
 
@@ -124,6 +124,23 @@ export async function deleteInscripcion(id) {
   return await response.json();
 }
 
+export async function confirmarInscripciones(tallerId, inscripcionesAprobadas) {
+  const response = await fetch(`${BACK_URL}/inscripcions/confirmar`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      tallerId,
+      inscripcionesAprobadas,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al confirmar inscripcions: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
 /* ------------------------------- INSTITUCIONS ------------------------------ */
 
 export async function getAllInstitucions() {
@@ -152,7 +169,7 @@ export async function getInstitucionById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir institució per ID: ${response.statusText}`
+      `Error al obtenir institució per ID: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -272,6 +289,25 @@ export async function deleteTaller(id) {
   });
   if (!response.ok) {
     throw new Error(`Error al eliminar taller: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function pointsTallers(tallerId) {
+  const response = await fetch(
+    `${BACK_URL}/tallers/${tallerId}/inscripcions-ordenadas`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Error al calcular puntuacions del taller: ${response.statusText}`,
+    );
   }
   return await response.json();
 }
