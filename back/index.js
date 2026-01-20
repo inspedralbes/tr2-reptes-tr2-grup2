@@ -284,7 +284,6 @@ app.delete("/assistencies/:id", async (req, res) => {
 app.put("/assistencies/afegirPersonal", async (req, res) => {
   const { institucioId, tallerID, alumnesAfegir, profesAfegir } = req.body;
   try {
-    // Validar parámetros
     if (!institucioId || !tallerID) {
       return res.status(400).json({
         error: "Falten paràmetres obligatoris (institucioId, tallerID)",
@@ -321,7 +320,6 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
           }))
         : [];
 
-    // Processar cada assistència
     for (const assistencia of assistencias) {
       let llista_alumnes = JSON.parse(assistencia.llista_alumnes || "[]");
       let llista_professors = JSON.parse(assistencia.llista_professors || "[]");
@@ -334,13 +332,13 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
         (profe) => profe.INSTITUT !== institucioId,
       );
 
-      // Afegir els nous alumnos
+      // Afegir els nous alumnes
       llista_alumnes = llista_alumnes.concat(alumnesFormatejats);
 
       // Afegir els nous profes
       llista_professors = llista_professors.concat(profesFormatejats);
 
-      // Actualizar la assistència
+      // Actualitzar l'assistència
       await updateAssistencia({
         id: assistencia.id,
         llista_alumnes: JSON.stringify(llista_alumnes),
