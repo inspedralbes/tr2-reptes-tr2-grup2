@@ -16,6 +16,8 @@ import {
   getUsuariForAuth,
   updateUsuariToken,
 } from "./functions/database/CRUD/Usuaris.js";
+import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
+import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -57,10 +59,14 @@ app.get("/", (req, res) => {
 
 // Ruta de login
 app.post("/login", async (req, res) => {
-  const { id, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const user = await getUsuariForAuth(parseInt(id));
+    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
+    
+    const user = await prisma.usuaris.findUnique({
+      where: { email },
+    });
 
     if (!user) {
       return res.status(400).json({ error: "Usuari no trobat" });
@@ -84,36 +90,54 @@ app.post("/login", async (req, res) => {
       user: {
         id: user.id,
         userName: user.nom,
+        nom: user.nom,
+        email: user.email,
         rol: user.rol,
+        institucio: user.institucio,
       },
     });
   } catch (error) {
     console.error("Error de base de dades:", error);
-    res.status(500).json({ error: "Error de base de dades" });
+    res.status(500).json({ error: "Error de base de dades: " + error.message });
   }
 });
 
 // Ruta de registre
 app.post("/register", async (req, res) => {
-  const { id, nom, password, rol, institucioId } = req.body;
+  const { nom, email, password, rol, responsable } = req.body;
 
   // Validar camps obligatoris
-  if (!id || !nom || !password) {
+  if (!nom || !email || !password) {
     return res
       .status(400)
-      .json({ error: "Falten camps obligatoris (id, nom, password)" });
+      .json({ error: "Falten camps obligatoris (nom, email, password)" });
   }
 
   try {
+    const prisma = await import("./generated/prisma/index.js").then(m => m.default || m);
+    
     // Verificar si l'usuari ja existeix
     const existingUser = await getUsuariForAuth(parseInt(id));
-
     if (existingUser) {
-      return res.status(409).json({ error: "L'usuari ja existeix" });
+      return res.status(409).json({ error: "L'email ja existeix" });
     }
 
     // Hashear la contrasenya
     const hashedPassword = await hashPassword(password);
+
+    let newInstitucio = null;
+    
+    // Si s'envia dades de responsable, crear la institució
+    if (responsable && responsable.nom && responsable.codi_centre) {
+      newInstitucio = await prisma.institucions.create({
+        data: {
+          nom: responsable.nom,
+          codi_centre: responsable.codi_centre,
+          direccio: responsable.direccio || "",
+          codi_postal: responsable.codi_postal || "",
+        },
+      });
+    }
 
     // Crear el nou usuari
     await createUsuari({
@@ -130,7 +154,7 @@ app.post("/register", async (req, res) => {
     });
   } catch (error) {
     console.error("Error al registrar usuari:", error);
-    res.status(500).json({ error: "Error al registrar l'usuari" });
+    res.status(500).json({ error: "Error al registrar l'usuari: " + error.message });
   }
 });
 
@@ -224,6 +248,7 @@ import {
   createInscripcio,
   updateInscripcio,
   deleteInscripcio,
+  procesarInscripcio,
 } from "./functions/database/CRUD/Inscripcions.js";
 
 app.get("/inscripcions", async (req, res) => {
@@ -245,14 +270,32 @@ app.post("/inscripcions", async (req, res) => {
 
 app.post("/inscripcions/dadesinsc", async (req, res) => {
   try {
-    const selections = req.body;
-    console.log("/inscripcions/dadesinsc received:", selections);
-    // TODO: funcion con la que implementar los datos necesarios para el insert
+    const { selecciones, "docents-ref": docentRef, comentari } = req.body;
 
-    res.json({ ok: true, received: selections });
+    // Paula: validando que selecciones sea un array no vacío
+    if (!Array.isArray(selecciones) || selecciones.length === 0) {
+      return res.status(400).json({
+        message: "selecciones debe ser un array no vacío",
+      });
+    }
+
+    // Paula: llamando a la función que procesa las inscripciones
+    const resultado = await procesarInscripcio(
+      selecciones,
+      docentRef || null,
+      comentari || null
+    );
+
+    return res.status(200).json({
+      ok: true,
+      message: "Inscripcions procesades correctament",
+      data: resultado,
+    });
   } catch (err) {
-    console.error("Error en /inscripcions/dadesinsc:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Error en /inscripcions/dadesinsc:", err.message);
+    return res.status(500).json({
+      message: `Error al procesar inscripcions: ${err.message}`,
+    });
   }
 });
 
@@ -329,9 +372,44 @@ app.get("/tallers/:id", async (req, res) => {
 });
 
 app.post("/tallers", async (req, res) => {
-  const data = req.body;
-  const newTaller = await createTaller(data);
-  res.json(newTaller);
+  try {
+    const data = req.body;
+    
+    // Validaciones básicas
+    if (!data.nom || !data.descripcio || !data.tallerista || !data.direccio || !data.horari || !data.periode || !data.admin) {
+      return res.status(400).json({ 
+        error: "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)" 
+      });
+    }
+    
+    const newTaller = await createTaller(data);
+    res.status(201).json(newTaller);
+  } catch (error) {
+    console.error("Error al crear taller:", error);
+    res.status(500).json({ error: error.message || "Error al crear taller" });
+  }
+});
+
+app.get("/tallers/:id/inscripcions", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const inscripcions = await getInscripciosByTallerId(id);
+    res.json(inscripcions);
+  } catch (error) {
+    console.error("Error al obtenir inscripcions del taller:", error);
+    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+  }
+});
+
+app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resultado = await calcularPuntuacionesDelTaller(id);
+    res.json(resultado);
+  } catch (error) {
+    console.error("Error al obtenir inscripcions ordenadas:", error);
+    res.status(500).json({ error: error.message || "Error al obtenir inscripcions" });
+  }
 });
 
 app.put("/tallers", async (req, res) => {
