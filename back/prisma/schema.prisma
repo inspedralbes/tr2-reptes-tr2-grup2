@@ -28,6 +28,7 @@ model Tallers {
   horari      String    @db.Text
   periode     Int
   autoritzat  Boolean   @default(false)
+  comentari_profe String? @db.Text // JSON array: [{id_inst: int, comentari: string}, ...]
 
   admin Int
 

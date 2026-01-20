@@ -36,7 +36,7 @@ app.use(
   cors({
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
 app.use((req, res, next) => {
@@ -63,7 +63,7 @@ app.post("/login", async (req, res) => {
 
   try {
     const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m,
+      (m) => m.default || m
     );
 
     const user = await prisma.usuaris.findUnique({
@@ -122,7 +122,7 @@ app.post("/register", async (req, res) => {
 
   try {
     const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m,
+      (m) => m.default || m
     );
 
     // Verificar si l'usuari ja existeix
@@ -205,7 +205,7 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
     res.json({ accessToken: newAccessToken });
@@ -311,7 +311,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null,
+      comentari || null
     );
 
     return res.status(200).json({
@@ -403,6 +403,7 @@ import {
   createTaller,
   updateTaller,
   deleteTaller,
+  addComentariProfe,
 } from "./functions/database/CRUD/Tallers.js";
 
 app.get("/tallers", async (req, res) => {
@@ -480,6 +481,29 @@ app.delete("/tallers/:id", async (req, res) => {
   const { id } = req.params;
   const deletedTaller = await deleteTaller(id);
   res.json(deletedTaller);
+});
+
+app.post("/tallers/:id/comentari-profe", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { idInstitucio, comentari } = req.body;
+
+    if (!idInstitucio || !comentari) {
+      return res.status(400).json({ error: "Falten idInstitucio i comentari" });
+    }
+
+    const resultado = await addComentariProfe(id, idInstitucio, comentari);
+    res.status(200).json({
+      ok: true,
+      message: "Comentari guardat correctament",
+      data: resultado,
+    });
+  } catch (error) {
+    console.error("Error en /tallers/:id/comentari-profe:", error.message);
+    res.status(500).json({
+      error: error.message || "Error al guardar comentari",
+    });
+  }
 });
 
 /* ------------------------------- USUARIS ------------------------------ */

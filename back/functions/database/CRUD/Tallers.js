@@ -75,6 +75,52 @@ export async function deleteTaller(id) {
   }
 }
 
+// ADD comentari de professor al taller
+export async function addComentariProfe(tallerId, idInstitucio, comentari) {
+  try {
+    const prisma = await getPrisma();
+    const taller = await prisma.tallers.findUnique({
+      where: { id: parseInt(tallerId) },
+    });
+
+    if (!taller) {
+      throw new Error("Taller no encontrado");
+    }
+
+    let comentaris = [];
+    if (taller.comentari_profe) {
+      try {
+        comentaris = JSON.parse(taller.comentari_profe);
+      } catch (e) {
+        comentaris = [];
+      }
+    }
+
+    const existingIndex = comentaris.findIndex(
+      (c) => c.id_inst === parseInt(idInstitucio)
+    );
+
+    if (existingIndex !== -1) {
+      comentaris[existingIndex].comentari = comentari;
+    } else {
+      comentaris.push({
+        id_inst: parseInt(idInstitucio),
+        comentari: comentari,
+      });
+    }
+
+    return await prisma.tallers.update({
+      where: { id: parseInt(tallerId) },
+      data: {
+        comentari_profe: JSON.stringify(comentaris),
+      },
+      include: { id_institucio: true, id_admin: true, id_periode: true },
+    });
+  } catch (error) {
+    throw new Error(`Error al añadir comentario: ${error.message}`);
+  }
+}
+
 // SELECT inscripcions por ID de taller
 export async function getInscripciosByTallerId(tallerId) {
   try {
