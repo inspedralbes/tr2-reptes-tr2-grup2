@@ -10,59 +10,54 @@ const isActive = (path) => {
 <template>
   <div id="navBar">
     <div id="btns">
-      <NuxtLink
-        to="/admin/paginaPrincipal-Admin"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive('/admin/paginaPrincipal-Admin') }"
-      >
-        <button @click="navigate">
+      <NuxtLink to="/admin/paginaPrincipal-Admin" custom v-slot="{ navigate }">
+        <button
+          @click="navigate"
+          data-tooltip="Pàgina Principal"
+          :class="{ 'btn-activo': isActive('/admin/paginaPrincipal-Admin') }"
+        >
           <img src="/img/navBarAdmin/home.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
 
-      <NuxtLink
-        to="/admin/gestioTallers-Admin"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive('/admin/gestioTallers-Admin') }"
-      >
-        <button @click="navigate">
+      <NuxtLink to="/admin/gestioTallers-Admin" custom v-slot="{ navigate }">
+        <button
+          @click="navigate"
+          data-tooltip="Gestió de Tallers"
+          :class="{ 'btn-activo': isActive('/admin/gestioTallers-Admin') }"
+        >
           <img src="/img/navBarAdmin/backpack.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/admin/gestioPeticions-Admin"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive('/admin/gestioPeticions-Admin') }"
-      >
-        <button @click="navigate">
+      <NuxtLink to="/admin/gestioPeticions-Admin" custom v-slot="{ navigate }">
+        <button
+          @click="navigate"
+          data-tooltip="Gestió de Peticions"
+          :class="{ 'btn-activo': isActive('/admin/gestioPeticions-Admin') }"
+        >
           <img src="/img/navBarAdmin/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/admin/gestioCentres-Admin"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive('/admin/gestioCentres-Admin') }"
-      >
-        <button @click="navigate">
+      <NuxtLink to="/admin/gestioCentres-Admin" custom v-slot="{ navigate }">
+        <button
+          @click="navigate"
+          data-tooltip="Gestió de Centres"
+          :class="{ 'btn-activo': isActive('/admin/gestioCentres-Admin') }"
+        >
           <img src="/img/navBarAdmin/academic-cap.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/admin/gestioInformes-Admin"
-        custom
-        v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive('/admin/gestioInformes-Admin') }"
-      >
-        <button @click="navigate">
+      <NuxtLink to="/admin/gestioInformes-Admin" custom v-slot="{ navigate }">
+        <button
+          @click="navigate"
+          data-tooltip="Gestió d'Informes"
+          :class="{ 'btn-activo': isActive('/admin/gestioInformes-Admin') }"
+        >
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
@@ -98,7 +93,11 @@ const isActive = (path) => {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  transition: background-color 0.3s ease, padding 0.3s ease, transform 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    padding 0.3s ease,
+    transform 0.3s ease;
+  position: relative;
 }
 
 #btns button img {
@@ -108,9 +107,26 @@ const isActive = (path) => {
 }
 
 #btns button:hover,
-.btn-activo {
+#btns button.btn-activo {
   background-color: #5c6bc0;
   padding: 10px;
   transform: scale(1.1);
+}
+
+#btns button:hover::after {
+  content: attr(data-tooltip);
+  position: fixed;
+  top: -25px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 </style>
