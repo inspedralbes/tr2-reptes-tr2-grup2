@@ -2,23 +2,16 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-//Funció per obtenir la plantilla HTML i substituir les variables
-function getTemplate(fileName, replacements) {
-  const filePath = path.join(process.cwd(), "templates", fileName);
-  let html = fs.readFileSync(filePath, "utf8");
-
-  // Reemplaza {{variable}} por el valor real
-  Object.keys(replacements).forEach((key) => {
-    html = html.replace(new RegExp(`{{${key}}}`, "g"), replacements[key]);
-  });
-
-  return html;
-}
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 export async function enviarEmail(type, userData) {
+  let html;
+  let subject;
+
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST_SMTP,
     port: process.env.EMAIL_PORT_SMTP,
@@ -29,27 +22,38 @@ export async function enviarEmail(type, userData) {
     },
   });
 
-  // Definir l'assumpte i el contingut segons el tipus d'email
-  let html;
-  let subject;
+  let mailOptions;
 
-  if (type === "benvinguda") {
-    subject = "¡Benvingut a bord!";
-    html = getTemplate("benvinguda.html", {
-      nombre: userData.nombre,
-      enlace: "https://www.winewithcola.com",
-    });
-  } else if (type === "recuperacion") {
-    subject = "Recupera la teva contrasenya";
-    html = getTemplate("password.html", { nombre: userData.nombre });
+  switch (type) {
+    case "registre":
+      subject = "Sollicitud de registre a GesTallers";
+      html = getTemplate("registre.html", {
+        nom: userData.nom,
+        id: userData.id,
+        email: userData.email,
+        url: `${process.env.API_URL}`,
+      });
+      mailOptions = {
+        from: `"GesTaller" <${process.env.EMAIL_USER_SMTP}>`,
+        to: "a22tonmarmar@inspedralbes.cat",
+        subject: subject,
+        html: html,
+      };
+      break;
+    case "registreAcceptat":
+      subject = "Aceptació de registre a GesTallers";
+      html = getTemplate("registre_aceptat.html", {
+        nom: userData.nom,
+        url: `${process.env.URL_BASE}`,
+      });
+      mailOptions = {
+        from: `"GesTaller" <${process.env.EMAIL_USER_SMTP}>`,
+        to: "a22tonmarmar@inspedralbes.cat",
+        subject: subject,
+        html: html,
+      };
+      break;
   }
-
-  const mailOptions = {
-    from: `"WineWithCola" <${process.env.EMAIL_USER_SMTP}>`,
-    to: userData.email,
-    subject: subject,
-    html: html,
-  };
 
   try {
     const info = await transporter.sendMail(mailOptions);
@@ -59,4 +63,16 @@ export async function enviarEmail(type, userData) {
     console.error("Error:", error);
     return { success: false, error: error.message };
   }
+}
+
+function getTemplate(fileName, replacements) {
+  const filePath = path.join(__dirname, "templates", fileName);
+  let html = fs.readFileSync(filePath, "utf8");
+  console.log("Template loaded from:", filePath);
+  // Reemplaza {{variable}} por el valor real
+  Object.keys(replacements).forEach((key) => {
+    html = html.replace(new RegExp(`{{${key}}}`, "g"), replacements[key]);
+  });
+
+  return html;
 }

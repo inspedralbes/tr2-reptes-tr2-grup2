@@ -68,6 +68,19 @@ export async function getUsuariByEmail(email, login) {
   }
 }
 
+export async function getUserId(email) {
+  try {
+    const prisma = await getPrisma();
+    const user = await prisma.usuaris.findUnique({
+      where: { email: email },
+      select: { id: true },
+    });
+    return parseInt(user.id);
+  } catch (error) {
+    throw new Error(`Error al obtenir ID de l'usuari: ${error.message}`);
+  }
+}
+
 // INSERT nou usuari
 export async function createUsuari(data) {
   try {

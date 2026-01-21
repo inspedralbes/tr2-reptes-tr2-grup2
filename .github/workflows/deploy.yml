@@ -16,6 +16,7 @@ jobs:
           API_URL: ${{ secrets.API_URL }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
+          URL_BASE: ${{ secrets.URL_BASE }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
@@ -58,6 +59,7 @@ jobs:
             echo "DATABASE_NAME=GESTIO-CURSOS" >> .env.PROD
             echo "DATABASE_HOST=tr2g2-mysql" >> .env.PROD
             echo "DATABASE_PORT=3306" >> .env.PROD
+            echo "BACK_URL=$URL_BASE" >> .env.PROD
             cd ..
 
             # Crear .env de SMTP
@@ -65,8 +67,10 @@ jobs:
             cd back/functions/smtp
             echo "EMAIL_USER_SMTP=${{ secrets.EMAIL_USER_SMTP }}" > .env
             echo "EMAIL_PASS_SMTP=${{ secrets.EMAIL_PASS_SMTP }}" >> .env
-            echo "EMAIL_HOST_SMTP=smtp.gmail.com" >> .env
-            echo "EMAIL_PORT_SMTP=465" >> .env
+            echo "EMAIL_HOST_SMTP=${{ secrets.EMAIL_HOST_SMTP }}" >> .env
+            echo "EMAIL_PORT_SMTP=${{ secrets.EMAIL_PORT_SMTP }}" >> .env
+            echo "API_URL=${{ secrets.API_URL }}:" >> .env
+            echo "URL_BASE=${{ secrets.URL_BASE }}:" >> .env
             cd ../../..
 
             # 5. Aixecar contenidors reconstruint la imatge

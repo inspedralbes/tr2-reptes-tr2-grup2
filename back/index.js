@@ -12,9 +12,11 @@ import {
   secretKey,
   hashPassword,
 } from "./functions/auth.js";
+import { enviarEmail } from "./functions/smtp/smtp.js";
 import {
   getUsuariForAuth,
   updateUsuariToken,
+  getUserId,
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
@@ -143,6 +145,8 @@ app.post("/register", async (req, res) => {
       responsable: true,
     });
 
+    enviarEmail("registre", { nom, email, id: getUserId(email) });
+
     res.status(201).json({
       message: "Petició d'usuari registrat correctament",
     });
@@ -178,6 +182,7 @@ app.post("/refresh", async (req, res) => {
     );
 
     res.json({ accessToken: newAccessToken });
+    enviarEmail("registreAcceptat", { nom: user.nom, email: user.email });
   } catch (err) {
     console.error("Error en refresh:", err);
     res.status(403).json({ error: "Token invàlid o expirat" });
