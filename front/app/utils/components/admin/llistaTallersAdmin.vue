@@ -1,9 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { getAllTallers } from "~/services/communicationManagerDatabase";
+import { getAllTallers, createTaller, updateTaller } from "~/services/communicationManagerDatabase";
+
+const BACK_URL = import.meta.env.VITE_URL_BACK;
 
 const tallers = ref([]);
 const mostrarModal = ref(false);
+const mostrarEditar = ref(false);
+const tallerSeleccionado = ref(null);
 const periodes = ref([]);
 
 // Estados reactivos para filtros
@@ -25,6 +29,8 @@ const diaSeleccionado = ref("");
 const horaInicio = ref("");
 const horaFin = ref("");
 const periodeSeleccionado = ref("");
+const imatgeFile = ref(null);
+
 
 const dias = [
   "Dilluns",
@@ -265,14 +271,46 @@ const abrirModal = () => {
 };
 
 const abrirModalEditar = (taller) => {
-  // Esta función puedes expandir para modo edición más adelante
-  abrirModal();
+  mostrarEditar.value = true;
+  tallerSeleccionado.value = taller;
+  nom.value = taller.nom || "";
+  descripcio.value = taller.descripcio || "";
+  tallerista.value = taller.tallerista || "";
+  placesMax.value = (taller.places_max ?? taller.places_disp ?? "") + "";
+  direccio.value = taller.direccio || "";
+  // Parsejar horari per omplir DIA/HORAINICI/HORAFI
+  try {
+    let horari = {};
+    if (typeof taller.horari === "string" && taller.horari.trim() !== "") {
+      horari = JSON.parse(taller.horari);
+    } else if (taller.horari) {
+      horari = taller.horari;
+    }
+    const torn = horari?.TORNS?.[0] || {};
+    diaSeleccionado.value = torn.DIA || "";
+    horaInicio.value = torn.HORAINICI || "";
+    horaFin.value = torn.HORAFI || "";
+  } catch (e) {
+    diaSeleccionado.value = "";
+    horaInicio.value = "";
+    horaFin.value = "";
+  }
+  // Periode (esperat com a enter)
+  periodeSeleccionado.value = (taller.periode ?? "") + "";
+  imatgeFile.value = null; // no canviar imatge per defecte
 };
 
 const cerrarModal = () => {
   mostrarModal.value = false;
   limpiarFormulario();
 };
+
+const cerrarModalEditar = () => {
+  mostrarEditar.value = false;
+  tallerSeleccionado.value = null;
+  limpiarFormulario();
+};
+
 
 const limpiarFormulario = () => {
   nom.value = "";
@@ -284,6 +322,14 @@ const limpiarFormulario = () => {
   horaInicio.value = "";
   horaFin.value = "";
   periodeSeleccionado.value = "";
+  imatgeFile.value = null;
+};
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    imatgeFile.value = file;
+  }
 };
 
 const crearTaller = async () => {
@@ -314,37 +360,28 @@ const crearTaller = async () => {
     ],
   });
 
-  const dataTaller = {
-    nom: nom.value,
-    descripcio: descripcio.value,
-    tallerista: tallerista.value,
-    places_max: parseInt(placesMax.value),
-    places_disp: parseInt(placesMax.value),
-    direccio: direccio.value,
-    horari: horariJSON,
-    periode: parseInt(periodeSeleccionado.value),
-    institucio: 1,
-    admin: 1,
-    autoritzat: false,
-    modalitat: "C",
-  };
+  // Crear FormData per enviar dades i fitxer
+  const formData = new FormData();
+  formData.append("nom", nom.value);
+  formData.append("descripcio", descripcio.value);
+  formData.append("tallerista", tallerista.value);
+  formData.append("places_max", Number.parseInt(placesMax.value));
+  formData.append("places_disp", Number.parseInt(placesMax.value));
+  formData.append("direccio", direccio.value);
+  formData.append("horari", horariJSON);
+  formData.append("periode", Number.parseInt(periodeSeleccionado.value));
+  formData.append("institucio", 1);
+  formData.append("admin", 1);
+  formData.append("autoritzat", false);
+  formData.append("modalitat", "C");
+
+  // Agregar imagen si se seleccionó una
+  if (imatgeFile.value) {
+    formData.append("imatge", imatgeFile.value);
+  }
 
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_URL_BACK || "http://localhost:8000"}/tallers`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataTaller),
-      },
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Error al crear taller");
-    }
-
-    const resultado = await response.json();
+    const resultado = await createTaller(formData);
     console.log("Taller creado:", resultado);
     alert("Taller creat correctament");
     cerrarModal();
@@ -353,6 +390,102 @@ const crearTaller = async () => {
     console.error("Error al crear taller:", error);
     alert(`Error: ${error.message}`);
   }
+};
+
+const actualizarTaller = async () => {
+  // Validar camps obligatoris
+  if (
+    !tallerSeleccionado.value?.id ||
+    !nom.value ||
+    !descripcio.value ||
+    !tallerista.value ||
+    !placesMax.value ||
+    !direccio.value ||
+    !diaSeleccionado.value ||
+    !horaInicio.value ||
+    !horaFin.value ||
+    !periodeSeleccionado.value
+  ) {
+    alert("Tots els camps són obligatoris");
+    return;
+  }
+
+  // Construir horari JSON
+  const horariJSON = JSON.stringify({
+    TORNS: [
+      {
+        DIA: diaSeleccionado.value,
+        HORAINICI: horaInicio.value,
+        HORAFI: horaFin.value,
+      },
+    ],
+  });
+
+  // Crear FormData amb dades i fitxer (PUT backend espera body i possible imatge)
+  const formData = new FormData();
+  formData.append("id", String(tallerSeleccionado.value.id));
+  formData.append("nom", nom.value);
+  formData.append("descripcio", descripcio.value);
+  formData.append("tallerista", tallerista.value);
+  formData.append("places_max", Number.parseInt(placesMax.value));
+  // Manté places_disp si no hi ha lògica específica (aquí igualem a places_max per simplicitat si cal)
+  formData.append(
+    "places_disp",
+    Number.parseInt(String(tallerSeleccionado.value.places_disp ?? placesMax.value)),
+  );
+  formData.append("direccio", direccio.value);
+  formData.append("horari", horariJSON);
+  formData.append("periode", Number.parseInt(periodeSeleccionado.value));
+  formData.append(
+    "institucio",
+    Number.parseInt(String(tallerSeleccionado.value.institucio ?? 1)),
+  );
+  formData.append("admin", Number.parseInt(String(tallerSeleccionado.value.admin ?? 1)));
+  formData.append(
+    "autoritzat",
+    (tallerSeleccionado.value.autoritzat ?? false) ? "true" : "false",
+  );
+  formData.append("modalitat", tallerSeleccionado.value.modalitat || "C");
+
+  // Afegir imatge si s'ha seleccionat una nova
+  if (imatgeFile.value) {
+    formData.append("imatge", imatgeFile.value);
+  }
+
+  try {
+    const resultado = await updateTaller(formData);
+    console.log("Taller actualitzat:", resultado);
+    alert("Taller actualitzat correctament");
+    cerrarModalEditar();
+    await cargarTallers();
+  } catch (error) {
+    console.error("Error al actualitzar taller:", error);
+    alert(`Error: ${error.message}`);
+  }
+};
+
+const getImageUrl = (source) => {
+  const DEFAULT_IMG = "/img/centro/image.png";
+
+  if (!source) return DEFAULT_IMG;
+
+  let path = null;
+  if (typeof source === "string") {
+    path = source;
+  } else if (typeof source === "object") {
+    path = source.imatge || source.image || source.foto || source.url || source.path || null;
+  }
+
+  if (!path) return DEFAULT_IMG;
+
+  if (path.startsWith("/")) return `${BACK_URL}${path}`;
+
+  // path no empieza por slash -> normalizar
+  return `${BACK_URL}/${path}`;
+};
+
+const onImgError = (e) => {
+  e.target.src = "/img/centro/image.png";
 };
 </script>
 
@@ -381,13 +514,8 @@ const crearTaller = async () => {
         </div>
 
         <div v-if="openMonthFilter" class="months-grid">
-          <button
-            v-for="mes in meses"
-            :key="mes"
-            class="month-chip"
-            @click="toggleMonthSelection(mes)"
-            :class="{ 'is-active': selectedMonths.includes(mes) }"
-          >
+          <button v-for="mes in meses" :key="mes" class="month-chip" @click="toggleMonthSelection(mes)"
+            :class="{ 'is-active': selectedMonths.includes(mes) }">
             {{ mes }}
           </button>
           <button class="btn-aplicar" @click="openMonthFilter = false">
@@ -406,34 +534,21 @@ const crearTaller = async () => {
       <!-- Filtro de BÚSQUEDA -->
       <h3>TALLER</h3>
       <div>
-        <input
-          v-model="searchTaller"
-          type="text"
-          class="search-input"
-          placeholder="Cercar taller..."
-        />
+        <input v-model="searchTaller" type="text" class="search-input" placeholder="Cercar taller..." />
       </div>
 
       <!-- Filtro de HORARI -->
       <h3>HORARI</h3>
       <div>
-        <div
-          @click="openHorariFilter = !openHorariFilter"
-          class="select-header"
-        >
+        <div @click="openHorariFilter = !openHorariFilter" class="select-header">
           <span v-if="selectedHoraris.length === 0">Escull el horari...</span>
           <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
           <span class="arrow" :class="{ rotated: openHorariFilter }">▲</span>
         </div>
 
         <div v-if="openHorariFilter" class="horaris-grid">
-          <button
-            v-for="horari in horaris"
-            :key="horari"
-            class="horari-chip"
-            @click="toggleHorariSelection(horari)"
-            :class="{ 'is-active': selectedHoraris.includes(horari) }"
-          >
+          <button v-for="horari in horaris" :key="horari" class="horari-chip" @click="toggleHorariSelection(horari)"
+            :class="{ 'is-active': selectedHoraris.includes(horari) }">
             {{ horari }}
           </button>
           <button class="btn-aplicar" @click="openHorariFilter = false">
@@ -442,11 +557,7 @@ const crearTaller = async () => {
         </div>
 
         <div class="selected-tags-container">
-          <div
-            v-for="horari in selectedHoraris"
-            :key="horari"
-            class="selected-tag"
-          >
+          <div v-for="horari in selectedHoraris" :key="horari" class="selected-tag">
             {{ horari }}
             <span class="remove-icon" @click="removeHorari(horari)">×</span>
           </div>
@@ -459,27 +570,15 @@ const crearTaller = async () => {
         No hi ha tallers disponibles
       </div>
 
-      <div
-        v-for="taller in tallersFiltrados"
-        :key="taller.id"
-        class="bloque-curso"
-      >
-        <div
-          class="fila-curso"
-          :style="{ zIndex: filaActiva === taller.id ? 100 : 1 }"
-        >
+      <div v-for="taller in tallersFiltrados" :key="taller.id" class="bloque-curso">
+        <div class="fila-curso" :style="{ zIndex: filaActiva === taller.id ? 100 : 1 }">
           <div class="col-titulo">
-            <img
-              src="/img/centro/image.png"
-              class="img-curso"
-              alt="imagen curso"
-            />
+            <img :src="getImageUrl(taller)" class="img-curso" alt="curso" @error="onImgError" />
           </div>
 
           <div class="col-info">
             <div class="text-info">
-              <span class="texto-titulo">{{ taller.nom }}</span
-              ><br />
+              <span class="texto-titulo">{{ taller.nom }}</span><br />
               <span class="info-item">
                 <img src="/img/centro/location.png" class="icon" alt="icon" />
                 {{ taller.direccio }}
@@ -488,11 +587,7 @@ const crearTaller = async () => {
           </div>
 
           <button class="btn-detalls" @click="toggleDetalls(taller.id)">
-            <span
-              class="btn-detalls-text"
-              :class="{ rotar: filaActiva === taller.id }"
-              >+</span
-            >
+            <span class="btn-detalls-text" :class="{ rotar: filaActiva === taller.id }">+</span>
           </button>
 
           <button id="btn-editar-taller" @click="abrirModalEditar(taller)">
@@ -532,63 +627,33 @@ const crearTaller = async () => {
           <!-- Nom -->
           <div class="form-group">
             <label for="nom">Nom del Taller *</label>
-            <input
-              id="nom"
-              v-model="nom"
-              type="text"
-              placeholder="Ej: Robòtica Avançada"
-              maxlength="191"
-              required
-            />
+            <input id="nom" v-model="nom" type="text" placeholder="Ej: Robòtica Avançada" maxlength="191" required />
           </div>
 
           <!-- Descripció -->
           <div class="form-group">
             <label for="descripcio">Descripció *</label>
-            <textarea
-              id="descripcio"
-              v-model="descripcio"
-              placeholder="Descripcio detallada del taller"
-              rows="3"
-              required
-            ></textarea>
+            <textarea id="descripcio" v-model="descripcio" placeholder="Descripcio detallada del taller" rows="3"
+              required></textarea>
           </div>
 
           <!-- Tallerista -->
           <div class="form-group">
             <label for="tallerista">Tallerista *</label>
-            <input
-              id="tallerista"
-              v-model="tallerista"
-              type="text"
-              maxlength="191"
-              required
-            />
+            <input id="tallerista" v-model="tallerista" type="text" maxlength="191" required />
           </div>
 
           <!-- Places Màximes -->
           <div class="form-group">
             <label for="placesMax">Places Màximes *</label>
-            <input
-              id="placesMax"
-              v-model="placesMax"
-              type="number"
-              min="1"
-              required
-            />
+            <input id="placesMax" v-model="placesMax" type="number" min="1" required />
           </div>
 
           <!-- Direcció -->
           <div class="form-group">
             <label for="direccio">Direcció *</label>
-            <input
-              id="direccio"
-              v-model="direccio"
-              type="text"
-              placeholder="c. Salvador Espriu, 3"
-              maxlength="191"
-              required
-            />
+            <input id="direccio" v-model="direccio" type="text" placeholder="c. Salvador Espriu, 3" maxlength="191"
+              required />
           </div>
 
           <!-- Dia de la setmana -->
@@ -623,12 +688,111 @@ const crearTaller = async () => {
             </select>
           </div>
 
+          <!-- Imatge -->
+          <div class="form-group">
+            <label for="imatge">Imatge del Taller</label>
+            <input id="imatge" type="file" accept="image/*" @change="handleFileChange" />
+            <small style="color: #666; margin-top: 5px;">Format: JPG, PNG, GIF (opcional)</small>
+          </div>
+
           <!-- Botones -->
           <div class="modal-buttons">
             <button type="button" class="btn-cancel" @click="cerrarModal">
               Cancelar
             </button>
             <button type="submit" class="btn-submit">Crear Taller</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR TALLER -->
+    <div v-if="mostrarEditar" class="modal-overlay" @click="cerrarModalEditar">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2>Editar Taller</h2>
+          <button class="btn-close" @click="cerrarModalEditar">✕</button>
+        </div>
+
+        <form @submit.prevent="actualizarTaller" class="modal-form">
+          <!-- Nom -->
+          <div class="form-group">
+            <label for="nom-edit">Nom del Taller *</label>
+            <input id="nom-edit" v-model="nom" type="text" placeholder="Ej: Robòtica Avançada" maxlength="191"
+              required />
+          </div>
+
+          <!-- Descripció -->
+          <div class="form-group">
+            <label for="descripcio-edit">Descripció *</label>
+            <textarea id="descripcio-edit" v-model="descripcio" placeholder="Descripcio detallada del taller" rows="3"
+              required></textarea>
+          </div>
+
+          <!-- Tallerista -->
+          <div class="form-group">
+            <label for="tallerista-edit">Tallerista *</label>
+            <input id="tallerista-edit" v-model="tallerista" type="text" maxlength="191" required />
+          </div>
+
+          <!-- Places Màximes -->
+          <div class="form-group">
+            <label for="placesMax-edit">Places Màximes *</label>
+            <input id="placesMax-edit" v-model="placesMax" type="number" min="1" required />
+          </div>
+
+          <!-- Direcció -->
+          <div class="form-group">
+            <label for="direccio-edit">Direcció *</label>
+            <input id="direccio-edit" v-model="direccio" type="text" placeholder="c. Salvador Espriu, 3" maxlength="191"
+              required />
+          </div>
+
+          <!-- Dia de la setmana -->
+          <div class="form-group">
+            <label for="dia-edit">Dia de la Setmana *</label>
+            <select id="dia-edit" v-model="diaSeleccionado" required>
+              <option value="">Selecciona un dia</option>
+              <option v-for="dia in dias" :key="dia" :value="dia">
+                {{ dia }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Hora Inici -->
+          <div class="form-group">
+            <label for="horaInicio-edit">Hora Inici *</label>
+            <input id="horaInicio-edit" v-model="horaInicio" type="time" required />
+          </div>
+
+          <!-- Hora Final -->
+          <div class="form-group">
+            <label for="horaFin-edit">Hora Final *</label>
+            <input id="horaFin-edit" v-model="horaFin" type="time" required />
+          </div>
+
+          <!-- Periode -->
+          <div class="form-group">
+            <label for="periode-edit">Periode *</label>
+            <select id="periode-edit" v-model="periodeSeleccionado" required>
+              <option value="">Selecciona un periode</option>
+              <option v-for="n in 6" :key="n" :value="n">{{ n }}</option>
+            </select>
+          </div>
+
+          <!-- Imatge -->
+          <div class="form-group">
+            <label for="imatge-edit">Imatge del Taller</label>
+            <input id="imatge-edit" type="file" accept="image/*" @change="handleFileChange" />
+            <small style="color: #666; margin-top: 5px;">Format: JPG, PNG, GIF (opcional)</small>
+          </div>
+
+          <!-- Botones -->
+          <div class="modal-buttons">
+            <button type="button" class="btn-cancel" @click="cerrarModalEditar">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-submit">Guardar canvis</button>
           </div>
         </form>
       </div>
@@ -765,8 +929,8 @@ const crearTaller = async () => {
 }
 
 .col-titulo img.img-curso {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
@@ -1030,7 +1194,7 @@ const crearTaller = async () => {
   overflow-y: auto;
 }
 
-#popup-filter > button {
+#popup-filter>button {
   float: right;
   background: none;
   border: none;
@@ -1040,7 +1204,7 @@ const crearTaller = async () => {
   margin-bottom: 10px;
 }
 
-#popup-filter > button:hover {
+#popup-filter>button:hover {
   color: #333;
 }
 
