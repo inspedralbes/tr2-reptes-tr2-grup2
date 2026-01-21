@@ -149,11 +149,9 @@ export async function getInscripciosByTallerId(tallerId) {
 }
 /* ------------------------------- FUNCIONALIDADES ------------------------------ */
 
-export async function procesarInscripcio(selections, docentRef, comentari) {
+export async function procesarInscripcio(selections, docentRef, comentari, institucioId = 3, periode = 2) {
   try {
     const prisma = await getPrisma();
-    const institucioId = 3; // ID de la institució, pot ser dinàmic segons el context
-    const periode = 2; // cuando tengamos la opcion de recibir el periodo elegido esto lo cambiare
 
     const existeEnHistoric = await prisma.historic.findFirst({
       where: { id_institucio: institucioId },
@@ -163,6 +161,7 @@ export async function procesarInscripcio(selections, docentRef, comentari) {
     const alumnes = selections.map(({ tallerId, numAlumnos }) => ({
       TALLER: Number(tallerId),
       QUANTITAT: Number(numAlumnos),
+      ESTAT: "ESPERA", // Estado inicial por defecto
     }));
 
     const inscripcio = await createInscripcio({
