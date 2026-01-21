@@ -1,7 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
-import { getAllTallers, getAllInscripcions, confirmarInscripciones, saveInscripcions } from "@/services/communicationManagerDatabase";
+import { 
+  getAllTallers, 
+  getAllInscripcions, 
+  confirmarInscripciones, 
+  saveInscripcions,
+  getSystemSettings 
+} from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
 const tallersGrouped = ref([]);
@@ -243,14 +249,21 @@ const processTallers = (data) => {
 // Carga inicial
 onMounted(async () => {
   try {
-    const rawData = await getAllTallers();
-    console.log("Datos crudos de talleres:", rawData);
+    const [rawData, settings] = await Promise.all([
+      getAllTallers(),
+      getSystemSettings(),
+    ]);
+    
+    // Filtrar por período seleccionado
+    const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
+    
+    console.log("Datos crudos de talleres:", filteredData);
 
     // Extraer horarios únicos
-    horaris.value = extractHoraris(rawData);
+    horaris.value = extractHoraris(filteredData);
     console.log("Horarios disponibles:", horaris.value);
 
-    tallersGrouped.value = processTallers(rawData);
+    tallersGrouped.value = processTallers(filteredData);
   } catch (error) {
     console.error("Error cargando talleres:", error);
   } finally {

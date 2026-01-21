@@ -26,6 +26,14 @@ import {
   getCriterisWeightsForPeriod,
 } from "./functions/database/CRUD/CriterisWeights.js";
 import { reloadWeights } from "./functions/database/Criteris.js";
+import {
+  getSystemSettings,
+  updateSystemSettings,
+} from "./functions/database/CRUD/SystemSettings.js";
+import {
+  getAllPeriodes,
+  createPeriode as createPeriodeDB,
+} from "./functions/database/CRUD/Periodes.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -677,6 +685,57 @@ app.put("/criteris-weights/:id", async (req, res) => {
     res.json(updatedWeight);
   } catch (error) {
     console.error("Error al actualizar peso de criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* ------------------------------- PERIODES ------------------------------ */
+
+app.get("/periodes", async (req, res) => {
+  try {
+    const periodes = await getAllPeriodes();
+    res.json(periodes);
+  } catch (error) {
+    console.error("Error al obtener periodes:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/periodes", async (req, res) => {
+  try {
+    const { dataIni, dataFi } = req.body;
+    const periode = await createPeriodeDB(dataIni, dataFi);
+    res.json(periode);
+  } catch (error) {
+    console.error("Error al crear periode:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* ------------------------------- SYSTEM SETTINGS ------------------------------ */
+
+app.get("/system-settings", async (req, res) => {
+  try {
+    const settings = await getSystemSettings();
+    res.json(settings);
+  } catch (error) {
+    console.error("Error al obtener configuración del sistema:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/system-settings/:id", async (req, res) => {
+  try {
+    const { selectedPeriodeId } = req.body;
+    
+    if (!selectedPeriodeId) {
+      return res.status(400).json({ error: "selectedPeriodeId es requerido" });
+    }
+    
+    const settings = await updateSystemSettings(selectedPeriodeId);
+    res.json(settings);
+  } catch (error) {
+    console.error("Error al actualizar configuración del sistema:", error);
     res.status(500).json({ error: error.message });
   }
 });

@@ -6,10 +6,12 @@ import { ref, onMounted } from "vue";
 import {
   getAllTallers,
   getAllInscripcions,
+  getSystemSettings,
 } from "@/services/communicationManagerDatabase";
 
 const userName = ref("");
 const tallers = ref([]);
+const selectedPeriodeId = ref(null);
 
 const mesesNombres = [
   "Gener", "Febrer", "Març", "Abril", "Maig", "Juny",
@@ -20,7 +22,7 @@ const diasSemana = [
   "Diumenge", "Dilluns", "Dimarts", "Dimecres", "Dijous", "Divendres", "Dissabte"
 ];
 
-function processTallers(allTallers, allInscripcions) {
+function processTallers(allTallers, allInscripcions, periodeId) {
   // 1. Filtrar inscripciones por institución del usuario
   const usuarioInstitucionId = localStorage.getItem("user_institution_id");
   let misInscripciones = [];
@@ -30,13 +32,10 @@ function processTallers(allTallers, allInscripcions) {
       (i) => i.institucio === parseInt(usuarioInstitucionId)
     );
   } else {
-    // Si no hay ID de institución, quizás mostramos todo o nada. 
-    // Asumiremos que si no hay ID, no filtramos (o mostramos todo 'active').
     misInscripciones = allInscripcions;
   }
 
   // Mapa de inscripciones activas (para filtrar tallers)
-  // Asumimos que queremos ver los talleres que TIENEN una inscripción de este centro
   const talleresIds = new Set();
   misInscripciones.forEach(i => {
     const alumnesArray = JSON.parse(i.alumnes || "[]");
@@ -48,6 +47,9 @@ function processTallers(allTallers, allInscripcions) {
   const grouped = {};
 
   allTallers.forEach((t) => {
+    // Filtrar por periodo seleccionado
+    if (periodeId && t.periode !== periodeId) return;
+    
     if (!talleresIds.has(t.id)) return;
 
     let horari = {};
@@ -75,7 +77,7 @@ function processTallers(allTallers, allInscripcions) {
       if (!grouped[mesNombre]) {
         grouped[mesNombre] = {
           mes: mesNombre,
-          mesIndex: dateObj.getMonth(), // Para ordenar si fuera necesario
+          mesIndex: dateObj.getMonth(),
           diasMap: {}
         };
       }
@@ -115,12 +117,14 @@ function processTallers(allTallers, allInscripcions) {
 
 async function fetchData() {
   try {
-    const [fetchedTallers, fetchedInscripcions] = await Promise.all([
+    const [fetchedTallers, fetchedInscripcions, settings] = await Promise.all([
       getAllTallers(),
       getAllInscripcions(),
+      getSystemSettings(),
     ]);
     
-    tallers.value = processTallers(fetchedTallers, fetchedInscripcions);
+    selectedPeriodeId.value = settings.selectedPeriodeId;
+    tallers.value = processTallers(fetchedTallers, fetchedInscripcions, selectedPeriodeId.value);
   } catch (error) {
     console.error("Error fetching data:", error);
   }

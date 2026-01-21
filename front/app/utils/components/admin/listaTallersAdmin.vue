@@ -1,14 +1,16 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { 
   getAllTallers, 
   createTaller, 
-  getPeriodes 
+  getPeriodes,
+  getSystemSettings
 } from "~/services/communicationManagerDatabase";
 
 const tallers = ref([]);
 const mostrarModal = ref(false);
 const periodes = ref([]);
+const selectedPeriodeId = ref(null);
 
 // Campos del formulario
 const nom = ref("");
@@ -31,12 +33,27 @@ const dias = [
   "Diumenge",
 ];
 
+// Filtrar talleres por période seleccionado
+const tallersFiltrados = computed(() => {
+  if (!selectedPeriodeId.value) return tallers.value;
+  return tallers.value.filter(t => t.periode === selectedPeriodeId.value);
+});
+
 const cargarTallers = async () => {
   try {
     tallers.value = await getAllTallers();
     console.log("Tallers obtinguts:", tallers.value);
   } catch (error) {
     console.error("Error al obtenir els tallers:", error);
+  }
+};
+
+const cargarSystemSettings = async () => {
+  try {
+    const settings = await getSystemSettings();
+    selectedPeriodeId.value = settings.selectedPeriodeId;
+  } catch (error) {
+    console.error("Error al obtenir configuració:", error);
   }
 };
 
@@ -63,6 +80,7 @@ const cargarPeriodes = async () => {
 onMounted(async () => {
   await cargarTallers();
   await cargarPeriodes();
+  await cargarSystemSettings();
 });
 
 // const tallers = ref([
@@ -195,7 +213,7 @@ const crearTaller = async () => {
 
       <!-- CONTENEDOR: fila + desplegable debajo -->
       <div
-        v-for="taller in tallers"
+        v-for="taller in tallersFiltrados"
         :key="taller.id"
         class="curso-item"
         :class="{ abierto: filaActiva === taller.id }"

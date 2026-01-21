@@ -2,44 +2,100 @@
   <div class="modal-overlay" @click.self="closeModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Configuració de Criteris</h2>
+        <h2>Configuració</h2>
         <button class="close-btn" @click="closeModal">✕</button>
       </div>
 
       <div class="modal-body">
-        <div class="intro-text">
-          <p>Ajusta els pesos dels criteris per modular com es prioritzen les sol·licituds de tallers. Els valors més alts augmenten la prioritat, mentre que els negatius la disminueixen.</p>
-        </div>
-
-        <div v-if="loading" class="loading">Carregant criteris...</div>
-
-        <div v-else class="weights-table">
-          <div class="table-header">
-            <div class="col-criterio">Criterio</div>
-            <div class="col-desc">Descripció</div>
-            <div class="col-pes">Pes Actual</div>
-            <div class="col-input">Nou Pes</div>
+        <!-- SECCIÓN: CRITERIS -->
+        <div class="section">
+          <h3 class="section-title">Pesos dels Criteris</h3>
+          <div class="intro-text">
+            <p>Ajusta els pesos dels criteris per modular com es prioritzen les sol·licituds de tallers. Els valors més alts augmenten la prioritat, mentre que els negatius la disminueixen.</p>
           </div>
 
-          <div v-for="weight in weights" :key="weight.id" class="table-row">
-            <div class="col-criterio">
-              <strong>{{ getCriterioName(weight.criterio) }}</strong>
+          <div v-if="loading" class="loading">Carregant criteris...</div>
+
+          <div v-else class="weights-table">
+            <div class="table-header">
+              <div class="col-criterio">Criterio</div>
+              <div class="col-desc">Descripció</div>
+              <div class="col-pes">Pes Actual</div>
+              <div class="col-input">Nou Pes</div>
             </div>
-            <div class="col-desc">
-              {{ getCriterioDesc(weight.criterio) }}
+
+            <div v-for="weight in weights" :key="weight.id" class="table-row">
+              <div class="col-criterio">
+                <strong>{{ getCriterioName(weight.criterio) }}</strong>
+              </div>
+              <div class="col-desc">
+                {{ getCriterioDesc(weight.criterio) }}
+              </div>
+              <div class="col-pes">
+                <span class="pes-badge">{{ weight.peso }}</span>
+              </div>
+              <div class="col-input">
+                <input
+                  v-model.number="editedWeights[weight.id]"
+                  type="number"
+                  min="-100"
+                  max="100"
+                  class="input-pes"
+                />
+              </div>
             </div>
-            <div class="col-pes">
-              <span class="pes-badge">{{ weight.peso }}</span>
-            </div>
-            <div class="col-input">
+          </div>
+        </div>
+
+        <!-- SECCIÓN: PERIODES -->
+        <div class="section">
+          <h3 class="section-title">Periode Actual</h3>
+          <div class="intro-text">
+            <p>Selecciona el periode que es mostrarà a totes les vistes. Només es veuran tallers i inscripcions d'aquest periode.</p>
+          </div>
+
+          <div class="periode-selector">
+            <select v-model="selectedPeriodeId" class="periode-dropdown">
+              <option value="">-- Selecciona un periode --</option>
+              <option v-for="p in periodes" :key="p.id" :value="p.id">
+                {{ formatDate(p.dataIni) }} - {{ formatDate(p.dataFi) }}
+              </option>
+            </select>
+            <button class="btn-guardar-periode" @click="guardarPeriode" :disabled="!selectedPeriodeId">
+              Guardar
+            </button>
+          </div>
+        </div>
+
+        <!-- SECCIÓN: CREAR PÉRIODE -->
+        <div class="section">
+          <h3 class="section-title">Crear Période</h3>
+          <div class="intro-text">
+            <p>Afegeix un nou periode indicant les dates d'inici i final.</p>
+          </div>
+
+          <div class="create-periode">
+            <div class="input-group">
+              <label for="dataIni">Data d'Inici:</label>
               <input
-                v-model.number="editedWeights[weight.id]"
-                type="number"
-                min="-100"
-                max="100"
-                class="input-pes"
+                id="dataIni"
+                v-model="newPeriodeDataIni"
+                type="date"
+                class="date-input"
               />
             </div>
+            <div class="input-group">
+              <label for="dataFi">Data Final:</label>
+              <input
+                id="dataFi"
+                v-model="newPeriodeDataFi"
+                type="date"
+                class="date-input"
+              />
+            </div>
+            <button class="btn-crear-periode" @click="crearPeriode">
+              Crear Periode
+            </button>
           </div>
         </div>
 
@@ -54,10 +110,10 @@
 
       <div class="modal-footer">
         <button class="btn-restablir" @click="restablirValors">
-          Restablir Valors
+          Restablir Pesos
         </button>
         <button class="btn-guardar" @click="guardarCambios" :disabled="loading">
-          Guardar Canvis
+          Guardar Criteris
         </button>
       </div>
     </div>
@@ -66,15 +122,30 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getCriterisWeights, updateCriterisWeight } from "@/services/communicationManagerDatabase.js";
+import { 
+  getCriterisWeights, 
+  updateCriterisWeight,
+  getSystemSettings,
+  updateSystemSettings,
+  getPeriodes,
+  createPeriode
+} from "@/services/communicationManagerDatabase.js";
 
 const emit = defineEmits(["close"]);
 
+// Criteris
 const weights = ref([]);
 const editedWeights = ref({});
 const loading = ref(true);
 const error = ref("");
 const successMessage = ref("");
+
+// Periodes
+const periodes = ref([]);
+const selectedPeriodeId = ref(null);
+const systemSettingsId = ref(null);
+const newPeriodeDataIni = ref("");
+const newPeriodeDataFi = ref("");
 
 const criterioTranslations = {
   FIRST_TIME: {
@@ -104,7 +175,6 @@ const cargarWeights = async () => {
   error.value = "";
   try {
     const data = await getCriterisWeights();
-    // Filtrar solo los criterios que queremos mostrar
     weights.value = data.filter(
       (w) => w.criterio !== "DIVERSITY" && w.criterio !== "NE"
     );
@@ -116,6 +186,24 @@ const cargarWeights = async () => {
     error.value = "Error al cargar criteris: " + err.message;
   } finally {
     loading.value = false;
+  }
+};
+
+const cargarPeriodes = async () => {
+  try {
+    periodes.value = await getPeriodes();
+  } catch (err) {
+    error.value = "Error al cargar periodes: " + err.message;
+  }
+};
+
+const cargarSystemSettings = async () => {
+  try {
+    const settings = await getSystemSettings();
+    selectedPeriodeId.value = settings.selectedPeriodeId;
+    systemSettingsId.value = settings.id;
+  } catch (err) {
+    error.value = "Error al cargar configuració: " + err.message;
   }
 };
 
@@ -155,11 +243,70 @@ const guardarCambios = async () => {
   }
 };
 
+const guardarPeriode = async () => {
+  if (!selectedPeriodeId.value) {
+    error.value = "Selecciona un periode";
+    return;
+  }
+  
+  loading.value = true;
+  error.value = "";
+  successMessage.value = "";
+
+  try {
+    await updateSystemSettings(systemSettingsId.value, selectedPeriodeId.value);
+    successMessage.value = "✓ Periode actualitzat correctament";
+    setTimeout(() => {
+      successMessage.value = "";
+    }, 3000);
+  } catch (err) {
+    error.value = "Error al guardar periode: " + err.message;
+  } finally {
+    loading.value = false;
+  }
+};
+
+const crearPeriode = async () => {
+  if (!newPeriodeDataIni.value || !newPeriodeDataFi.value) {
+    error.value = "Completa les dues dates";
+    return;
+  }
+
+  loading.value = true;
+  error.value = "";
+  successMessage.value = "";
+
+  try {
+    const newPeriode = await createPeriode(newPeriodeDataIni.value, newPeriodeDataFi.value);
+    successMessage.value = "✓ Periode creat correctament";
+    newPeriodeDataIni.value = "";
+    newPeriodeDataFi.value = "";
+    await cargarPeriodes();
+    setTimeout(() => {
+      successMessage.value = "";
+    }, 3000);
+  } catch (err) {
+    error.value = "Error al crear periode: " + err.message;
+  } finally {
+    loading.value = false;
+  }
+};
+
 const closeModal = () => {
   emit("close");
 };
 
-onMounted(cargarWeights);
+const formatDate = (date) => {
+  if (!date) return "";
+  const d = new Date(date);
+  return d.toLocaleDateString("ca-ES");
+};
+
+onMounted(async () => {
+  await cargarWeights();
+  await cargarPeriodes();
+  await cargarSystemSettings();
+});
 </script>
 
 <style scoped>
@@ -225,6 +372,19 @@ onMounted(cargarWeights);
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #3949ab;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e0e0e0;
 }
 
 .intro-text {
@@ -387,5 +547,110 @@ onMounted(cargarWeights);
 .btn-guardar:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.periode-selector {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background-color: white;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.periode-dropdown {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #3949ab;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.periode-dropdown:focus {
+  outline: none;
+  border-color: #283593;
+  box-shadow: 0 0 5px rgba(57, 73, 171, 0.3);
+}
+
+.btn-guardar-periode {
+  padding: 10px 20px;
+  background-color: #3949ab;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-guardar-periode:hover:not(:disabled) {
+  background-color: #283593;
+  box-shadow: 0 4px 10px rgba(57, 73, 171, 0.3);
+}
+
+.btn-guardar-periode:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-periode {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  background-color: white;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.date-input {
+  padding: 10px;
+  border: 1px solid #3949ab;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  min-width: 150px;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #283593;
+  box-shadow: 0 0 5px rgba(57, 73, 171, 0.3);
+}
+
+.btn-crear-periode {
+  padding: 10px 20px;
+  background-color: #3949ab;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-crear-periode:hover {
+  background-color: #283593;
+  box-shadow: 0 4px 10px rgba(57, 73, 171, 0.3);
 }
 </style>

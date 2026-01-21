@@ -517,3 +517,51 @@ export async function getPeriodes() {
   }
   return await response.json();
 }
+
+export async function createPeriode(dataIni, dataFi) {
+  const response = await fetch(`${BACK_URL}/periodes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      dataIni,
+      dataFi,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al crear periode: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- SYSTEM SETTINGS ------------------------------ */
+
+export async function getSystemSettings() {
+  const response = await fetch(`${BACK_URL}/system-settings`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir configuració del sistema: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateSystemSettings(id, selectedPeriodeId) {
+  const response = await fetch(`${BACK_URL}/system-settings/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      selectedPeriodeId,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar configuració del sistema: ${response.statusText}`);
+  }
+  return await response.json();
+}

@@ -1,6 +1,12 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { getAllTallers, getAllInscripcions, getInstitucionById, getUsuariById } from "@/services/communicationManagerDatabase";
+import { 
+  getAllTallers, 
+  getAllInscripcions, 
+  getInstitucionById, 
+  getUsuariById,
+  getSystemSettings 
+} from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
 const tallersGrouped = ref([]);
@@ -191,10 +197,17 @@ const processTallers = (data, inscritos) => {
 // Carga inicial
 onMounted(async () => {
   try {
-    const rawData = await getAllTallers();
-    horaris.value = extractHoraris(rawData);
+    const [rawData, inscripciones, settings] = await Promise.all([
+      getAllTallers(),
+      getAllInscripcions(),
+      getSystemSettings(),
+    ]);
     
-    const inscripciones = await getAllInscripcions();
+    // Filtrar talleres por período seleccionado
+    const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
+    
+    horaris.value = extractHoraris(filteredData);
+    
     const usuarioInstitucionId = localStorage.getItem("user_institution_id");
     const inscripcionesFiltridas = [];
     for (const i of inscripciones) {
@@ -203,7 +216,6 @@ onMounted(async () => {
           inscripcionesFiltridas.push(i);
         }
       } else {
-        // Si no hay ID de institución, las añadimos todas
         inscripcionesFiltridas.push(i);
       }
     }
@@ -218,7 +230,7 @@ onMounted(async () => {
       });
     }
     
-    tallersGrouped.value = processTallers(rawData, inscripcionesFiltridas);
+    tallersGrouped.value = processTallers(filteredData, inscripcionesFiltridas);
   } catch (error) {
     console.error("Error cargando talleres:", error);
   } finally {

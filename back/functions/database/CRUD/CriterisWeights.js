@@ -1,16 +1,16 @@
 import { getPrisma } from "../dbConn.js";
 
-// SELECT todos los pesos de criterios
+// SELECT tots els pesos de criteris
 export async function getAllCriterisWeights() {
   try {
     const prisma = await getPrisma();
     return await prisma.criterisWeights.findMany();
   } catch (error) {
-    throw new Error(`Error al obtener pesos de criterios: ${error.message}`);
+    throw new Error(`Error al obtenir pesos de criteris: ${error.message}`);
   }
 }
 
-// SELECT peso de criterio específico
+// SELECT pes de criteri específic
 export async function getCriterisWeightById(id) {
   try {
     const prisma = await getPrisma();
@@ -18,54 +18,54 @@ export async function getCriterisWeightById(id) {
       where: { id: parseInt(id) },
     });
   } catch (error) {
-    throw new Error(`Error al obtener peso de criterio: ${error.message}`);
+    throw new Error(`Error al obtenir pes de criteri: ${error.message}`);
   }
 }
 
-// SELECT por nombre de criterio
-export async function getCriterisWeightByCriterio(criterio) {
+// SELECT per nom de criteri
+export async function getCriterisWeightByCriterio(criteri) {
   try {
     const prisma = await getPrisma();
     return await prisma.criterisWeights.findUnique({
-      where: { criterio },
+      where: { criteri },
     });
   } catch (error) {
     throw new Error(
-      `Error al obtener peso para criterio ${criterio}: ${error.message}`
+      `Error al obtenir pes per criteri ${criteri}: ${error.message}`
     );
   }
 }
 
-// UPDATE peso de criterio
-export async function updateCriterisWeight(id, newPeso) {
+// UPDATE pes de criteri
+export async function updateCriterisWeight(id, newPes) {
   try {
     const prisma = await getPrisma();
     return await prisma.criterisWeights.update({
       where: { id: parseInt(id) },
-      data: { peso: parseInt(newPeso) },
+      data: { pes: parseInt(newPes) },
     });
   } catch (error) {
-    throw new Error(`Error al actualizar peso de criterio: ${error.message}`);
+    throw new Error(`Error al actualitzar pes de criteri: ${error.message}`);
   }
 }
 
-// SELECT pesos para un período específico (o globales)
+// SELECT pesos per a un període específic (o globals)
 export async function getCriterisWeightsForPeriod(periodeId) {
   try {
     const prisma = await getPrisma();
-    // Obtener pesos globales y específicos del período
+    // Obtenir pesos globals i específics del període
     const weights = await prisma.criterisWeights.findMany({
       where: {
         OR: [
-          { periode: null }, // Pesos globales
-          { periode: parseInt(periodeId) }, // Pesos específicos del período
+          { periode: null }, // Pesos globals
+          { periode: parseInt(periodeId) }, // Pesos específics del període
         ],
       },
     });
     return weights;
   } catch (error) {
     throw new Error(
-      `Error al obtener pesos para el período: ${error.message}`
+      `Error al obtenir pesos per al període: ${error.message}`
     );
   }
 }
