@@ -1,9 +1,26 @@
 :root {
     background-color: #FCFCFC;
+    /* Define variables para tamaños responsive */
+    --max-width: 1200px;
+    --padding-mobile: 10px;
+    --padding-tablet: 20px;
+    --padding-desktop: 30px;
+}
+
+@font-face {
+    font-family: 'Coolvetica';
+    src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
+}
+
+@font-face {
+    font-family: 'CoolveticaItalic';
+    src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg\ It.otf);
 }
 
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
+    height: 100%;
+    box-sizing: border-box;
 }

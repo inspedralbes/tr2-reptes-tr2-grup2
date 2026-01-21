@@ -1,8 +1,21 @@
-<script setup></script>
+<script setup>
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
+const isActive = (path) => {
+  return route.path === path;
+};
+</script>
 <template>
   <div id="navBar">
     <div id="btns">
-      <NuxtLink to="/admin/paginaPrincipal-Admin" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
+      <NuxtLink
+        to="/admin/paginaPrincipal-Admin"
+        custom
+        v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive('/admin/paginaPrincipal-Admin') }"
+      >
         <button @click="navigate">
           <img src="/img/navBarAdmin/home.png" alt="" />
         </button>
@@ -10,26 +23,45 @@
 
       <br />
 
-      <NuxtLink to="/admin/paginaInscripcionsTalleres-Profes" custom v-slot="{ navigate }"
-        :class="{ 'btn-activo': isActive }">
+      <NuxtLink
+        to="/admin/gestioTallers-Admin"
+        custom
+        v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive('/admin/gestioTallers-Admin') }"
+      >
         <button @click="navigate">
           <img src="/img/navBarAdmin/backpack.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/admin/???" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
+      <NuxtLink
+        to="/admin/gestioPeticions-Admin"
+        custom
+        v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive('/admin/gestioPeticions-Admin') }"
+      >
         <button @click="navigate">
           <img src="/img/navBarAdmin/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/admin/???" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
+      <NuxtLink
+        to="/admin/gestioCentres-Admin"
+        custom
+        v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive('/admin/gestioCentres-Admin') }"
+      >
         <button @click="navigate">
           <img src="/img/navBarAdmin/academic-cap.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/admin/???" custom v-slot="{ navigate }" :class="{ 'btn-activo': isActive }">
+      <NuxtLink
+        to="/admin/gestioInformes-Admin"
+        custom
+        v-slot="{ navigate }"
+        :class="{ 'btn-activo': isActive('/admin/gestioInformes-Admin') }"
+      >
         <button @click="navigate">
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>

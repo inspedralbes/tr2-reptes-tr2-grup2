@@ -1,15 +1,25 @@
-# ETAPA 1: Construcción (Node.js)
-FROM node:20-alpine AS builder
+# --- Etapa de Desarrollo (development) ---
+# Esta etapa instala todas las dependencias y sirve como base para el hot-reloading.
+# Es utilizada por `docker-compose.dev.yml`.
+FROM node:20-alpine AS development
+
 WORKDIR /app
+
+# Copia los archivos de dependencias y las instala.
 COPY package*.json ./
 RUN npm install
+
+# Copia el resto del código (será sobreescrito por el volumen en desarrollo).
 COPY . .
 
-# Definimos la variable de entorno directamente en la ejecución del build.
-# Esto asegura que Vite lea la variable VITE_URL_BACK con la IP correcta.
-RUN cp .env.PROD .env && npm run build
+# Expone el puerto de Vite para el desarrollo.
+EXPOSE 5174
 
-# ETAPA 2: Servir (Apache)
-FROM httpd:2.4-alpine
-# Copia los archivos de la carpeta 'dist' generados en la Etapa 1
-COPY --from=builder /app/dist/ /usr/local/apache2/htdocs/
+# Comando por defecto para iniciar el servidor de desarrollo.
+CMD ["npm", "run", "dev", "--", "--host"]
+
+# --- Etapa de Producción (production) ---
+# Esta etapa construye la aplicación para producción.
+# Es utilizada por `nginx.Dockerfile` en el `docker-compose.prod.yml`.
+FROM development AS production
+RUN npm run generate
