@@ -61,6 +61,17 @@ const isActive = (path) => {
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
+      <br />
+      <!-- Este icono de boton es temporal, se debe reemplazar por el icono de mejor calidad de imagen -->
+      <NuxtLink to="/admin/gestioPeriodes-Admin" custom v-slot="{ navigate }">
+        <button
+          @click="navigate"
+          data-tooltip="Gestió Períodes"
+          :class="{ 'btn-activo': isActive('/admin/gestioPeriodes-Admin') }"
+        >
+          <img src="/img/centro/calendar.png" alt="" class="icon-white" />
+        </button>
+      </NuxtLink>
     </div>
   </div>
 </template>
@@ -104,6 +115,12 @@ const isActive = (path) => {
   width: 40px;
   height: 40px;
   object-fit: contain;
+}
+
+#btns button img.icon-white {
+  width: 32px;
+  height: 32px;
+  filter: brightness(0) invert(1);
 }
 
 #btns button:hover,
