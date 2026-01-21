@@ -8,7 +8,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const storage = multer.();
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage: storage });
 
