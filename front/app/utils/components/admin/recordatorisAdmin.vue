@@ -11,7 +11,7 @@ import { ref } from "vue";
       </div>
 
       <div class="col-info">
-        <span class="info-item"> 8 </span>
+        <span class="info-item"> X </span>
       </div>
     </div>
     <div class="fila-recordatori">

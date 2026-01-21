@@ -1,7 +1,7 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
 import navBarAdmin from "@/layouts/navBarAdmin.vue";
-import llistaTallers from "@/utils/components/admin/listaTallersAdmin.vue";
+import llistaTallers from "@/utils/components/admin/llistaTallersAdmin.vue";
 </script>
 <template>
   <Encabezado></Encabezado>
@@ -43,6 +43,6 @@ import llistaTallers from "@/utils/components/admin/listaTallersAdmin.vue";
   margin: 0 auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
-  max-height: 500px;
+  max-height: 550px;
 }
 </style>

@@ -56,7 +56,6 @@ import recordatorisAdmin from "@/utils/components/admin/recordatorisAdmin.vue";
 .tarjetas-admin {
   background-color: #f5f5f5;
   border-radius: 20px;
-  /* padding: 24px; */
   padding-top: 5px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   max-height: 250px;

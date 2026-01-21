@@ -9,7 +9,7 @@ import institucions from "@/utils/components/admin/centresAdmin.vue";
     <navBarAdmin />
     <div id="content">
       <div class="header-Centres">
-        <h2>Gestió centres</h2>
+        <h2>Informació centres</h2>
       </div>
       <div class="container-courses">
         <br />

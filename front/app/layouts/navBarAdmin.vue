@@ -45,7 +45,7 @@ const isActive = (path) => {
       <NuxtLink to="/admin/gestioCentres-Admin" custom v-slot="{ navigate }">
         <button
           @click="navigate"
-          data-tooltip="Gestió Centres"
+          data-tooltip="Informació Centres"
           :class="{ 'btn-activo': isActive('/admin/gestioCentres-Admin') }"
         >
           <img src="/img/navBarAdmin/academic-cap.png" alt="" />
