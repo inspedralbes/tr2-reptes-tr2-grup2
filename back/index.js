@@ -539,6 +539,31 @@ app.put("/tallers", uploadImages.single("imatge"), async (req, res) => {
   }
 });
 
+app.delete("/tallers", async (req, res) => {
+  try {
+    const { id } = req.body;
+    const tallerActual = await getTallerById(id);
+
+    // Eliminar la imatge si existeix i no és la d'exemple
+    if (tallerActual && tallerActual.imatge) {
+      const imageName = tallerActual.imatge.replace("/files/images/", "");
+      const fullPath = path.join("./files/images", imageName);
+
+      if (imageName !== "example.png" && fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    const deletedTaller = await deleteTaller(id);
+    res.json(deletedTaller);
+  } catch (error) {
+    console.error("Error al eliminar taller:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Error al eliminar taller" });
+  }
+});
+
 app.get("/tallers/:id/inscripcions", async (req, res) => {
   try {
     const { id } = req.params;

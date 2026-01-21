@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { getAllTallers, createTaller, updateTaller } from "~/services/communicationManagerDatabase";
+import { getAllTallers, createTaller, updateTaller, deleteTaller } from "~/services/communicationManagerDatabase";
 
 const BACK_URL = import.meta.env.VITE_URL_BACK;
 
@@ -487,8 +487,21 @@ const getImageUrl = (source) => {
 const onImgError = (e) => {
   e.target.src = "/img/centro/image.png";
 };
-</script>
 
+async function confirmarEliminar(id) {
+  if (confirm("Estàs segur que vols eliminar aquest taller?")) {
+    await deleteTaller(id)
+      .then(() => {
+        alert("Taller eliminat correctament");
+        cargarTallers();
+      })
+      .catch((error) => {
+        console.error("Error al eliminar taller:", error);
+        alert(`Error: ${error.message}`);
+      });
+  }
+}
+</script>
 <template>
   <div id="container">
     <div class="header-lista">
@@ -592,6 +605,10 @@ const onImgError = (e) => {
 
           <button id="btn-editar-taller" @click="abrirModalEditar(taller)">
             Editar
+          </button>
+
+          <button id="btn-eliminar-taller" @click="confirmarEliminar(taller.id)">
+            Eliminar
           </button>
         </div>
 
@@ -990,6 +1007,26 @@ const onImgError = (e) => {
 
 #btn-editar-taller:hover {
   background-color: #3949ab;
+  transform: translateY(-2px);
+}
+
+#btn-eliminar-taller {
+  background-color: #cd5050;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 40px;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+#btn-eliminar-taller:hover {
+  background-color: #a52c2c;
   transform: translateY(-2px);
 }
 

@@ -287,12 +287,13 @@ export async function updateTaller(formData) {
 }
 
 export async function deleteTaller(id) {
-  const response = await fetch(`${BACK_URL}/tallers/${id}`, {
+  const response = await fetch(`${BACK_URL}/tallers`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
       //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
+    body: JSON.stringify({ id }),
   });
   if (!response.ok) {
     throw new Error(`Error al eliminar taller: ${response.statusText}`);
