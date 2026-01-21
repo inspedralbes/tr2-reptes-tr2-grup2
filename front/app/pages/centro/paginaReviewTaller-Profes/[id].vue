@@ -36,6 +36,7 @@ import Encabezado from "@/layouts/encabezado.vue";
 import navProfes from "@/layouts/navBarProfes.vue";
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { getTallerById, saveComentariProfe } from "@/services/communicationManagerDatabase.js";
 
 const route = useRoute();
 const tallerNom = ref("");
@@ -49,9 +50,7 @@ const loadTaller = async () => {
     const id = route.params.id;
     if (!id) return;
 
-    const res = await fetch(`http://localhost:8000/tallers/${id}`);
-    if (!res.ok) throw new Error("Error fetching taller");
-    const data = await res.json();
+    const data = await getTallerById(id);
     tallerNom.value = data.nom || "Taller desconegut";
   } catch (err) {
     console.error("Error carregant taller:", err);
@@ -69,19 +68,7 @@ const guardarComentari = async () => {
     const tallerId = route.params.id;
     const institutId = localStorage.getItem("user_institution_id") || 1;
 
-    const res = await fetch(
-      `http://localhost:8000/tallers/${tallerId}/comentari-profe`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idInstitucio: parseInt(institutId),
-          comentari: comentari.value,
-        }),
-      }
-    );
-
-    if (!res.ok) throw new Error("Error guardant comentari");
+    await saveComentariProfe(tallerId, institutId, comentari.value);
 
     mensaje.value = "Comentari guardat correctament.";
     mensajeTipo.value = "success";

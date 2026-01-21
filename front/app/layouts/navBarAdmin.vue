@@ -1,7 +1,10 @@
 <script setup>
 import { useRoute } from "vue-router";
+import { ref } from "vue";
+import GestioWeights from "@/utils/components/admin/GestioWeights.vue";
 
 const route = useRoute();
+const mostrarModalWeights = ref(false);
 
 const isActive = (path) => {
   return route.path === path;
@@ -66,7 +69,14 @@ const isActive = (path) => {
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
+
+      <br />
+      <button @click="mostrarModalWeights = true" title="Configurar criteris">
+        <i class="fas fa-cog"></i>
+      </button>
     </div>
+
+    <GestioWeights v-if="mostrarModalWeights" @close="mostrarModalWeights = false" />
   </div>
 </template>
 <style>
@@ -107,10 +117,13 @@ const isActive = (path) => {
   object-fit: contain;
 }
 
-#btns button:hover,
-.btn-activo {
-  background-color: #5c6bc0;
-  padding: 10px;
-  transform: scale(1.1);
+#btns button i {
+  font-size: 28px;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+#btns button:hover i {
+  transform: rotate(90deg);
 }
 </style>

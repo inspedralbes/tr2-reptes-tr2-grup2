@@ -10,6 +10,9 @@ import {
   getAllInstitucions,
 } from "@/services/communicationManagerDatabase";
 
+//ejemplo para ver esta pagina: http://localhost:3000/Tallerista/1/2
+//teneis que tener datos que corresponden a esos ids en la base de datos
+//tanto en assistencias como en tallers etc
 const route = useRoute();
 
 // Obtener IDs de la URL
@@ -204,6 +207,32 @@ const guardarAssistencia = async () => {
   }
 };
 
+// Guardar comentari del tallerista
+const guardarComentari = async () => {
+  if (!taller.value) return;
+  
+  try {
+    // Guardar el comentari del tallerista
+    await updateTaller(TALLER_ID, {
+      comentari_tallerista: comentari.value
+    });
+    // Actualizar el taller localmente
+    if (taller.value) {
+      taller.value.comentari_tallerista = comentari.value;
+    }
+    alert("Comentari guardat correctament!");
+  } catch (err) {
+    console.error("Error al guardar comentari:", err);
+    alert("Error al guardar el comentari");
+  }
+};
+
+// Tancar el bloc de comentaris
+const tancarComentari = () => {
+  mostrarModal.value = false;
+  comentari.value = "";
+};
+
 // Carregar dades
 onMounted(async () => {
   try {
@@ -270,6 +299,23 @@ onMounted(async () => {
               <span class="dia-horari">{{ getInfoTorn(assistencia.dia) }}</span>
             </div>
             <span class="dia-arrow">→</span>
+          </div>
+        </div>
+
+        <!-- Bloc de comentaris -->
+        <div class="comentaris-section">
+          <h3>Comentari sobre la sessió</h3>
+          <textarea
+            v-model="comentari"
+            placeholder="Afegeix comentaris sobre el taller (màxim 300 caràcters)"
+            maxlength="300"
+            class="textarea-comentari"
+          ></textarea>
+          <div class="char-counter">{{ comentari.length }}/300</div>
+          <div class="comentari-actions">
+            <button class="btn-guardar-comentari" @click="guardarComentari">
+              Guardar comentari
+            </button>
           </div>
         </div>
       </div>
@@ -358,18 +404,6 @@ onMounted(async () => {
           </table>
           <p v-else class="no-dades">No hi ha professors registrats.</p>
         </div>
-
-        <!-- Comentaris -->
-        <div class="comentaris-section">
-          <h4>Comentaris</h4>
-          <textarea
-            v-model="comentari"
-            placeholder="Afegeix comentaris sobre el taller (màxim 300 caràcters)"
-            maxlength="300"
-            class="textarea-comentari"
-          ></textarea>
-          <div class="char-counter">{{ comentari.length }}/300</div>
-        </div>
       </div>
 
       <div class="modal-footer">
@@ -380,6 +414,7 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+
 </template>
 
 <style scoped>
@@ -706,5 +741,56 @@ td input[type="checkbox"]:disabled {
 .btn-guardar:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+/* Bloc de comentaris */
+.comentaris-section {
+  margin-top: 24px;
+  padding: 20px 0;
+  border-top: 1px solid #eee;
+}
+
+.comentaris-section h3 {
+  font-size: 0.95rem;
+  margin: 0 0 12px 0;
+  color: #555;
+  font-weight: normal;
+}
+
+.comentari-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+.btn-guardar-comentari,
+.btn-tancar-comentari {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Coolvetica";
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn-guardar-comentari {
+  background-color: #5C6BC0;
+  color: white;
+}
+
+.btn-guardar-comentari:hover {
+  background-color: #4d58a6;
+}
+
+.btn-tancar-comentari {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.btn-tancar-comentari:hover {
+  background-color: #efefef;
 }
 </style>

@@ -122,9 +122,10 @@ model Periodes {
   dataFi  DateTime
 
   // Foreigns
-  historic     Historic[]
-  tallers      Tallers[]
-  inscripcions Inscripcions[]
+  historic        Historic[]
+  tallers         Tallers[]
+  inscripcions    Inscripcions[]
+  criterisWeights CriterisWeights[]
 }
 
 model Historic {
@@ -136,6 +137,17 @@ model Historic {
   // Relations
   id_institucio_rel Institucions @relation(fields: [id_institucio], references: [id])
   periode_rel       Periodes     @relation(fields: [periode], references: [id])
+}
+
+model CriterisWeights {
+  id                Int       @id @default(autoincrement())
+  criterio          String    @unique // FIRST_TIME, ATTENDANCE_RISK, DIVERSITY, NO_CAPACITY, NE
+  peso              Int       @default(20)
+  periode           Int?      // Si es null, aplica globalmente
+  fechaActualizacion DateTime  @default(now()) @updatedAt
+  
+  // Relación con periodo
+  id_periode        Periodes? @relation(fields: [periode], references: [id])
 }
 
 enum Rol {

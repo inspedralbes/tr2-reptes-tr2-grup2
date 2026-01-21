@@ -18,6 +18,14 @@ import {
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
+import {
+  getAllCriterisWeights,
+  getCriterisWeightById,
+  getCriterisWeightByCriterio,
+  updateCriterisWeight,
+  getCriterisWeightsForPeriod,
+} from "./functions/database/CRUD/CriterisWeights.js";
+import { reloadWeights } from "./functions/database/Criteris.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -272,6 +280,54 @@ app.delete("/assistencies/:id", async (req, res) => {
   const { id } = req.params;
   const deletedAssistencia = await deleteAssistencia(id);
   res.json(deletedAssistencia);
+});
+
+/* ------------------------------- HISTORIC ------------------------------ */
+
+import {
+  getAllHistoric,
+  getHistoricByInstitucion,
+  createHistoric,
+  deleteHistoric,
+} from "./functions/database/CRUD/Historic.js";
+
+app.get("/historic", async (req, res) => {
+  try {
+    const historic = await getAllHistoric();
+    res.json(historic);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/historic/institucion/:institucion", async (req, res) => {
+  try {
+    const { institucion } = req.params;
+    const historic = await getHistoricByInstitucion(institucion);
+    res.json(historic);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/historic", async (req, res) => {
+  try {
+    const { idInstitucion, periode, assistencia } = req.body;
+    const result = await createHistoric(idInstitucion, periode, assistencia);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/historic/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await deleteHistoric(id);
+    res.json(deleted);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /* ------------------------------- INSCRIPCIONS ------------------------------ */
@@ -557,6 +613,72 @@ app.delete("/usuaris/:id", async (req, res) => {
   const { id } = req.params;
   const deletedUsuari = await deleteUsuari(id);
   res.json(deletedUsuari);
+});
+
+/* ------------------------------- CRITERIS WEIGHTS ------------------------------ */
+
+app.get("/criteris-weights", async (req, res) => {
+  try {
+    const weights = await getAllCriterisWeights();
+    res.json(weights);
+  } catch (error) {
+    console.error("Error al obtener pesos de criterios:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const weight = await getCriterisWeightById(id);
+    res.json(weight);
+  } catch (error) {
+    console.error("Error al obtener peso de criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/criterio/:criterio", async (req, res) => {
+  try {
+    const { criterio } = req.params;
+    const weight = await getCriterisWeightByCriterio(criterio);
+    res.json(weight);
+  } catch (error) {
+    console.error("Error al obtener peso por criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/periodo/:periodeId", async (req, res) => {
+  try {
+    const { periodeId } = req.params;
+    const weights = await getCriterisWeightsForPeriod(periodeId);
+    res.json(weights);
+  } catch (error) {
+    console.error("Error al obtener pesos del período:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/criteris-weights/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { peso } = req.body;
+
+    if (peso === undefined) {
+      return res.status(400).json({ error: "El campo 'peso' es requerido" });
+    }
+
+    const updatedWeight = await updateCriterisWeight(id, peso);
+    
+    // Recargar pesos en memoria
+    await reloadWeights();
+    
+    res.json(updatedWeight);
+  } catch (error) {
+    console.error("Error al actualizar peso de criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /* -------------------------------------------------------------------------- */

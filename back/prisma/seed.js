@@ -317,6 +317,29 @@ async function main() {
       });
     } catch (e) {}
   }
+  console.log("\n🚀 [6/7] Creant pesos de criterios...");
+  const pesos = [
+    { criterio: "FIRST_TIME", peso: 20 },
+    { criterio: "ATTENDANCE_RISK", peso: -30 },
+    { criterio: "DIVERSITY", peso: 15 },
+    { criterio: "NO_CAPACITY", peso: -30 },
+    { criterio: "NE", peso: 30 },
+  ];
+
+  for (const p of pesos) {
+    const existe = await prisma.criterisWeights.findUnique({
+      where: { criterio: p.criterio },
+    });
+    if (!existe) {
+      await prisma.criterisWeights.create({
+        data: {
+          criterio: p.criterio,
+          peso: p.peso,
+          periode: null, // Aplica globalmente
+        },
+      });
+    }
+  }
 
   console.log("\n🏁 [FIN] Seed completat correctament.");
 }

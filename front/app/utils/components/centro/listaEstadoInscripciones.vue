@@ -121,7 +121,10 @@ const processTallers = (data, inscritos) => {
   // Filtrar solo los talleres a los que hay inscripción
   data.forEach((t) => {
     // Buscar si hay inscripción para este taller
-    const inscripcion = inscritos.find(i => i.tallerId === t.id);
+    const inscripcion = inscritos.find(i => {
+      const alumnesArray = JSON.parse(i.alumnes || "[]");
+      return alumnesArray.some(a => a.TALLER === t.id);
+    });
     
     // Si no hay inscripción, no incluir el taller
     if (!inscripcion) return;
@@ -206,7 +209,13 @@ onMounted(async () => {
     }
     inscripcionsMap.value = {};
     for (const i of inscripcionesFiltridas) {
-      inscripcionsMap.value[i.tallerId] = i;
+      const alumnesArray = JSON.parse(i.alumnes || "[]");
+      alumnesArray.forEach(alumne => {
+        if (!inscripcionsMap.value[alumne.TALLER]) {
+          inscripcionsMap.value[alumne.TALLER] = [];
+        }
+        inscripcionsMap.value[alumne.TALLER].push(i);
+      });
     }
     
     tallersGrouped.value = processTallers(rawData, inscripcionesFiltridas);

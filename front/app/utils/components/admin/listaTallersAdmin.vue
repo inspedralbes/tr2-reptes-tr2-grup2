@@ -1,6 +1,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { getAllTallers } from "~/services/communicationManagerDatabase";
+import { 
+  getAllTallers, 
+  createTaller, 
+  getPeriodes 
+} from "~/services/communicationManagerDatabase";
 
 const tallers = ref([]);
 const mostrarModal = ref(false);
@@ -49,15 +53,7 @@ const formatHorari = (horariJSON) => {
 
 const cargarPeriodes = async () => {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_URL_BACK || "http://localhost:8000"}/periodes`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-    if (!response.ok) throw new Error("Error al cargar periodes");
-    periodes.value = await response.json();
+    periodes.value = await getPeriodes();
     console.log("Periodes carregats:", periodes.value);
   } catch (error) {
     console.error("Error al cargar periodes:", error);
@@ -176,22 +172,7 @@ const crearTaller = async () => {
   };
 
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_URL_BACK || "http://localhost:8000"}/tallers`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataTaller),
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Error al crear taller");
-    }
-
-    const resultado = await response.json();
-    console.log("Taller creado:", resultado);
+    await createTaller(dataTaller);
     alert("Taller creat correctament");
     cerrarModal();
     await cargarTallers();

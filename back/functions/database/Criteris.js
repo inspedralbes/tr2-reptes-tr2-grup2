@@ -4,33 +4,60 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { getInscripcioById } from "./CRUD/Inscripcions.js";
 import { getPrisma } from "./dbConn.js";
+import { getAllCriterisWeights } from "./CRUD/CriterisWeights.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const weights = JSON.parse(
-  fs.readFileSync(join(__dirname, "../../data/priority_weights.json"), "utf-8"),
-);
 
-const PRIORITY_WEIGHTS = {
-  FIRST_TIME: weights.FIRST_TIME ?? 20,
-  ATTENDANCE_RISK: weights.ATTENDANCE_RISK ?? -30,
-  DIVERSITY: weights.DIVERSITY ?? 15,
-  MIN_ASSIST: weights.MIN_ASSIST ?? 0.8,
-  NO_CAPACITY: weights.NO_CAPACITY ?? -30,
-  NE: weights.NE ?? 30,
+let PRIORITY_WEIGHTS = {
+  FIRST_TIME: 20,
+  ATTENDANCE_RISK: -30,
+  DIVERSITY: 15,
+  MIN_ASSIST: 0.8,
+  NO_CAPACITY: -30,
+  NE: 30,
 };
 
 const prisma = await getPrisma();
+
+// Cargar pesos de la base de datos
+async function loadWeightsFromDB() {
+  try {
+    const dbWeights = await getAllCriterisWeights();
+    for (const w of dbWeights) {
+      PRIORITY_WEIGHTS[w.criterio] = w.peso;
+    }
+    console.log("✅ Pesos de criterios cargados desde BD");
+  } catch (error) {
+    console.warn(
+      "⚠️ Error cargando pesos de BD, usando valores por defecto:",
+      error.message
+    );
+  }
+}
+
+// Cargar pesos al iniciar
+await loadWeightsFromDB();
+
+// Función para recargar pesos (útil desde el endpoint PUT)
+export async function reloadWeights() {
+  await loadWeightsFromDB();
+}
 
 export async function isFirstTime(tallerId, inscripcioId) {
   const inscripcio = await prisma.inscripcions.findUnique({
     where: { id: Number(inscripcioId) },
     select: {
-      tallerId: true,
+      alumnes: true,
       primera_vegada: true,
     },
   });
 
-  const aplicat = inscripcio?.tallerId == tallerId && inscripcio.primera_vegada;
+  // Parsear el array alumnes y buscar el taller específico
+  const alumnesArray = JSON.parse(inscripcio?.alumnes || "[]");
+  const tallerEnInscripcion = alumnesArray.find(a => a.TALLER === Number(tallerId));
+
+  // Solo aplica si: 1) es primera vez Y 2) el taller está en esta inscripción
+  const aplicat = inscripcio?.primera_vegada && tallerEnInscripcion !== undefined;
   
   return {
     criterio: "Primera vegada",

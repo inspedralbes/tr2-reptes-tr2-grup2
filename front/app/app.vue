@@ -1,5 +1,6 @@
 <script setup>
 import index from "@/pages/index.vue";
+import "@fortawesome/fontawesome-free/css/all.css";
 </script>
 <template>
   <router-view></router-view>

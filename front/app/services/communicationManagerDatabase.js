@@ -400,3 +400,120 @@ export async function deleteUsuari(id) {
   }
   return await response.json();
 }
+
+/* ------------------------------- COMENTARIS ------------------------------ */
+
+export async function saveComentariProfe(tallerId, idInstitucio, comentari) {
+  const response = await fetch(`${BACK_URL}/tallers/${tallerId}/comentari-profe`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      idInstitucio: parseInt(idInstitucio),
+      comentari,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar comentari: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function saveInscripcions(selecciones, docentRef, comentari) {
+  const selectionsArray = Object.entries(selecciones).map(
+    ([tallerId, numAlumnos]) => ({
+      tallerId: Number(tallerId),
+      numAlumnos: Number(numAlumnos),
+    }),
+  );
+
+  const payload = {
+    selecciones: selectionsArray,
+    "docents-ref": docentRef?.trim() || null,
+    comentari: comentari?.trim() || null,
+  };
+
+  const response = await fetch(`${BACK_URL}/inscripcions/dadesinsc`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar inscripciones: ${response.statusText}`);
+  }
+  return await response.json();
+}
+/* ------------------------------- CRITERIS WEIGHTS ------------------------------ */
+
+export async function getCriterisWeights() {
+  const response = await fetch(`${BACK_URL}/criteris-weights`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir pesos de criteris: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateCriterisWeight(id, peso) {
+  const response = await fetch(`${BACK_URL}/criteris-weights/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ peso: parseInt(peso) }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar pes de criterio: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- HISTORIC ------------------------------ */
+
+export async function createHistoric(idInstitucion, periode, assistencia) {
+  const response = await fetch(`${BACK_URL}/historic`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idInstitucion: parseInt(idInstitucion),
+      periode: parseInt(periode),
+      assistencia: parseFloat(assistencia),
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar historic: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function getHistoricByInstitucion(institucion) {
+  const response = await fetch(
+    `${BACK_URL}/historic/institucion/${institucion}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Error al obtenir historic: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- PERIODES ------------------------------ */
+
+export async function getPeriodes() {
+  const response = await fetch(`${BACK_URL}/periodes`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir periodes: ${response.statusText}`);
+  }
+  return await response.json();
+}

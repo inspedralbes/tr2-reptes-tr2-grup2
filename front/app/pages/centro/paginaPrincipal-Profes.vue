@@ -37,7 +37,13 @@ function processTallers(allTallers, allInscripcions) {
 
   // Mapa de inscripciones activas (para filtrar tallers)
   // Asumimos que queremos ver los talleres que TIENEN una inscripción de este centro
-  const talleresIds = new Set(misInscripciones.map(i => i.tallerId));
+  const talleresIds = new Set();
+  misInscripciones.forEach(i => {
+    const alumnesArray = JSON.parse(i.alumnes || "[]");
+    alumnesArray.forEach(alumne => {
+      talleresIds.add(alumne.TALLER);
+    });
+  });
 
   const grouped = {};
 
