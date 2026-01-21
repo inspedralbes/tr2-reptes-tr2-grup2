@@ -53,7 +53,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 // SelectorAlumnos removed from this component to hide numeric dropdown
-import { getAllTallers, confirmarInscripciones, pointsTallers } from "@/services/communicationManagerDatabase";
+import {
+  getAllTallers,
+  confirmarInscripciones,
+  pointsTallers,
+} from "@/services/communicationManagerDatabase";
 import "@fortawesome/fontawesome-free/css/all.css";
 
 // Estados reactivos
@@ -128,7 +132,7 @@ const selectInscripcion = (id, alumnos) => {
 const alumnosSeleccionados = () => {
   return Object.values(inscripcionesSeleccionadas.value).reduce(
     (sum, alumnos) => sum + alumnos,
-    0
+    0,
   );
 };
 
@@ -142,7 +146,7 @@ const puedeSeleccionar = (alumnos) => {
 
 const guardarSeleccion = () => {
   const idsSeleccionados = Object.keys(inscripcionesSeleccionadas.value).map(
-    (id) => Number(id)
+    (id) => Number(id),
   );
   const resultado = {
     tallerId: tallerIdActual.value,
@@ -150,7 +154,9 @@ const guardarSeleccion = () => {
     alumnosAprobados: alumnosSeleccionados(),
   };
   console.log("Inscripciones aprobadas:", resultado);
-  alert(`Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`);
+  alert(
+    `Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`,
+  );
 };
 
 // Lógica de procesamiento de datos
@@ -251,7 +257,9 @@ const getMesNum = (mes) => {
 
 async function guardarInscripciones() {
   try {
-    const inscripcionesAprobadas = Object.keys(inscripcionesSeleccionadas.value).map(Number);
+    const inscripcionesAprobadas = Object.keys(
+      inscripcionesSeleccionadas.value,
+    ).map(Number);
 
     await confirmarInscripciones(tallerIdActual.value, inscripcionesAprobadas);
 
@@ -283,36 +291,57 @@ async function guardarInscripciones() {
     <!-- Vista de inscripciones -->
     <div v-if="viendoInscripciones" class="inscripciones-container">
       <div class="info-plazas">
-        <p>Plazas disponibles: <strong>{{ alumnosSeleccionados() }} / {{ placesMax }}</strong></p>
+        <p>
+          Plazas disponibles:
+          <strong>{{ alumnosSeleccionados() }} / {{ placesMax }}</strong>
+        </p>
         <div class="progress-bar">
-          <div class="progress-fill" :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"></div>
+          <div
+            class="progress-fill"
+            :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"
+          ></div>
         </div>
       </div>
 
       <table class="tabla-inscripciones">
         <thead>
           <tr>
-            <th style="width: 40px;">✓</th>
+            <th style="width: 40px">✓</th>
             <th>Institució</th>
-            <th style="width: 80px;">Alumnes</th>
-            <th style="width: 100px;">Puntuació</th>
-            <th style="width: 60px;"></th>
+            <th style="width: 80px">Alumnes</th>
+            <th style="width: 100px">Puntuació</th>
+            <th style="width: 60px"></th>
           </tr>
         </thead>
         <tbody>
           <template v-for="insc in inscripciones" :key="insc.id">
-            <tr :class="{ 'disabled-row': !puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id] }">
+            <tr
+              :class="{
+                'disabled-row':
+                  !puedeSeleccionar(insc.alumnos) &&
+                  !inscripcionesSeleccionadas[insc.id],
+              }"
+            >
               <td>
-                <input type="checkbox" :checked="!!inscripcionesSeleccionadas[insc.id]"
+                <input
+                  type="checkbox"
+                  :checked="!!inscripcionesSeleccionadas[insc.id]"
                   @change="selectInscripcion(insc.id, insc.alumnos)"
-                  :disabled="!puedeSeleccionar(insc.alumnos) && !inscripcionesSeleccionadas[insc.id]" />
+                  :disabled="
+                    !puedeSeleccionar(insc.alumnos) &&
+                    !inscripcionesSeleccionadas[insc.id]
+                  "
+                />
               </td>
               <td>{{ insc.institucion }}</td>
               <td>{{ insc.alumnos }}</td>
               <td>
                 <div class="puntuacion-cell">
                   <span class="score">{{ insc.puntuacion }}</span>
-                  <button class="btn-expandir" @click="toggleInscripcionExpandida(insc.id)">
+                  <button
+                    class="btn-expandir"
+                    @click="toggleInscripcionExpandida(insc.id)"
+                  >
                     +
                   </button>
                 </div>
@@ -323,11 +352,27 @@ async function guardarInscripciones() {
             <tr v-if="inscripcionesExpandidas[insc.id]" class="fila-desglose">
               <td colspan="5">
                 <div class="desglose">
-                  <div class="desglose-item" v-for="item in insc.aceptadas" :key="item.criterio">
+                  <div
+                    class="desglose-item"
+                    v-for="item in insc.aceptadas"
+                    :key="item.criterio"
+                  >
                     <span class="criterio">{{ item.criterio }}</span>
                     <span
-                      :class="['puntos', { 'positivo': item.puntos > 0, 'negativo': item.puntos < 0, 'no-aplicat': !item.aplicat }]">
-                      {{ item.aplicat ? (item.puntos > 0 ? '+' : '') + item.puntos : 'No aplicat' }}
+                      :class="[
+                        'puntos',
+                        {
+                          positivo: item.puntos > 0,
+                          negativo: item.puntos < 0,
+                          'no-aplicat': !item.aplicat,
+                        },
+                      ]"
+                    >
+                      {{
+                        item.aplicat
+                          ? (item.puntos > 0 ? "+" : "") + item.puntos
+                          : "No aplicat"
+                      }}
                     </span>
                   </div>
                 </div>
@@ -349,32 +394,51 @@ async function guardarInscripciones() {
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
 
-      <div v-for="seccion in tallersGrouped" :key="seccion.mes" class="seccion-mes">
+      <div
+        v-for="seccion in tallersGrouped"
+        :key="seccion.mes"
+        class="seccion-mes"
+      >
         <h2 class="mes-titulo">{{ seccion.mes }}</h2>
 
-        <div v-for="curso in seccion.cursos" :key="curso.id" class="bloque-curso">
-          <div class="fila-curso" :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }">
+        <div
+          v-for="curso in seccion.cursos"
+          :key="curso.id"
+          class="bloque-curso"
+        >
+          <div
+            class="fila-curso"
+            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
+          >
             <div class="col-titulo">
               <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
             </div>
 
             <div class="col-info">
               <div class="text-info">
-                <span class="texto-titulo">{{ curso.titulo }}</span><br />
+                <span class="texto-titulo">{{ curso.titulo }}</span
+                ><br />
                 <span class="info-item">
-                  <img src="/img/centro/calendar.png" class="icon" />
+                  <img src="/img/centro/calendar.png" class="icon" alt="icon" />
                   {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
-                  <img src="/img/centro/clock.png" class="icon" />
+                  <img src="/img/centro/clock.png" class="icon" alt="icon" />
                   {{ curso.hora }}
                 </span>
               </div>
             </div>
 
             <button class="btn-detalls" @click="toggleDetalles(curso.id)">
-              <span class="btn-detalls-text" :class="{ rotar: cursoExpandido === curso.id }">+</span>
+              <span
+                class="btn-detalls-text"
+                :class="{ rotar: cursoExpandido === curso.id }"
+                >+</span
+              >
             </button>
 
-            <button class="btn-veure-inscripcions" @click="vereuInscripcions(curso.id, curso.titulo)">
+            <button
+              class="btn-veure-inscripcions"
+              @click="vereuInscripcions(curso.id, curso.titulo)"
+            >
               Veure inscripcions
             </button>
 
@@ -397,7 +461,7 @@ async function guardarInscripciones() {
 
 <style scoped>
 /* --- CONTENEDOR PRINCIPAL --- */
-#container {
+/* #container {
   margin-top: -25px;
   font-family: Arial, Helvetica, sans-serif;
   background-color: #ffffff;
@@ -409,7 +473,7 @@ async function guardarInscripciones() {
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
-}
+} */
 
 .loading-state {
   text-align: center;
@@ -444,7 +508,9 @@ async function guardarInscripciones() {
   border-radius: 20px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease,
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
@@ -564,7 +630,9 @@ async function guardarInscripciones() {
   border-radius: 8px;
   cursor: pointer;
   margin-left: 40px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-veure-inscripcions:hover {
@@ -621,7 +689,9 @@ async function guardarInscripciones() {
   align-items: center;
   justify-content: center;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -784,7 +854,9 @@ async function guardarInscripciones() {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-expandir:hover {
@@ -864,7 +936,9 @@ async function guardarInscripciones() {
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-guardar:hover {

@@ -36,6 +36,6 @@ import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
   margin: 0 auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
-  max-height: 500px;
+  max-height: 550px;
 }
 </style>
