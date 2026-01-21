@@ -4,6 +4,7 @@ import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import graficaTallers from "@/utils/components/admin/graficaTallers.vue";
 import graficaInstitucions from "@/utils/components/admin/graficaInstitucions.vue";
 import calendari from "@/utils/components/admin/calendari.vue";
+import recordatorisAdmin from "@/utils/components/admin/recordatorisAdmin.vue";
 </script>
 <template>
   <Encabezado />
@@ -13,7 +14,7 @@ import calendari from "@/utils/components/admin/calendari.vue";
       <h2>Bon día, <span id="user">*AdminName*</span>:</h2>
       <div class="panell-admin">
         <div class="tarjetas-admin">
-          <p>PPPP</p>
+          <recordatorisAdmin />
         </div>
         <div class="tarjetas-admin">
           <graficaTallers />
@@ -46,18 +47,18 @@ import calendari from "@/utils/components/admin/calendari.vue";
 
 .panell-admin {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(280px, 320px) minmax(520px, 1fr);
   gap: 40px;
+  align-items: start;
 }
 
 /* Estilització de les targetes, canviar amb el style de Valeria/Alba */
 .tarjetas-admin {
   background-color: #f5f5f5;
   border-radius: 20px;
-  padding: 24px;
   padding-top: 5px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  min-width: 500px;
   max-height: 250px;
+  width: 100%;
 }
 </style>
