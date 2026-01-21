@@ -459,12 +459,14 @@ app.get("/usuaris/:id", async (req, res) => {
   res.json(usuari);
 });
 
-app.put("/usuaris/aceptat", async (req, res) => {
+app.put("/usuaris/aceptat/:id", async (req, res) => {
   const data = req.body;
+  const id = id;
   data = { ...data, autoritzat: true };
   try {
-    await updateUsuari(data.id, data);
+    await updateUsuari(id, data);
     // EN UN FUTUR AFEGIR L'ENVIO DEL CORREU ELECTRONIC AQUÍ
+    sendMail("registreAcceptat", { nom: data.nom, email: data.email });
     return res.json({
       message: "Usuari actualitzat correctament",
     });
