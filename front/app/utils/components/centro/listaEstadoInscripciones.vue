@@ -17,7 +17,14 @@ const searchTaller = ref("");
 const inscripcionsMap = ref({}); 
 const usuarioInstitucion = ref(null); 
 const horaris = ref([]);
-const inscripcionEditando = ref(false)
+const showEditModal = ref(false);
+const formIscripcio = ref({
+  id: null,
+  nomAlumnes : "",
+  apellidosAlumnes: "",
+  nomProfes: "",
+  apellidosProfes: "",
+  });
 
 const selecciones = ref({});
 
@@ -75,13 +82,11 @@ function extractHoraris(data) {
     } catch (e) {
       horari = {};
     }
-
     // Acceso seguro a la hora de inicio
     let hora = "00:00";
     if (horari.TORNS && horari.TORNS[0] && horari.TORNS[0].HORAINICI) {
       hora = horari.TORNS[0].HORAINICI;
     }
-
     // Evitar duplicados manualmente
     let existe = false;
     for (let j = 0; j < listaHoras.length; j++) {
@@ -90,12 +95,10 @@ function extractHoraris(data) {
         break;
       }
     }
-
     if (!existe) {
       listaHoras.push(hora);
     }
   }
-
   // Ordenar alfabéticamente
   return listaHoras.sort();
 }
@@ -187,21 +190,53 @@ const processTallers = (data, inscritos) => {
 };
 
 //Funciones para botones de editar, eliminar e inscribirse
-const updateTaller = (id) => {
-  try {
-    await
-  } catch (error) {
-    
+const openEditModal = (tallerId) => {
+  // Buscamos la inscripción en el mapa que ya tienes usando el ID del taller
+  const inscripcionOriginal = inscripcionsMap.value[tallerId];
+  
+  if (inscripcionOriginal) {
+    // Copiamos los datos de la inscripción al formulario temporal
+    formIscripcio.value = { 
+      id: inscripcionOriginal.id,
+      nomAlumnes: inscripcionOriginal.nomAlumnes || "",
+      apellidosAlumnes: inscripcionOriginal.apellidosAlumnes || "",
+      nomProfes: inscripcionOriginal.nomProfes || "",
+      apellidosProfes: inscripcionOriginal.apellidosProfes || ""
+    };
+    // Abrimos el modal
+    showEditModal.value = true;
+  } else {
+    console.error("No s'ha trobat la inscripció per a aquest taller");
   }
+};
 
-
-  console.log("Actualizar taller", id);
+const handleUpdate = async () => {
+  try {
+    const id = formIscripcio.value.id;
+    
+    // Llamamos al servicio de actualización con los datos del formulario
+    await updateInscripcion(id, {
+      nomAlumnes: formIscripcio.value.nomAlumnes,
+      apellidosAlumnes: formIscripcio.value.apellidosAlumnes,
+      nomProfes: formIscripcio.value.nomProfes,
+      apellidosProfes: formIscripcio.value.apellidosProfes
+    });
+    
+    // Si todo va bien:
+    // Cerramos el modal
+    showEditModal.value = false; 
+    // Recargamos los datos para ver los cambios reflejados
+    await loadData();            
+    alert("Inscripció actualizada correctament!");
+  } catch (error) {
+    console.error("Error al actualizar la inscripción:", error);
+    alert("Hubo un error al intentar actualizar la inscripción.");
+  }
 };
 const deleteInscription = async (id) => {
 
   //Pedimos que confirme la eliminación
   if (!confirm("Estàs segur que vols eliminar aquesta inscripció?")) return;
-  
   try {
     //Si confirma, eliminamos la inscripción
     await deleteInscripcion(id);
@@ -211,6 +246,7 @@ const deleteInscription = async (id) => {
     console.error("Error eliminando inscripción:", error);
   }
 };
+
 const inscripcionTaller = (id) => {
   console.log("Inscribirse al taller", id);
 };  
@@ -478,18 +514,8 @@ const getMesNum = (mes) => {
             </div>
             <div id="col-btn">
               <button id="btn-inscripcion">Inscripció</button>
-              <button @click="inscripcionEditando = true" id="btn-update">Actualitzar</button>
+              <button @click="openEditModal(curso.id)" id="btn-update">Actualitzar</button>
               <button @click="deleteInscription(curso.id)" id="btn-delete">Eliminar</button>
-            </div>
-            <div v-if="inscripcionEditando === true" id="popup-update">
-              <h2>Actualitzar inscripció</h2>
-              <form>
-                <label>Nom</label>
-                <select>
-                  
-                </select>
-                <button type="submit">Actualitzar</button>
-              </form>
             </div>
           </div>
 
@@ -502,6 +528,35 @@ const getMesNum = (mes) => {
             </div>
           </Transition>
         </div>
+      </div>
+    </div>
+    <!-- Nuevo Modal fuera de la lista -->
+    <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+      <div class="modal-content">
+        <h2>Actualitzar inscripció</h2>
+        <form @submit.prevent="handleUpdate">
+          <div class="form-group">
+            <label>Nom dels alumnes</label>
+            <input type="text" v-model="formIscripcio.nomAlumnes" required>
+          </div>
+          <div class="form-group">
+            <label>Cognoms dels alumnes</label>
+            <input type="text" v-model="formIscripcio.apellidosAlumnes" required>
+          </div>
+          <div class="form-group">
+            <label>Nom dels Profes</label>
+            <input type="text" v-model="formIscripcio.nomProfes" required>
+          </div>
+          <div class="form-group">
+            <label>Cognoms dels Profes</label>
+            <input type="text" v-model="formIscripcio.apellidosProfes" required>
+          </div>
+          
+          <div class="modal-buttons">
+            <button type="button" @click="showEditModal = false" class="btn-cancel">Cancel·lar</button>
+            <button type="submit" class="btn-save">Guardar Canvis</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -942,44 +997,153 @@ const getMesNum = (mes) => {
 
 /* --- BOTONES --- */
 #btn-inscripcion {
-  background-color: #1D1D1D;
-  color: #FFFFFF;
+  background-color: #9FACFE;
+  color: #141414;
   border: none;
   border-radius: 20px;
-  padding: 10px 20px;
+  border-color: #717ED3;
+  border-style: solid;
+  border-width: 4px;
+  padding: 5px 15px;
   cursor: pointer;
+  font-family: 'Coolvetica';
   transition: all 0.3s ease;
 }
 
 #btn-inscripcion:hover {
-  background-color: #3949ab;
+  background-color: #687DFF;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #4956AA;
 }
 
 #btn-update {
-  background-color: #1D1D1D;
-  color: #FFFFFF;
+  background-color: #9FACFE;
+  color: #141414;
   border: none;
   border-radius: 20px;
-  padding: 10px 20px;
+  border-color: #717ED3;
+  border-style: solid;
+  border-width: 4px;
+  padding: 5px 15px;
   cursor: pointer;
+  font-family: 'Coolvetica';
   transition: all 0.3s ease;
 }
 
 #btn-update:hover {
-  background-color: #3949ab;
+  background-color: #687DFF;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #4956AA;
 }
 
 #btn-delete {
-  background-color: #1D1D1D;
-  color: #FFFFFF;
+  background-color: #9FACFE;
+  color: #141414;
   border: none;
   border-radius: 20px;
-  padding: 10px 20px;
+  border-color: #717ED3;
+  border-style: solid;
+  border-width: 4px;
+  padding: 5px 15px;
   cursor: pointer;
+  font-family: 'Coolvetica';
   transition: all 0.3s ease;
 }
 
 #btn-delete:hover {
-  background-color: #3949ab;
+  background-color: #687DFF;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #4956AA;
+}
+
+/* --- ESTILOS DEL MODAL DE ACTUALIZACIÓN --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5); /* Fondo oscuro transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Aseguramos que esté por encima de todo */
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  width: 400px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  color: #1a1a1a;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  color: #3949ab;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.form-group input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.btn-cancel {
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-cancel:hover {
+  background: #d0d0d0;
+}
+
+.btn-save {
+  background: #3949ab;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-save:hover {
+  background: #283593;
 }
 </style>

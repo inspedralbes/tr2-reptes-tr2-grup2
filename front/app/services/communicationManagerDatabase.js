@@ -141,6 +141,20 @@ export async function confirmarInscripciones(tallerId, inscripcionesAprobadas) {
   return await response.json();
 }
 
+export async function updateInscripcion(id, inscripcionData) {
+  const response = await fetch(`${BACK_URL}/inscripcions/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(inscripcionData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar inscripció: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
 /* ------------------------------- INSTITUCIONS ------------------------------ */
 
 export async function getAllInstitucions() {
