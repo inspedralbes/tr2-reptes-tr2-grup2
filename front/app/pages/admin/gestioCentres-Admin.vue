@@ -1,7 +1,7 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
 import navBarAdmin from "@/layouts/navBarAdmin.vue";
-import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
+import institucions from "@/utils/components/admin/centresAdmin.vue";
 </script>
 <template>
   <Encabezado></Encabezado>
@@ -9,11 +9,11 @@ import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
     <navBarAdmin />
     <div id="content">
       <div class="header-Centres">
-        <h2>Gestió centres</h2>
+        <h2>Informació centres</h2>
       </div>
       <div class="container-courses">
         <br />
-        
+        <institucions></institucions>
       </div>
     </div>
   </div>
@@ -44,7 +44,9 @@ import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
   border-radius: 20px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease,
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
