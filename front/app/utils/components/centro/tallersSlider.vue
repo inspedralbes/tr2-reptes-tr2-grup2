@@ -1,63 +1,3 @@
-<template>
-  <div class="slider-container" ref="containerElement">
-    <button
-      class="arrow-prev"
-      @click="scrollPrev"
-      :style="{ opacity: isAtStart ? '0.3' : '1' }"
-    >
-      <img src="/img/centro/flecha-izq.png" alt="Anterior" />
-    </button>
-
-    <div class="slider-wrapper" ref="sliderElement" @scroll="handleScroll">
-      <template v-for="grupo in tallers" :key="grupo.mes">
-        <div
-          v-for="(dia, index) in grupo.dias"
-          :key="dia.diaNum"
-          class="day-group"
-        >
-          <p class="month-label" :class="{ 'hidden-label': index !== 0 }">
-            {{ grupo.mes }}
-          </p>
-
-          <h3 class="date-label">{{ dia.diaSemana }}, {{ dia.diaNum }}</h3>
-
-          <div class="cards-container">
-            <div
-              v-for="taller in dia.cursos"
-              :key="taller.titulo"
-              class="card"
-              :style="getCardStyle(taller.titulo)"
-            >
-              <div class="card-info">
-                <p class="title">{{ taller.titulo }}</p>
-                <p class="location">{{ taller.lugar }}</p>
-              </div>
-              <div class="card-time">
-                <span>
-                  <img
-                    src="/img/centro/clock.png"
-                    alt="Reloj"
-                    class="clock-icon"
-                  />
-                  {{ taller.hora }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-    </div>
-
-    <button
-      class="arrow-next"
-      @click="scrollNext"
-      :style="{ opacity: isAtEnd ? '0.3' : '1' }"
-    >
-      <img src="/img/centro/flecha-drc.png" alt="Siguiente" />
-    </button>
-  </div>
-</template>
-
 <script setup>
 import { ref, onMounted, computed } from "vue";
 
@@ -140,57 +80,75 @@ onMounted(() => {
   handleScroll();
 });
 
-const tallers = ref([
-  {
-    mes: "Septembre",
-    dias: [
-      {
-        diaSemana: "Dilluns",
-        diaNum: 23,
-        cursos: [
-          { titulo: "Curs de Vela", lugar: "Port de Barcelona", hora: "15:30" },
-          { titulo: "Curs de Teatre", lugar: "Santa María", hora: "15:00" },
-          { titulo: "Extra de Tarde", lugar: "Aula 3", hora: "19:00" },
-        ],
-      },
-      {
-        diaSemana: "Dimarts",
-        diaNum: 24,
-        cursos: [
-          { titulo: "Curs de Piano", lugar: "Conservatori", hora: "17:00" },
-          { titulo: "Curs de Piano", lugar: "Conservatori", hora: "13:00" },
-        ],
-      },
-    ],
+const props = defineProps({
+  tallers: {
+    type: Array,
+    default: () => [],
   },
-  {
-    mes: "Octubre",
-    dias: [
-      {
-        diaSemana: "Dimarts",
-        diaNum: 17,
-        cursos: [
-          { titulo: "Carpinteria", lugar: "La Pedrera", hora: "16:30" },
-          { titulo: "Curs de Vela", lugar: "Port de Barcelona", hora: "10:00" }, 
-        ],
-      },
-    ],
-  },
-  {
-    mes: "Novembre",
-    dias: [
-      {
-        diaSemana: "Dimarts",
-        diaNum: 17,
-        cursos: [
-          { titulo: "Carpinteria", lugar: "La Pedrera", hora: "16:30" },
-          { titulo: "Curs de Vela", lugar: "Port de Barcelona", hora: "10:00" },
-        ],
-      },
-    ],
-  },
-]);
+});
+
+const tallers = computed(() => props.tallers);
 </script>
+
+<template>
+  <div class="slider-container" ref="containerElement">
+    <button
+      class="arrow-prev"
+      @click="scrollPrev"
+      :style="{ opacity: isAtStart ? '0.3' : '1' }"
+    >
+      <img src="/img/centro/flecha-izq.png" alt="Anterior" />
+    </button>
+
+    <div class="slider-wrapper" ref="sliderElement" @scroll="handleScroll">
+      <template v-for="grupo in tallers" :key="grupo.mes">
+        <div
+          v-for="(dia, index) in grupo.dias"
+          :key="dia.diaNum"
+          class="day-group"
+        >
+          <p class="month-label" :class="{ 'hidden-label': index !== 0 }">
+            {{ grupo.mes }}
+          </p>
+
+          <h3 class="date-label">{{ dia.diaSemana }}, {{ dia.diaNum }}</h3>
+
+          <div class="cards-container">
+            <div
+              v-for="taller in dia.cursos"
+              :key="taller.titulo"
+              class="card"
+              :style="getCardStyle(taller.titulo)"
+            >
+              <div class="card-info">
+                <p class="title">{{ taller.titulo }}</p>
+                <p class="location">{{ taller.lugar }}</p>
+              </div>
+              <div class="card-time">
+                <span>
+                  <img
+                    src="/img/centro/clock.png"
+                    alt="Reloj"
+                    class="clock-icon"
+                  />
+                  {{ taller.hora }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <button
+      class="arrow-next"
+      @click="scrollNext"
+      :style="{ opacity: isAtEnd ? '0.3' : '1' }"
+    >
+      <img src="/img/centro/flecha-drc.png" alt="Siguiente" />
+    </button>
+  </div>
+</template>
 
 <style scoped>
 .slider-container {

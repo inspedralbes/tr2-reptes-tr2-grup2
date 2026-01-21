@@ -24,24 +24,3 @@ html, body {
     height: 100%;
     box-sizing: border-box;
 }
-
-*, *::before, *::after {
-    box-sizing: inherit;
-}
-
-/* Tipografía responsive */
-html {
-    font-size: 16px;
-}
-
-@media (max-width: 768px) {
-    html {
-        font-size: 14px;
-    }
-}
-
-@media (max-width: 480px) {
-    html {
-        font-size: 12px;
-    }
-}

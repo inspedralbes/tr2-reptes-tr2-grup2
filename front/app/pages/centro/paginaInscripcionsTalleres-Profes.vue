@@ -17,6 +17,8 @@ import llistaTallers from "@/utils/components/centro/listaInscripciones.vue";
 <style scoped>
 #cuerpo {
   display: flex;
+  height: calc(100vh - 85px);
+  overflow: hidden;
 }
 #contenido {
   margin-top: 20px;
