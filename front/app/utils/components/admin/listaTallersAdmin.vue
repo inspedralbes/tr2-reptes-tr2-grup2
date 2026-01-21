@@ -16,6 +16,7 @@ const diaSeleccionado = ref("");
 const horaInicio = ref("");
 const horaFin = ref("");
 const periodeSeleccionado = ref("");
+const imatgeFile = ref(null);
 
 const dias = [
   "Dilluns",
@@ -39,7 +40,7 @@ const cargarTallers = async () => {
 const formatHorari = (horariJSON) => {
   try {
     const horari = JSON.parse(horariJSON);
-    return horari.TORNS.map(torn => 
+    return horari.TORNS.map(torn =>
       `${torn.DIA}: ${torn.HORAINICI} - ${torn.HORAFI}`
     ).join(", ");
   } catch {
@@ -130,6 +131,14 @@ const limpiarFormulario = () => {
   horaInicio.value = "";
   horaFin.value = "";
   periodeSeleccionado.value = "";
+  imatgeFile.value = null;
+};
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    imatgeFile.value = file;
+  }
 };
 
 const crearTaller = async () => {
@@ -160,28 +169,32 @@ const crearTaller = async () => {
     ],
   });
 
-  const dataTaller = {
-    nom: nom.value,
-    descripcio: descripcio.value,
-    tallerista: tallerista.value,
-    places_max: parseInt(placesMax.value),
-    places_disp: parseInt(placesMax.value),
-    direccio: direccio.value,
-    horari: horariJSON,
-    periode: parseInt(periodeSeleccionado.value),
-    institucio: 1,
-    admin: 1,
-    autoritzat: false,
-    modalitat: "C",
-  };
+  // Crear FormData per enviar dades i fitxer
+  const formData = new FormData();
+  formData.append("nom", nom.value);
+  formData.append("descripcio", descripcio.value);
+  formData.append("tallerista", tallerista.value);
+  formData.append("places_max", parseInt(placesMax.value));
+  formData.append("places_disp", parseInt(placesMax.value));
+  formData.append("direccio", direccio.value);
+  formData.append("horari", horariJSON);
+  formData.append("periode", parseInt(periodeSeleccionado.value));
+  formData.append("institucio", 1);
+  formData.append("admin", 1);
+  formData.append("autoritzat", false);
+  formData.append("modalitat", "C");
+
+  // Agregar imagen si se seleccionó una
+  if (imatgeFile.value) {
+    formData.append("imatge", imatgeFile.value);
+  }
 
   try {
     const response = await fetch(
       `${import.meta.env.VITE_URL_BACK || "http://localhost:8000"}/tallers`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataTaller),
+        body: formData,
       }
     );
 
@@ -213,13 +226,8 @@ const crearTaller = async () => {
         <h2 class="mes-titulo">{{ taller.target }}</h2> -->
 
       <!-- CONTENEDOR: fila + desplegable debajo -->
-      <div
-        v-for="taller in tallers"
-        :key="taller.id"
-        class="curso-item"
-        :class="{ abierto: filaActiva === taller.id }"
-        :style="{ zIndex: filaActiva === taller.id ? 100 : 1 }"
-      >
+      <div v-for="taller in tallers" :key="taller.id" class="curso-item" :class="{ abierto: filaActiva === taller.id }"
+        :style="{ zIndex: filaActiva === taller.id ? 100 : 1 }">
         <!-- FILA (barra superior) -->
         <div class="fila-curso">
           <div class="col-titulo">
@@ -266,63 +274,33 @@ const crearTaller = async () => {
           <!-- Nom -->
           <div class="form-group">
             <label for="nom">Nom del Taller *</label>
-            <input
-              id="nom"
-              v-model="nom"
-              type="text"
-              placeholder="Ej: Robòtica Avançada"
-              maxlength="191"
-              required
-            />
+            <input id="nom" v-model="nom" type="text" placeholder="Ej: Robòtica Avançada" maxlength="191" required />
           </div>
 
           <!-- Descripció -->
           <div class="form-group">
             <label for="descripcio">Descripció *</label>
-            <textarea
-              id="descripcio"
-              v-model="descripcio"
-              placeholder="Descripcio detallada del taller"
-              rows="3"
-              required
-            ></textarea>
+            <textarea id="descripcio" v-model="descripcio" placeholder="Descripcio detallada del taller" rows="3"
+              required></textarea>
           </div>
 
           <!-- Tallerista -->
           <div class="form-group">
             <label for="tallerista">Tallerista *</label>
-            <input
-              id="tallerista"
-              v-model="tallerista"
-              type="text"
-              maxlength="191"
-              required
-            />
+            <input id="tallerista" v-model="tallerista" type="text" maxlength="191" required />
           </div>
 
           <!-- Places Màximes -->
           <div class="form-group">
             <label for="placesMax">Places Màximes *</label>
-            <input
-              id="placesMax"
-              v-model="placesMax"
-              type="number"
-              min="1"
-              required
-            />
+            <input id="placesMax" v-model="placesMax" type="number" min="1" required />
           </div>
 
           <!-- Direcció -->
           <div class="form-group">
             <label for="direccio">Direcció *</label>
-            <input
-              id="direccio"
-              v-model="direccio"
-              type="text"
-              placeholder="c. Salvador Espriu, 3"
-              maxlength="191"
-              required
-            />
+            <input id="direccio" v-model="direccio" type="text" placeholder="c. Salvador Espriu, 3" maxlength="191"
+              required />
           </div>
 
           <!-- Dia de la setmana -->
@@ -357,6 +335,13 @@ const crearTaller = async () => {
             </select>
           </div>
 
+          <!-- Imatge -->
+          <div class="form-group">
+            <label for="imatge">Imatge del Taller</label>
+            <input id="imatge" type="file" accept="image/*" @change="handleFileChange" />
+            <small style="color: #666; margin-top: 5px;">Format: JPG, PNG, GIF (opcional)</small>
+          </div>
+
           <!-- Botones -->
           <div class="modal-buttons">
             <button type="button" class="btn-cancel" @click="cerrarModal">
@@ -387,6 +372,7 @@ const crearTaller = async () => {
   margin-bottom: 10px;
   margin-right: 40px;
 }
+
 .header-lista p {
   font-size: 1.2rem;
   font-weight: bold;
@@ -509,6 +495,7 @@ p {
   cursor: pointer;
   font-weight: bold;
 }
+
 .btn-detalls-text {
   margin-left: 30px;
 }
@@ -528,11 +515,13 @@ p {
   transition: max-height 0.25s ease, opacity 0.25s ease;
   overflow: hidden;
 }
+
 .slide-enter-from,
 .slide-leave-to {
   max-height: 0;
   opacity: 0;
 }
+
 .slide-enter-to,
 .slide-leave-from {
   max-height: 500px;
@@ -544,6 +533,7 @@ p {
   height: 16px;
   margin-right: 4px;
 }
+
 .mes-titulo {
   font-size: 1.5rem;
   color: #333;

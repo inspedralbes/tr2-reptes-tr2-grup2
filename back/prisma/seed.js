@@ -26,7 +26,7 @@ const workshopsData = [
 async function main() {
   prisma = await getPrisma();
   console.log(
-    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)..."
+    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)...",
   );
 
   const periodsIds = [];
@@ -131,7 +131,7 @@ async function main() {
   const csvFilePath = path.join(
     process.cwd(),
     "prisma",
-    "totcat-centres-educatius.csv"
+    "totcat-centres-educatius.csv",
   );
 
   if (fs.existsSync(csvFilePath)) {
@@ -203,7 +203,7 @@ async function main() {
             });
 
             console.log(
-              `   🌟 [VIP] Institució i Profesor creats: ${nomCentre}`
+              `   🌟 [VIP] Institució i Profesor creats: ${nomCentre}`,
             );
           }
         }
@@ -212,10 +212,10 @@ async function main() {
       }
     }
     console.log(
-      `\n   ✅ Importació CSV finalitzada. Total processats: ${count}`
+      `\n   ✅ Importació CSV finalitzada. Total processats: ${count}`,
     );
     console.log(
-      `   ✅ Institucions VIP seleccionades: ${vipInstitutions.length}`
+      `   ✅ Institucions VIP seleccionades: ${vipInstitutions.length}`,
     );
   } else {
     console.error("   ⛔ NO S'HA TROBAT EL CSV.");
@@ -259,6 +259,7 @@ async function main() {
           periode: period,
           admin: adminId,
           autoritzat: true,
+          imatge: "/files/images/example.png",
         },
       });
 
@@ -268,7 +269,9 @@ async function main() {
           institucio: inst.id,
           primera_vegada: true,
           periode: period,
-          alumnes: JSON.stringify([{ TALLER: taller.id, QUANTITAT: 15, ESTAT:"ESPERA" }]),
+          alumnes: JSON.stringify([
+            { TALLER: taller.id, QUANTITAT: 15, ESTAT: "ESPERA" },
+          ]),
           referents: "Cap d'Estudis",
           docents_referents: "docent@centre.cat",
           autoritzat: true,
@@ -325,4 +328,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-  

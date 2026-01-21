@@ -43,10 +43,6 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   next();
 });
-
-app.use("/images", express.static("./files/images"));
-app.use("/archives", express.static("./files/archives"));
-
 /* -------------------------------------------------------------------------- */
 /*                                   ROUTES                                   */
 /* -------------------------------------------------------------------------- */
@@ -234,20 +230,19 @@ app.post("/logout", async (req, res) => {
 
 /* ------------------------------- MULTER ------------------------------ */
 
-import uploadArchives from "./functions/uploads/archives.cjs";
 import uploadImages from "./functions/uploads/images.cjs";
+import uploadOthers from "./functions/uploads/others.cjs";
 
 app.post("/uploadImage", uploadImages.single("file"), (req, res) => {
-  res.json({ message: "Imagen subida", file: req.file });
+  res.json({ message: "Imatge Pujada", file: req.file });
 });
 
-app.post("/uploadArchive", uploadArchives.single("file"), (req, res) => {
-  res.json({ message: "Archivo subido", file: req.file });
+app.post("/uploadOther", uploadOthers.single("file"), (req, res) => {
+  res.json({ message: "Arxiu Pujat", file: req.file });
 });
 
-app.post("/uploadFiles", uploadArchives.array("files", 10), (req, res) => {
-  res.json({ message: "Archivos subidos", files: req.files });
-});
+app.use("/files/images", express.static("./files/images"));
+app.use("/files/archives", express.static("./files/archives"));
 
 /* ------------------------------- ASSISTENCIA ------------------------------ */
 
@@ -436,11 +431,9 @@ app.get("/tallers/:id", async (req, res) => {
   res.json(taller);
 });
 
-app.post("/tallers", async (req, res) => {
+app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
   try {
     const data = req.body;
-
-    // Validaciones básicas
     if (
       !data.nom ||
       !data.descripcio ||
@@ -456,11 +449,60 @@ app.post("/tallers", async (req, res) => {
       });
     }
 
+    // Convertir camps numèrics i booleans
+    data.places_max = parseInt(data.places_max);
+    data.places_disp = parseInt(data.places_disp);
+    data.periode = parseInt(data.periode);
+    data.institucio = parseInt(data.institucio);
+    data.admin = parseInt(data.admin);
+    data.autoritzat = data.autoritzat === "true" || data.autoritzat === true;
+
+    data.imatge = req.file
+      ? `/files/images/${req.file.filename}`
+      : "/files/images/example.png";
+
     const newTaller = await createTaller(data);
     res.status(201).json(newTaller);
   } catch (error) {
     console.error("Error al crear taller:", error);
     res.status(500).json({ error: error.message || "Error al crear taller" });
+  }
+});
+
+app.put("/tallers", uploadImages.single("imatge"), async (req, res) => {
+  try {
+    const data = req.body;
+
+    // Convertir camps numèrics i booleans
+    data.places_max = parseInt(data.places_max);
+    data.places_disp = parseInt(data.places_disp);
+    data.periode = parseInt(data.periode);
+    data.institucio = parseInt(data.institucio);
+    data.admin = parseInt(data.admin);
+    data.autoritzat = data.autoritzat === "true" || data.autoritzat === true;
+
+    if (req.file) {
+      const tallerActual = await getTallerById(data.id);
+
+      if (tallerActual && tallerActual.imatge) {
+        const oldImagePath = tallerActual.imatge.replace("/files/images/", "");
+        const fullPath = path.join("./", "files", "images", oldImagePath);
+
+        if (oldImagePath !== "example.png" && fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      }
+
+      data.imatge = `/files/images/${req.file.filename}`;
+    }
+
+    const updatedTaller = await updateTaller(data);
+    res.json(updatedTaller);
+  } catch (error) {
+    console.error("Error al actualitzar taller:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Error al actualitzar taller" });
   }
 });
 
@@ -490,12 +532,6 @@ app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
   }
 });
 
-app.put("/tallers", async (req, res) => {
-  const data = req.body;
-  const updatedTaller = await updateTaller(data);
-  res.json(updatedTaller);
-});
-
 app.delete("/tallers/:id", async (req, res) => {
   const { id } = req.params;
   const deletedTaller = await deleteTaller(id);
@@ -505,7 +541,6 @@ app.delete("/tallers/:id", async (req, res) => {
 /* ------------------------------- USUARIS ------------------------------ */
 
 import {
-import archiver from "archiver";
   getAllUsuaris,
   getUsuariById,
   createUsuari,
