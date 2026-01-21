@@ -25,6 +25,21 @@ export async function getInscripcioById(id) {
   }
 }
 
+// SELECT totes les inscripcions per un periode
+export async function getInscripcionsByPeriode(periodeId) {
+  try {
+    const prisma = await getPrisma();
+    return await prisma.inscripcions.findMany({
+      where: { periode: parseInt(periodeId) },
+      include: { id_institucio: true, periode_relacio: true },
+    });
+  } catch (error) {
+    throw new Error(
+      `Error al obtenir inscripcions per periode: ${error.message}`,
+    );
+  }
+}
+
 // INSERT nova inscripció
 export async function createInscripcio(data) {
   try {

@@ -26,7 +26,7 @@ const workshopsData = [
 async function main() {
   prisma = await getPrisma();
   console.log(
-    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)...",
+    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)...",,
   );
 
   const periodsIds = [];
@@ -255,7 +255,7 @@ async function main() {
           direccio: inst.direccio,
           horari: JSON.stringify({
             DATAINI: "2025-09-05",
-            DATAFI: "2026-12-22",
+            DATAFI: "2025-12-22",
             TORNS: [{ DIA: "Dilluns", HORAINICI: "10:00", HORAFI: "12:00" }],
           }),
           periode: period,
@@ -286,10 +286,10 @@ async function main() {
           id_taller: taller.id,
           dia: new Date(),
           llista_alumnes: JSON.stringify([
-            { NOM: "Alumne 1", ASSISTENCIA: true },
+            { NOM: "Alumne 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: true },
           ]),
           llista_professors: JSON.stringify([
-            { NOM: "Profe 1", ASSISTENCIA: true },
+            { NOM: "Profe 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: flase },
           ]),
           autoritzat: false,
         },
