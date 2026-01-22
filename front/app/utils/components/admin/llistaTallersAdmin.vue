@@ -1,6 +1,12 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { getAllTallers, createTaller, updateTaller, deleteTaller } from "~/services/communicationManagerDatabase";
+import {
+  getAllTallers,
+  createTaller,
+  getPeriodes,
+  getSystemSettings
+  , updateTaller, deleteTaller,
+} from "~/services/communicationManagerDatabase";
 
 const BACK_URL = import.meta.env.VITE_URL_BACK;
 
@@ -9,6 +15,8 @@ const mostrarModal = ref(false);
 const mostrarEditar = ref(false);
 const tallerSeleccionado = ref(null);
 const periodes = ref([]);
+const selectedPeriodeId = ref(null);
+
 
 // Estados reactivos para filtros
 const filterOpen = ref(false);
@@ -72,6 +80,15 @@ const cargarTallers = async () => {
   }
 };
 
+const cargarSystemSettings = async () => {
+  try {
+    const settings = await getSystemSettings();
+    selectedPeriodeId.value = settings.selectedPeriodeId;
+  } catch (error) {
+    console.error("Error al obtenir configuració:", error);
+  }
+};
+
 const extractHoraris = (data) => {
   const horasSet = new Set();
 
@@ -100,25 +117,18 @@ const formatHorari = (horariJSON) => {
 
 const cargarPeriodes = async () => {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_URL_BACK || "http://localhost:8000"}/periodes`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-    if (!response.ok) throw new Error("Error al cargar periodes");
-    periodes.value = await response.json();
+    periodes.value = await getPeriodes();
     console.log("Periodes carregats:", periodes.value);
   } catch (error) {
     console.error("Error al cargar periodes:", error);
   }
 };
-
 onMounted(async () => {
   await cargarTallers();
   await cargarPeriodes();
+  await cargarSystemSettings();
 });
+
 
 const filaActiva = ref(null);
 
@@ -222,34 +232,38 @@ const getTallerHora = (taller) => {
 };
 
 const tallersFiltrados = computed(() => {
-  return tallers.value.filter((taller) => {
-    // Filtro por mes
-    if (selectedMonths.value.length > 0) {
+  let filtered = tallers.value;
+
+  // Filtro por período (SIEMPRE activo si está seleccionado)
+  if (selectedPeriodeId.value) {
+    filtered = filtered.filter(t => t.periode === selectedPeriodeId.value);
+  }
+
+  // Filtro por mes
+  if (selectedMonths.value.length > 0) {
+    filtered = filtered.filter(taller => {
       const tallerMes = getTallerMes(taller);
-      if (!selectedMonths.value.includes(tallerMes)) {
-        return false;
-      }
-    }
+      return selectedMonths.value.includes(tallerMes);
+    });
+  }
 
-    // Filtro por horario
-    if (selectedHoraris.value.length > 0) {
+  // Filtro por horario
+  if (selectedHoraris.value.length > 0) {
+    filtered = filtered.filter(taller => {
       const tallerHora = getTallerHora(taller);
-      if (!selectedHoraris.value.includes(tallerHora)) {
-        return false;
-      }
-    }
+      return selectedHoraris.value.includes(tallerHora);
+    });
+  }
 
-    // Filtro por búsqueda de nombre
-    if (searchTaller.value.trim() !== "") {
-      const busqueda = searchTaller.value.toLowerCase();
-      const nombre = taller.nom.toLowerCase();
-      if (!nombre.includes(busqueda)) {
-        return false;
-      }
-    }
+  // Filtro por búsqueda de nombre
+  if (searchTaller.value.trim() !== "") {
+    const busqueda = searchTaller.value.toLowerCase();
+    filtered = filtered.filter(taller => {
+      return taller.nom.toLowerCase().includes(busqueda);
+    });
+  }
 
-    return true;
-  });
+  return filtered;
 });
 
 const abrirModal = () => {
