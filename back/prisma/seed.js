@@ -26,7 +26,7 @@ const workshopsData = [
 async function main() {
   prisma = await getPrisma();
   console.log(
-    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)...",,
+    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)..."
   );
 
   const periodsIds = [];
@@ -290,7 +290,7 @@ async function main() {
             { NOM: "Alumne 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: true },
           ]),
           llista_professors: JSON.stringify([
-            { NOM: "Profe 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: flase },
+            { NOM: "Profe 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: false },
           ]),
           autoritzat: false,
         },
@@ -316,7 +316,7 @@ async function main() {
           assistencia: assistencia,
         },
       });
-    } catch (e) {}
+    } catch (e) { }
   }
   console.log("\n🚀 [6/7] Creant pesos de criterios...");
   const pesos = [
@@ -329,13 +329,13 @@ async function main() {
 
   for (const p of pesos) {
     const existe = await prisma.criterisWeights.findUnique({
-      where: { criterio: p.criterio },
+      where: { criteri: p.criterio },
     });
     if (!existe) {
       await prisma.criterisWeights.create({
         data: {
-          criterio: p.criterio,
-          peso: p.peso,
+          criteri: p.criterio,
+          pes: p.peso,
           periode: null, // Aplica globalmente
         },
       });
