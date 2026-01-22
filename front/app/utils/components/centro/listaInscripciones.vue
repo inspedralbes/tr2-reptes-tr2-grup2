@@ -95,7 +95,14 @@ function toggleMonthSelection(mes) {
   }
 }
 function removeMonth(mes) {
-  selectedMonths.value = selectedMonths.value.filter((m) => m !== mes);
+  // Buscamos la posición del mes en el array
+  for (let i = 0; i < selectedMonths.value.length; i++) {
+    if (selectedMonths.value[i] === mes) {
+      // Si lo encontramos, lo borramos en esa posición y salimos del bucle
+      selectedMonths.value.splice(i, 1);
+      break; 
+    }
+  }
 }
 
 function toggleHorariSelection(horari) {
@@ -108,7 +115,12 @@ function toggleHorariSelection(horari) {
 }
 
 function removeHorari(horari) {
-  selectedHoraris.value = selectedHoraris.value.filter((h) => h !== horari);
+  for (let i = 0; i < selectedHoraris.value.length; i++) {
+    if (selectedHoraris.value[i] === horari) {
+      selectedHoraris.value.splice(i, 1);
+      break;
+    }
+  }
 }
 
 function toggleFilter() {
@@ -255,8 +267,9 @@ onMounted(async () => {
     ]);
     
     // Filtrar por período seleccionado
-    const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
-    
+    //Alba: Lo he comentado para que se muestren todos los talleres, sin filtrar por periodo ya que me estaba dando problemas de que no se me veian los talleres
+    // const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
+    const filteredData = rawData;
     console.log("Datos crudos de talleres:", filteredData);
 
     // Extraer horarios únicos

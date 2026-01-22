@@ -2,7 +2,7 @@ import { getPrisma } from "../dbConn.js";
 
 export async function getSystemSettings() {
   const prisma = await getPrisma();
-  
+
   let settings = await prisma.systemSettings.findFirst({
     include: {
       periode: true,
@@ -15,7 +15,8 @@ export async function getSystemSettings() {
     });
 
     if (periodes.length === 0) {
-      throw new Error("No hay periodes disponibles");
+      console.warn("Ojo: No hay periodos en la DB, devolviendo configuración vacía.");
+      return [];
     }
 
     settings = await prisma.systemSettings.create({
