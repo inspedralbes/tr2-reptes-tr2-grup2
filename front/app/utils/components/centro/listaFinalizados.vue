@@ -91,19 +91,19 @@ onMounted(async () => {
   // DATOS ESTÁTICOS DE PRUEBA (TEMPORAL)
   tallersFinalitzats.value = [
     {
-      id: 9991,
+      id: 1,
       nom: "Taller de Cocina Mediterránea (Demo)",
       descripcio: "Un taller demostrativo sobre cocina tradicional.",
       direccio: "Aula Gastronómica 1",
     },
     {
-      id: 9992,
+      id: 2,
       nom: "Introducción a Vue.js (Demo)",
       descripcio: "Aprende los fundamentos del framework progresivo.",
       direccio: "Lab de Informática 2",
     },
     {
-      id: 9993,
+      id: 3,
       nom: "Mecánica Básica (Demo)",
       descripcio: "Mantenimiento preventivo para tu vehículo.",
       direccio: "Taller de Automoción",
@@ -152,7 +152,7 @@ onMounted(async () => {
         <div class="card-body">
           <p class="desc">{{ taller.descripcio }}</p>
           <p class="ubicacion">{{ taller.direccio }}</p>
-          <NuxtLink :to="`/paginaReviewTaller-Profes/${taller.id}`">
+          <NuxtLink :to="`/centro/paginaReviewTaller-Profes/${taller.id}`">
             <button>Avaluar taller</button>
           </NuxtLink>
         </div>

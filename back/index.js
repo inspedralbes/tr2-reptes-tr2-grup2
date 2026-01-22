@@ -18,6 +18,22 @@ import {
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
+import {
+  getAllCriterisWeights,
+  getCriterisWeightById,
+  getCriterisWeightByCriterio,
+  updateCriterisWeight,
+  getCriterisWeightsForPeriod,
+} from "./functions/database/CRUD/CriterisWeights.js";
+import { reloadWeights } from "./functions/database/Criteris.js";
+import {
+  getSystemSettings,
+  updateSystemSettings,
+} from "./functions/database/CRUD/SystemSettings.js";
+import {
+  getAllPeriodes,
+  createPeriode as createPeriodeDB,
+} from "./functions/database/CRUD/Periodes.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -36,7 +52,7 @@ app.use(
   cors({
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
 app.use((req, res, next) => {
@@ -63,7 +79,7 @@ app.post("/login", async (req, res) => {
 
   try {
     const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m,
+      (m) => m.default || m
     );
 
     const user = await prisma.usuaris.findUnique({
@@ -122,7 +138,7 @@ app.post("/register", async (req, res) => {
 
   try {
     const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m,
+      (m) => m.default || m
     );
 
     // Verificar si l'usuari ja existeix
@@ -205,7 +221,7 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
     res.json({ accessToken: newAccessToken });
@@ -234,6 +250,7 @@ app.post("/logout", async (req, res) => {
 import {
   getAllAssistencies,
   getAssistenciaById,
+  getAssistenciesByTallerId,
   createAssistencia,
   updateAssistencia,
   deleteAssistencia,
@@ -242,6 +259,12 @@ import {
 
 app.get("/assistencies", async (req, res) => {
   const assistencies = await getAllAssistencies();
+  res.json(assistencies);
+});
+
+app.get("/assistencies/taller/:tallerId", async (req, res) => {
+  const { tallerId } = req.params;
+  const assistencies = await getAssistenciesByTallerId(tallerId);
   res.json(assistencies);
 });
 
@@ -361,6 +384,54 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
   }
 });
 
+/* ------------------------------- HISTORIC ------------------------------ */
+
+import {
+  getAllHistoric,
+  getHistoricByInstitucion,
+  createHistoric,
+  deleteHistoric,
+} from "./functions/database/CRUD/Historic.js";
+
+app.get("/historic", async (req, res) => {
+  try {
+    const historic = await getAllHistoric();
+    res.json(historic);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/historic/institucion/:institucion", async (req, res) => {
+  try {
+    const { institucion } = req.params;
+    const historic = await getHistoricByInstitucion(institucion);
+    res.json(historic);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/historic", async (req, res) => {
+  try {
+    const { idInstitucion, periode, assistencia } = req.body;
+    const result = await createHistoric(idInstitucion, periode, assistencia);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/historic/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await deleteHistoric(id);
+    res.json(deleted);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /* ------------------------------- INSCRIPCIONS ------------------------------ */
 
 import {
@@ -406,7 +477,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null,
+      comentari || null
     );
 
     return res.status(200).json({
@@ -613,6 +684,7 @@ import {
   updateTaller,
   deleteTaller,
   getTallersByPeriode,
+  addComentariProfe,
 } from "./functions/database/CRUD/Tallers.js";
 
 app.get("/tallers", async (req, res) => {
@@ -686,10 +758,40 @@ app.put("/tallers", async (req, res) => {
   res.json(updatedTaller);
 });
 
+app.put("/tallers/:id", async (req, res) => {
+  const { id } = req.params;
+  const data = { ...req.body, id: parseInt(id) };
+  const updatedTaller = await updateTaller(data);
+  res.json(updatedTaller);
+});
+
 app.delete("/tallers/:id", async (req, res) => {
   const { id } = req.params;
   const deletedTaller = await deleteTaller(id);
   res.json(deletedTaller);
+});
+
+app.post("/tallers/:id/comentari-profe", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { idInstitucio, comentari } = req.body;
+
+    if (!idInstitucio || !comentari) {
+      return res.status(400).json({ error: "Falten idInstitucio i comentari" });
+    }
+
+    const resultado = await addComentariProfe(id, idInstitucio, comentari);
+    res.status(200).json({
+      ok: true,
+      message: "Comentari guardat correctament",
+      data: resultado,
+    });
+  } catch (error) {
+    console.error("Error en /tallers/:id/comentari-profe:", error.message);
+    res.status(500).json({
+      error: error.message || "Error al guardar comentari",
+    });
+  }
 });
 
 /* ------------------------------- USUARIS ------------------------------ */
@@ -729,6 +831,123 @@ app.delete("/usuaris/:id", async (req, res) => {
   const { id } = req.params;
   const deletedUsuari = await deleteUsuari(id);
   res.json(deletedUsuari);
+});
+
+/* ------------------------------- CRITERIS WEIGHTS ------------------------------ */
+
+app.get("/criteris-weights", async (req, res) => {
+  try {
+    const weights = await getAllCriterisWeights();
+    res.json(weights);
+  } catch (error) {
+    console.error("Error al obtener pesos de criterios:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const weight = await getCriterisWeightById(id);
+    res.json(weight);
+  } catch (error) {
+    console.error("Error al obtener peso de criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/criterio/:criterio", async (req, res) => {
+  try {
+    const { criterio } = req.params;
+    const weight = await getCriterisWeightByCriterio(criterio);
+    res.json(weight);
+  } catch (error) {
+    console.error("Error al obtener peso por criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/periodo/:periodeId", async (req, res) => {
+  try {
+    const { periodeId } = req.params;
+    const weights = await getCriterisWeightsForPeriod(periodeId);
+    res.json(weights);
+  } catch (error) {
+    console.error("Error al obtener pesos del período:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/criteris-weights/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { peso } = req.body;
+
+    if (peso === undefined) {
+      return res.status(400).json({ error: "El campo 'peso' es requerido" });
+    }
+
+    const updatedWeight = await updateCriterisWeight(id, peso);
+    
+    // Recargar pesos en memoria
+    await reloadWeights();
+    
+    res.json(updatedWeight);
+  } catch (error) {
+    console.error("Error al actualizar peso de criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* ------------------------------- PERIODES ------------------------------ */
+
+app.get("/periodes", async (req, res) => {
+  try {
+    const periodes = await getAllPeriodes();
+    res.json(periodes);
+  } catch (error) {
+    console.error("Error al obtener periodes:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/periodes", async (req, res) => {
+  try {
+    const { dataIni, dataFi } = req.body;
+    const periode = await createPeriodeDB(dataIni, dataFi);
+    res.json(periode);
+  } catch (error) {
+    console.error("Error al crear periode:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* ------------------------------- SYSTEM SETTINGS ------------------------------ */
+
+app.get("/system-settings", async (req, res) => {
+  try {
+    const settings = await getSystemSettings();
+    res.json(settings);
+  } catch (error) {
+    console.error("Error al obtener configuración del sistema:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/system-settings/:id", async (req, res) => {
+  try {
+    const { selectedPeriodeId } = req.body;
+    
+    if (!selectedPeriodeId) {
+      return res.status(400).json({ error: "selectedPeriodeId es requerido" });
+    }
+    
+    const settings = await updateSystemSettings(selectedPeriodeId);
+    res.json(settings);
+  } catch (error) {
+    console.error("Error al actualizar configuración del sistema:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /* -------------------------------------------------------------------------- */

@@ -28,6 +28,9 @@ model Tallers {
   horari      String    @db.Text
   periode     Int
   autoritzat  Boolean   @default(false)
+  comentari_profe String? @db.Text // JSON array: [{id_inst: int, comentari: string}, ...]
+  comentari_tallerista String?
+  mailTallerista String?
 
   admin Int
 
@@ -119,9 +122,11 @@ model Periodes {
   dataFi  DateTime
 
   // Foreigns
-  historic     Historic[]
-  tallers      Tallers[]
-  inscripcions Inscripcions[]
+  historic         Historic[]
+  tallers          Tallers[]
+  inscripcions     Inscripcions[]
+  criterisWeights  CriterisWeights[]
+  systemSettings   SystemSettings[]
 }
 
 model Historic {
@@ -133,6 +138,25 @@ model Historic {
   // Relations
   id_institucio_rel Institucions @relation(fields: [id_institucio], references: [id])
   periode_rel       Periodes     @relation(fields: [periode], references: [id])
+}
+
+model CriterisWeights {
+  id                Int       @id @default(autoincrement())
+  criteri           String    @unique // FIRST_TIME, ATTENDANCE_RISK, DIVERSITY, NO_CAPACITY, NE
+  pes               Int       @default(20)
+  periode           Int?      // Si es null, aplica globalment
+  dataActualitzacio DateTime  @default(now()) @updatedAt
+  
+  // Relació amb periode
+  id_periode        Periodes? @relation(fields: [periode], references: [id])
+}
+
+model SystemSettings {
+  id                Int      @id @default(autoincrement())
+  selectedPeriodeId Int
+  
+  // Relación con periodo
+  periode           Periodes @relation(fields: [selectedPeriodeId], references: [id])
 }
 
 enum Rol {

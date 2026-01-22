@@ -1,7 +1,10 @@
 <script setup>
 import { useRoute } from "vue-router";
+import { ref } from "vue";
+import GestioWeights from "@/utils/components/admin/GestioWeights.vue";
 
 const route = useRoute();
+const mostrarModalWeights = ref(false);
 
 const isActive = (path) => {
   return route.path === path;
@@ -61,18 +64,14 @@ const isActive = (path) => {
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
+
       <br />
-      <!-- Este icono de boton es temporal, se debe reemplazar por el icono de mejor calidad de imagen -->
-      <NuxtLink to="/admin/gestioPeriodes-Admin" custom v-slot="{ navigate }">
-        <button
-          @click="navigate"
-          data-tooltip="Gestió Períodes"
-          :class="{ 'btn-activo': isActive('/admin/gestioPeriodes-Admin') }"
-        >
-          <img src="/img/centro/calendar.png" alt="" class="icon-white" />
-        </button>
-      </NuxtLink>
+      <button @click="mostrarModalWeights = true" title="Configurar criteris">
+        <i class="fas fa-cog"></i>
+      </button>
     </div>
+
+    <GestioWeights v-if="mostrarModalWeights" @close="mostrarModalWeights = false" />
   </div>
 </template>
 <style>
@@ -123,11 +122,14 @@ const isActive = (path) => {
   filter: brightness(0) invert(1);
 }
 
-#btns button:hover,
-#btns button.btn-activo {
-  background-color: #5c6bc0;
-  padding: 10px;
-  transform: scale(1.1);
+#btns button i {
+  font-size: 28px;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+#btns button:hover i {
+  transform: rotate(90deg);
 }
 
 #btns button:hover::after {

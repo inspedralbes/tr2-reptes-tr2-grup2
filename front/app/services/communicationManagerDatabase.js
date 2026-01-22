@@ -35,6 +35,21 @@ export async function getAssistenciaById(id) {
   return await response.json();
 }
 
+export async function getAssistenciesByTallerId(tallerId) {
+  const response = await fetch(`${BACK_URL}/assistencies/taller/${tallerId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir assistències del taller: ${response.statusText}`,
+    );
+  }
+  return await response.json();
+}
+
 export async function createAssistencia(assistenciaData) {
   const response = await fetch(`${BACK_URL}/assistencies`, {
     method: "POST",
@@ -50,8 +65,8 @@ export async function createAssistencia(assistenciaData) {
   return await response.json();
 }
 
-export async function updateAssistencia(id, assistenciaData) {
-  const response = await fetch(`${BACK_URL}/assistencies/${id}`, {
+export async function updateAssistencia(assistenciaData) {
+  const response = await fetch(`${BACK_URL}/assistencies`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -396,6 +411,171 @@ export async function deleteUsuari(id) {
   });
   if (!response.ok) {
     throw new Error(`Error al eliminar usuari: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- COMENTARIS ------------------------------ */
+
+export async function saveComentariProfe(tallerId, idInstitucio, comentari) {
+  const response = await fetch(`${BACK_URL}/tallers/${tallerId}/comentari-profe`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      idInstitucio: parseInt(idInstitucio),
+      comentari,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar comentari: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function saveInscripcions(selecciones, docentRef, comentari) {
+  const selectionsArray = Object.entries(selecciones).map(
+    ([tallerId, numAlumnos]) => ({
+      tallerId: Number(tallerId),
+      numAlumnos: Number(numAlumnos),
+    }),
+  );
+
+  const payload = {
+    selecciones: selectionsArray,
+    "docents-ref": docentRef?.trim() || null,
+    comentari: comentari?.trim() || null,
+  };
+
+  const response = await fetch(`${BACK_URL}/inscripcions/dadesinsc`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar inscripciones: ${response.statusText}`);
+  }
+  return await response.json();
+}
+/* ------------------------------- CRITERIS WEIGHTS ------------------------------ */
+
+export async function getCriterisWeights() {
+  const response = await fetch(`${BACK_URL}/criteris-weights`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir pesos de criteris: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateCriterisWeight(id, peso) {
+  const response = await fetch(`${BACK_URL}/criteris-weights/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ peso: parseInt(peso) }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar pes de criterio: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- HISTORIC ------------------------------ */
+
+export async function createHistoric(idInstitucion, periode, assistencia) {
+  const response = await fetch(`${BACK_URL}/historic`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idInstitucion: parseInt(idInstitucion),
+      periode: parseInt(periode),
+      assistencia: parseFloat(assistencia),
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar historic: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function getHistoricByInstitucion(institucion) {
+  const response = await fetch(
+    `${BACK_URL}/historic/institucion/${institucion}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Error al obtenir historic: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- PERIODES ------------------------------ */
+
+export async function getPeriodes() {
+  const response = await fetch(`${BACK_URL}/periodes`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir periodes: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function createPeriode(dataIni, dataFi) {
+  const response = await fetch(`${BACK_URL}/periodes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      dataIni,
+      dataFi,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al crear periode: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- SYSTEM SETTINGS ------------------------------ */
+
+export async function getSystemSettings() {
+  const response = await fetch(`${BACK_URL}/system-settings`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir configuració del sistema: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function updateSystemSettings(id, selectedPeriodeId) {
+  const response = await fetch(`${BACK_URL}/system-settings/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      selectedPeriodeId,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar configuració del sistema: ${response.statusText}`);
   }
   return await response.json();
 }

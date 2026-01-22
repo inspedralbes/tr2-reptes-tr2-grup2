@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import AccionesInscripcion from "./AccionesInscripcion.vue";
-import { getAllTallers, getAllInscripcions, getInstitucionById, getUsuariById, deleteInscripcion, updateInscripcion } from "@/services/communicationManagerDatabase";
+import { getAllTallers, getAllInscripcions, getInstitucionById, getUsuariById } from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
 const tallersGrouped = ref([]);
@@ -116,7 +115,10 @@ const processTallers = (data, inscritos) => {
   // Filtrar solo los talleres a los que hay inscripción
   data.forEach((t) => {
     // Buscar si hay inscripción para este taller
-    const inscripcion = inscritos.find(i => i.tallerId === t.id);
+    const inscripcion = inscritos.find(i => {
+      const alumnesArray = JSON.parse(i.alumnes || "[]");
+      return alumnesArray.some(a => a.TALLER === t.id);
+    });
     
     // Si no hay inscripción, no incluir el taller
     if (!inscripcion) return;
@@ -183,7 +185,6 @@ const processTallers = (data, inscritos) => {
 // Función de carga de datos reutilizable
 const loadData = async () => {
   try {
-    cargando.value = true;
     const rawData = await getAllTallers();
     horaris.value = extractHoraris(rawData);
     
@@ -196,16 +197,21 @@ const loadData = async () => {
           inscripcionesFiltridas.push(i);
         }
       } else {
-        // Si no hay ID de institución, las añadimos todas
         inscripcionesFiltridas.push(i);
       }
     }
     inscripcionsMap.value = {};
     for (const i of inscripcionesFiltridas) {
-      inscripcionsMap.value[i.tallerId] = i;
+      const alumnesArray = JSON.parse(i.alumnes || "[]");
+      alumnesArray.forEach(alumne => {
+        if (!inscripcionsMap.value[alumne.TALLER]) {
+          inscripcionsMap.value[alumne.TALLER] = [];
+        }
+        inscripcionsMap.value[alumne.TALLER].push(i);
+      });
     }
     
-    tallersGrouped.value = processTallers(rawData, inscripcionesFiltridas);
+    tallersGrouped.value = processTallers(filteredData, inscripcionesFiltridas);
   } catch (error) {
     console.error("Error cargando talleres:", error);
   } finally {

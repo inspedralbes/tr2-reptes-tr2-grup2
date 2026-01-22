@@ -1,7 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
-import { getAllTallers } from "@/services/communicationManagerDatabase";
+import { 
+  getAllTallers, 
+  getAllInscripcions, 
+  confirmarInscripciones, 
+  saveInscripcions,
+  getSystemSettings 
+} from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
 const tallersGrouped = ref([]);
@@ -53,26 +59,7 @@ const enviarTodasSeleccionadas = () => {
 // Paula: funcion para enviar datos al backend desde el modal
 const confirmarEnvio = async () => {
   try {
-    const selectionsArray = Object.entries(selecciones.value).map(
-      ([tallerId, numAlumnos]) => ({
-        tallerId: Number(tallerId),
-        numAlumnos: Number(numAlumnos),
-      }),
-    );
-
-    const payload = {
-      selecciones: selectionsArray,
-      "docents-ref": docentRef.value.trim() || null,
-      comentari: comentari.value.trim() || null,
-    };
-
-    const backendBase = import.meta.env.VITE_URL_BACK || "";
-    const res = await fetch(`${backendBase}/inscripcions/dadesinsc`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error("Error al guardar selecciones");
+    await saveInscripcions(selecciones.value, docentRef.value, comentari.value);
     console.log("Guardadas todas las selecciones");
 
     // Limpiar y cerrar
@@ -262,14 +249,21 @@ const processTallers = (data) => {
 // Carga inicial
 onMounted(async () => {
   try {
-    const rawData = await getAllTallers();
-    console.log("Datos crudos de talleres:", rawData);
+    const [rawData, settings] = await Promise.all([
+      getAllTallers(),
+      getSystemSettings(),
+    ]);
+    
+    // Filtrar por período seleccionado
+    const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
+    
+    console.log("Datos crudos de talleres:", filteredData);
 
     // Extraer horarios únicos
-    horaris.value = extractHoraris(rawData);
+    horaris.value = extractHoraris(filteredData);
     console.log("Horarios disponibles:", horaris.value);
 
-    tallersGrouped.value = processTallers(rawData);
+    tallersGrouped.value = processTallers(filteredData);
   } catch (error) {
     console.error("Error cargando talleres:", error);
   } finally {
