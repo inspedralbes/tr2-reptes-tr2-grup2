@@ -50,7 +50,7 @@ model Tallers {
 model Institucions {
   id          Int    @id @default(autoincrement())
   nom         String
-  codi_centre String
+  codi_centre String @unique
   direccio    String
   codi_postal String
 
@@ -93,7 +93,7 @@ model Usuaris {
   email      String  @unique
   password   String
   telefon    Int
-  token      String?
+  token      String? @db.Text
   rol        Rol
   institucio Int?
   autoritzat Boolean

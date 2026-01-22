@@ -14,9 +14,11 @@ import {
   secretKey,
   hashPassword,
 } from "./functions/auth.js";
+import { enviarEmail } from "./functions/smtp/smtp.js";
 import {
   getUsuariForAuth,
   updateUsuariToken,
+  getUserId,
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
@@ -36,6 +38,8 @@ import {
   getAllPeriodes,
   createPeriode as createPeriodeDB,
 } from "./functions/database/CRUD/Periodes.js";
+import { getInstitucioByCodiCentre } from "./functions/database/CRUD/Institucions.js";
+import { getUsuariByEmail } from "./functions/database/CRUD/Usuaris.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -54,7 +58,7 @@ app.use(
   cors({
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use((req, res, next) => {
@@ -77,48 +81,36 @@ app.get("/", (req, res) => {
 // Ruta de login
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
-    const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m
-    );
+    const existingUser = await getUsuariByEmail(email, true);
 
-    const user = await prisma.usuaris.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      return res.status(400).json({ error: "Usuari no trobat" });
+    if (!existingUser) {
+      return res
+        .status(409)
+        .json({ error: "Ja existeix un usuari amb el correu donat." });
     }
 
-    if (!user.autoritzat) {
+    if (!existingUser.autoritzat) {
       return res.status(403).json({ error: "Usuari no autoritzat" });
     }
 
-    const match = await comparePassword(password, user.password);
-    if (!match) {
+    const comparingPassword = await comparePassword(
+      password,
+      existingUser.password,
+    );
+
+    if (!comparingPassword) {
       return res.status(400).json({ error: "Contrasenya incorrecta" });
     }
 
-    const { accessToken, refreshToken } = generateTokens(user);
-
-    // Guardar el refresh token en la base de datos
-    await prisma.usuaris.update({
-      where: { email },
-      data: { token: refreshToken },
-    });
+    const { accessToken, refreshToken } = generateTokens(existingUser);
+    await updateUsuariToken(parseInt(existingUser.id), refreshToken);
 
     res.status(200).json({
       message: "Login correcte",
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        nom: user.nom,
-        email: user.email,
-        rol: user.rol,
-        institucio: user.institucio,
-      },
+      user: existingUser,
     });
   } catch (error) {
     console.error("Error de base de dades:", error);
@@ -130,7 +122,6 @@ app.post("/login", async (req, res) => {
 app.post("/register", async (req, res) => {
   const { nom, email, password, rol, responsable } = req.body;
 
-  // Validar camps obligatoris
   if (!nom || !email || !password) {
     return res
       .status(400)
@@ -138,61 +129,43 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m
-    );
-
-    // Verificar si l'usuari ja existeix
-    const existingUser = await prisma.usuaris.findUnique({
-      where: { email },
-    });
+    const existingUser = await getUsuariByEmail(email, false);
     if (existingUser) {
-      return res.status(409).json({ error: "L'email ja existeix" });
+      return res
+        .status(409)
+        .json({ error: "Ja existeix un usuari amb el correu donat." });
     }
 
-    // Hashear la contrasenya
-    const hashedPassword = await hashPassword(password);
-
-    let newInstitucio = null;
-
-    // Si s'envia dades de responsable, crear la institució
-    if (responsable && responsable.nom && responsable.codi_centre) {
-      newInstitucio = await prisma.institucions.create({
-        data: {
-          nom: responsable.nom,
-          codi_centre: responsable.codi_centre,
-          direccio: responsable.direccio || "",
-          codi_postal: responsable.codi_postal || "",
-        },
+    const codi_centre = responsable.codi_centre;
+    if (!codi_centre) {
+      return res.status(400).json({
+        error: "Falta el codi del centre a la informació de responsable.",
       });
     }
+    const existingInstitucio = await getInstitucioByCodiCentre(codi_centre);
+    if (existingInstitucio === false) {
+      return res
+        .status(409)
+        .json({ error: "No existeix una institució amb el codi donat." });
+    }
 
-    // Crear el nou usuari
-    const newUser = await prisma.usuaris.create({
-      data: {
-        nom,
-        email,
-        password: hashedPassword,
-        telefon: 0,
-        rol: rol || "Professorat",
-        autoritzat: false, // Per defecte no autoritzat fins que un admin l'aprovi
-        responsable: !!newInstitucio, // Si s'ha creat institució, és responsable
-        institucio: newInstitucio ? newInstitucio.id : null,
-      },
+    const hashedPassword = await hashPassword(password);
+
+    await createUsuari({
+      nom,
+      email,
+      password: hashedPassword,
+      rol: rol || "Professorat",
+      autoritzat: false,
+      institucio: existingInstitucio.id,
+      telefon: 0,
+      responsable: true,
     });
 
+    enviarEmail("registre", { nom, email, id: getUserId(email) });
+
     res.status(201).json({
-      message: "Usuari i institució registrats correctament",
-      user: {
-        id: newUser.id,
-        nom: newUser.nom,
-        email: newUser.email,
-        rol: newUser.rol,
-        responsable: newUser.responsable,
-      },
-      institucio: newInstitucio
-        ? { id: newInstitucio.id, nom: newInstitucio.nom }
-        : null,
+      message: "Petició d'usuari registrat correctament",
     });
   } catch (error) {
     console.error("Error al registrar usuari:", error);
@@ -222,10 +195,11 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     res.json({ accessToken: newAccessToken });
+    enviarEmail("registreAcceptat", { nom: user.nom, email: user.email });
   } catch (err) {
     console.error("Error en refresh:", err);
     res.status(403).json({ error: "Token invàlid o expirat" });
@@ -500,7 +474,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null
+      comentari || null,
     );
 
     return res.status(200).json({
@@ -724,6 +698,8 @@ app.get("/tallers/:id", async (req, res) => {
 app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
   try {
     const data = req.body;
+
+    // Validaciones básicas
     if (
       !data.nom ||
       !data.descripcio ||
@@ -872,12 +848,6 @@ app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
   }
 });
 
-app.put("/tallers", async (req, res) => {
-  const data = req.body;
-  const updatedTaller = await updateTaller(data);
-  res.json(updatedTaller);
-});
-
 app.delete("/tallers/:id", async (req, res) => {
   const { id } = req.params;
   const deletedTaller = await deleteTaller(id);
@@ -928,19 +898,23 @@ app.get("/usuaris/:id", async (req, res) => {
   res.json(usuari);
 });
 
-app.post("/usuaris", async (req, res) => {
+app.put("/usuaris/aceptat/:id", async (req, res) => {
   const data = req.body;
-  const newUsuari = await createUsuari(data);
-  res.json(newUsuari);
+  const id = id;
+  data = { ...data, autoritzat: true };
+  try {
+    await updateUsuari(id, data);
+    // EN UN FUTUR AFEGIR L'ENVIO DEL CORREU ELECTRONIC AQUÍ
+    sendMail("registreAcceptat", { nom: data.nom, email: data.email });
+    return res.json({
+      message: "Usuari actualitzat correctament",
+    });
+  } catch (error) {
+    return res.json({ message: "Error al actualizar usuari:", error });
+  }
 });
 
-app.put("/usuaris", async (req, res) => {
-  const data = req.body;
-  const updatedUsuari = await updateUsuari(data);
-  res.json(updatedUsuari);
-});
-
-app.delete("/usuaris/:id", async (req, res) => {
+app.delete("/usuaris/denegat/:id", async (req, res) => {
   const { id } = req.params;
   const deletedUsuari = await deleteUsuari(id);
   res.json(deletedUsuari);
