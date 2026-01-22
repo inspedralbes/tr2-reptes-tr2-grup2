@@ -1,15 +1,13 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
-import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import informes from "@/utils/components/admin/informesAdmin.vue";
 </script>
 
 <template>
-  <Encabezado />
-  <div id="body">
-    <navBarAdmin />
-    <div id="content">
-      <informes></informes>
+  <div>
+    <div id="body">
+      <div id="content">
+        <informes></informes>
+      </div>
     </div>
   </div>
 </template>

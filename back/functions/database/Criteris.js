@@ -4,52 +4,67 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { getInscripcioById } from "./CRUD/Inscripcions.js";
 import { getPrisma } from "./dbConn.js";
+import { getAllCriterisWeights } from "./CRUD/CriterisWeights.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const weights = JSON.parse(
-  fs.readFileSync(join(__dirname, "../../data/priority_weights.json"), "utf-8"),
-);
 
-const PRIORITY_WEIGHTS = {
-  FIRST_TIME: weights.FIRST_TIME ?? 20,
-  ATTENDANCE_RISK: weights.ATTENDANCE_RISK ?? -30,
-  DIVERSITY: weights.DIVERSITY ?? 15,
-  MIN_ASSIST: weights.MIN_ASSIST ?? 0.8,
-  NO_CAPACITY: weights.NO_CAPACITY ?? -30,
-  NE: weights.NE ?? 30,
+let PRIORITY_WEIGHTS = {
+  FIRST_TIME: 20,
+  ATTENDANCE_RISK: -30,
+  DIVERSITY: 15,
+  MIN_ASSIST: 0.8,
+  NO_CAPACITY: -30,
+  NE: 30,
 };
 
-let score = 50;
 const prisma = await getPrisma();
-const tallerId = 1;
-const inscripcioId = 3;
 
-// Estructura para guardar el desglose de puntuación
-let aceptadas = [];
+// Cargar pesos de la base de datos
+async function loadWeightsFromDB() {
+  try {
+    const dbWeights = await getAllCriterisWeights();
+    for (const w of dbWeights) {
+      PRIORITY_WEIGHTS[w.criterio] = w.peso;
+    }
+    console.log("✅ Pesos de criterios cargados desde BD");
+  } catch (error) {
+    console.warn(
+      "⚠️ Error cargando pesos de BD, usando valores por defecto:",
+      error.message
+    );
+  }
+}
+
+// Cargar pesos al iniciar
+await loadWeightsFromDB();
+
+// Función para recargar pesos (útil desde el endpoint PUT)
+export async function reloadWeights() {
+  await loadWeightsFromDB();
+}
 
 export async function isFirstTime(tallerId, inscripcioId) {
   const inscripcio = await prisma.inscripcions.findUnique({
     where: { id: Number(inscripcioId) },
     select: {
-      tallerId: true,
+      alumnes: true,
       primera_vegada: true,
     },
   });
 
-  if (inscripcio?.tallerId == tallerId && inscripcio.primera_vegada) {
-    score += PRIORITY_WEIGHTS.FIRST_TIME;
-    aceptadas.push({
-      criterio: "Primera vegada",
-      puntos: PRIORITY_WEIGHTS.FIRST_TIME,
-      aplicat: true,
-    });
-  } else {
-    aceptadas.push({
-      criterio: "Primera vegada",
-      puntos: PRIORITY_WEIGHTS.FIRST_TIME,
-      aplicat: false,
-    });
-  }
+  // Parsear el array alumnes y buscar el taller específico
+  const alumnesArray = JSON.parse(inscripcio?.alumnes || "[]");
+  const tallerEnInscripcion = alumnesArray.find(a => a.TALLER === Number(tallerId));
+
+  // Solo aplica si: 1) es primera vez Y 2) el taller está en esta inscripción
+  const aplicat = inscripcio?.primera_vegada && tallerEnInscripcion !== undefined;
+  
+  return {
+    criterio: "Primera vegada",
+    puntos: PRIORITY_WEIGHTS.FIRST_TIME,
+    aplicat: aplicat,
+    score: aplicat ? PRIORITY_WEIGHTS.FIRST_TIME : 0,
+  };
 }
 
 export async function hasAttendanceRisk(inscripcioId) {
@@ -58,26 +73,28 @@ export async function hasAttendanceRisk(inscripcioId) {
     select: { institucio: true },
   });
   const idinstit = idinstitRes?.institucio;
+  
   if (!idinstit) {
-    aceptadas.push({
+    return {
       criterio: "Risc d'assistència",
       puntos: PRIORITY_WEIGHTS.ATTENDANCE_RISK,
       aplicat: false,
-    });
-    return;
+      score: 0,
+    };
   }
 
   const assist = await prisma.historic.findMany({
     where: { id_institucio: Number(idinstit) },
     select: { assistencia: true },
   });
+  
   if (!assist || assist.length === 0) {
-    aceptadas.push({
+    return {
       criterio: "Risc d'assistència",
       puntos: PRIORITY_WEIGHTS.ATTENDANCE_RISK,
       aplicat: false,
-    });
-    return;
+      score: 0,
+    };
   }
 
   let suma = 0;
@@ -86,20 +103,14 @@ export async function hasAttendanceRisk(inscripcioId) {
   }
 
   const porcentaje = suma / assist.length;
-  if (porcentaje < PRIORITY_WEIGHTS.MIN_ASSIST) {
-    score += PRIORITY_WEIGHTS.ATTENDANCE_RISK;
-    aceptadas.push({
-      criterio: "Risc d'assistència",
-      puntos: PRIORITY_WEIGHTS.ATTENDANCE_RISK,
-      aplicat: true,
-    });
-  } else {
-    aceptadas.push({
-      criterio: "Risc d'assistència",
-      puntos: PRIORITY_WEIGHTS.ATTENDANCE_RISK,
-      aplicat: false,
-    });
-  }
+  const aplicat = porcentaje < PRIORITY_WEIGHTS.MIN_ASSIST;
+  
+  return {
+    criterio: "Risc d'assistència",
+    puntos: PRIORITY_WEIGHTS.ATTENDANCE_RISK,
+    aplicat: aplicat,
+    score: aplicat ? PRIORITY_WEIGHTS.ATTENDANCE_RISK : 0,
+  };
 }
 
 export async function validateCapacity(tallerId, inscripcioId) {
@@ -115,36 +126,42 @@ export async function validateCapacity(tallerId, inscripcioId) {
       alumnes: true,
     },
   });
-  const alumnesObj = JSON.parse(sol_insc?.alumnes || "[]");
-  if (capacity && capacity.places_disp < alumnesObj.QUANTITAT) {
-    score += PRIORITY_WEIGHTS.NO_CAPACITY;
-    aceptadas.push({
-      criterio: "Sense capacitat",
-      puntos: PRIORITY_WEIGHTS.NO_CAPACITY,
-      aplicat: true,
-    });
-  } else {
-    aceptadas.push({
-      criterio: "Sense capacitat",
-      puntos: PRIORITY_WEIGHTS.NO_CAPACITY,
-      aplicat: false,
-    });
-  }
+  const alumnesArray = JSON.parse(sol_insc?.alumnes || "[]");
+  // Buscar el taller específico en el array
+  const alumnesDelTaller = alumnesArray.find(a => a.TALLER === Number(tallerId));
+  const quantitat = alumnesDelTaller?.QUANTITAT || 0;
+  
+  const aplicat = capacity && capacity.places_disp < quantitat;
+  
+  return {
+    criterio: "Sense capacitat",
+    puntos: PRIORITY_WEIGHTS.NO_CAPACITY,
+    aplicat: aplicat,
+    score: aplicat ? PRIORITY_WEIGHTS.NO_CAPACITY : 0,
+  };
 }
 
 export async function calcularPuntuacion(inscripcioId, tallerId) {
-  score = 50;
-  aceptadas = [];
   const inscripcio = await getInscripcioById(inscripcioId);
 
-  await isFirstTime(tallerId, inscripcioId);
-  await hasAttendanceRisk(inscripcioId);
-  await validateCapacity(tallerId, inscripcioId);
+  const criterios = await Promise.all([
+    isFirstTime(tallerId, inscripcioId),
+    hasAttendanceRisk(inscripcioId),
+    validateCapacity(tallerId, inscripcioId),
+  ]);
+
+  const score = 50 + criterios.reduce((sum, c) => sum + c.score, 0);
+
+  // Guardar puntuación en la base de datos
+  await prisma.inscripcions.update({
+    where: { id: Number(inscripcioId) },
+    data: { puntuacio: score },
+  });
 
   return {
     id: inscripcio.id,
     score: score,
-    aceptadas: aceptadas,
+    aceptadas: criterios,
   };
 }
 
@@ -204,6 +221,3 @@ export async function calcularPuntuacionesDelTaller(tallerId) {
     );
   }
 }
-
-// const resultado = await calcularPuntuacion(inscripcioId, tallerId);
-// console.log(resultado);

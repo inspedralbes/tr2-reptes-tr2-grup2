@@ -1,48 +1,26 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
-import navProfes from "@/layouts/navBarProfes.vue";
-import { ref, onMounted } from "vue";
-import {
-  getAllTallers,
-  getAllInscripcions,
-} from "@/services/communicationManagerDatabase";
-
-const tallersFinalitzats = ref([]);
-const isLoading = ref(true);
-
-function processTallers(allTallers, allInscripcions) {
-    
-}
-
-onMounted(async () => {
-    try {
-        const fetchedTallers = await getAllTallers(); 
-        const fetchedInscripcions = await getAllInscripcions();
-
-        tallersFinalitzats.value = processTallers(fetchedTallers, fetchedInscripcions);
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    } finally {
-        isLoading.value = false;
-    }
-});
-
+import listaFinalizados from "@/utils/components/centro/listaFinalizados.vue";
 </script>
 <template>
-  <Encabezado />
-  <div id="cuerpo">
-    <navProfes />
-
-    <div id="contenedor">
-      <h3>Tallers finalitzats:</h3>
-      <div id="contenido"></div>
+  <div>
+    <div id="cuerpo">
+      <div id="contenedor">
+        <h3>Tallers finalitzats:</h3>
+        <div id="contenido">
+          <listaFinalizados />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <style scoped>
+@font-face {
+  font-family: "Coolvetica";
+  src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
+}
+
 #cuerpo {
   display: flex;
-  background-color: #f5f5f5;
   height: calc(100vh - 85px);
   overflow: hidden;
 }
