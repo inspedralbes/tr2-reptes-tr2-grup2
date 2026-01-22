@@ -248,44 +248,52 @@ export async function getTallerById(id) {
   return await response.json();
 }
 
-export async function createTaller(tallerData) {
+export async function createTaller(formData) {
   const response = await fetch(`${BACK_URL}/tallers`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify(tallerData),
+    body: formData,
   });
 
   if (!response.ok) {
-    throw new Error(`Error al crear taller: ${response.statusText}`);
+    let text = "";
+    try {
+      text = await response.text();
+    } catch (e) {
+      console.warn("Failed to read error response text (createTallerForm)", e);
+    }
+    throw new Error(`Error al crear taller: ${response.status} ${text}`);
   }
+
   return await response.json();
 }
 
-export async function updateTaller(id, tallerData) {
-  const response = await fetch(`${BACK_URL}/tallers/${id}`, {
+export async function updateTaller(formData) {
+  const response = await fetch(`${BACK_URL}/tallers`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify(tallerData),
+    body: formData,
   });
+
   if (!response.ok) {
-    throw new Error(`Error al actualitzar taller: ${response.statusText}`);
+    let text = "";
+    try {
+      text = await response.text();
+    } catch (e) {
+      console.warn("Failed to read error response text (updateTallerForm)", e);
+    }
+    throw new Error(`Error al actualitzar taller: ${response.status} ${text}`);
   }
+
   return await response.json();
 }
 
 export async function deleteTaller(id) {
-  const response = await fetch(`${BACK_URL}/tallers/${id}`, {
+  const response = await fetch(`${BACK_URL}/tallers`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
       //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
+    body: JSON.stringify({ id }),
   });
   if (!response.ok) {
     throw new Error(`Error al eliminar taller: ${response.statusText}`);

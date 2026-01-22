@@ -28,6 +28,7 @@ model Tallers {
   horari      String    @db.Text
   periode     Int
   autoritzat  Boolean   @default(false)
+  imatge      String?
 
   admin Int
 
