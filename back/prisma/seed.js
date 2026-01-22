@@ -261,6 +261,7 @@ async function main() {
           periode: period,
           admin: adminId,
           autoritzat: true,
+          imatge: "/files/images/example.png",
         },
       });
 

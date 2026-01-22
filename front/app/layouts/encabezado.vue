@@ -1,4 +1,16 @@
-<script setup></script>
+<script setup>
+import { useRouter, useRoute } from "vue-router";
+import { computed } from "vue";
+
+const router = useRouter();
+const route = useRoute();
+
+const isHome = computed(() => route.path === "/");
+
+const handleLogout = () => {
+  router.push("/");
+};
+</script>
 <template>
   <header>
     <img
@@ -10,6 +22,13 @@
       src="/assets/img/encabezado/consorci-nombre.png"
       alt="Nombre Consorci"
       id="nombre-img"
+    />
+    <img
+      v-if="!isHome"
+      src="/img/log_out.png"
+      alt="Log Out"
+      id="logout-img"
+      @click="handleLogout"
     />
   </header>
 </template>
@@ -23,6 +42,15 @@
   margin-top: 30px;
   height: 30px;
   margin-left: 15px;
+}
+
+#logout-img {
+  height: 30px;
+  position: absolute;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 header {
   width: 100vw;
