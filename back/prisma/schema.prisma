@@ -29,7 +29,8 @@ model Tallers {
   periode     Int
   autoritzat  Boolean   @default(false)
   imatge      String?
-
+  mailTallerista String?
+  
   admin Int
 
   admet_insc Boolean?

@@ -23,6 +23,7 @@ const horaris = ref([]);
 const nom = ref("");
 const descripcio = ref("");
 const tallerista = ref("");
+const mailtallerista = ref("");
 const placesMax = ref("");
 const direccio = ref("");
 const diaSeleccionado = ref("");
@@ -30,6 +31,8 @@ const horaInicio = ref("");
 const horaFin = ref("");
 const periodeSeleccionado = ref("");
 const imatgeFile = ref(null);
+const dataInici = ref("");
+const dataFi = ref("");
 
 
 const dias = [
@@ -70,35 +73,18 @@ const cargarTallers = async () => {
 };
 
 const extractHoraris = (data) => {
-  const listaHoras = [];
-  for (let i = 0; i < data.length; i++) {
-    const t = data[i];
-    let horari = {};
+  const horasSet = new Set();
+
+  data.forEach(taller => {
     try {
-      if (typeof t.horari === "string" && t.horari.trim() !== "") {
-        horari = JSON.parse(t.horari);
-      } else if (t.horari) {
-        horari = t.horari;
-      }
+      const horari = JSON.parse(taller.horari);
+      horasSet.add(horari?.TORNS?.[0]?.HORAINICI || "00:00");
     } catch (e) {
-      horari = {};
+      horasSet.add("00:00");
     }
-    let hora = "00:00";
-    if (horari.TORNS && horari.TORNS[0] && horari.TORNS[0].HORAINICI) {
-      hora = horari.TORNS[0].HORAINICI;
-    }
-    let existe = false;
-    for (let j = 0; j < listaHoras.length; j++) {
-      if (listaHoras[j] === hora) {
-        existe = true;
-        break;
-      }
-    }
-    if (!existe) {
-      listaHoras.push(hora);
-    }
-  }
-  return listaHoras.sort();
+  });
+
+  return Array.from(horasSet).sort();
 };
 
 const formatHorari = (horariJSON) => {
@@ -276,9 +262,10 @@ const abrirModalEditar = (taller) => {
   nom.value = taller.nom || "";
   descripcio.value = taller.descripcio || "";
   tallerista.value = taller.tallerista || "";
+  mailtallerista.value = taller.mailTallerista || "";
   placesMax.value = (taller.places_max ?? taller.places_disp ?? "") + "";
   direccio.value = taller.direccio || "";
-  // Parsejar horari per omplir DIA/HORAINICI/HORAFI
+  // Parsejar horari per omplir DIA/HORAINICI/HORAFI/DATAINI/DATAFI
   try {
     let horari = {};
     if (typeof taller.horari === "string" && taller.horari.trim() !== "") {
@@ -290,16 +277,19 @@ const abrirModalEditar = (taller) => {
     diaSeleccionado.value = torn.DIA || "";
     horaInicio.value = torn.HORAINICI || "";
     horaFin.value = torn.HORAFI || "";
+    dataInici.value = horari.DATAINI || "";
+    dataFi.value = horari.DATAFI || "";
   } catch (e) {
     diaSeleccionado.value = "";
     horaInicio.value = "";
     horaFin.value = "";
+    dataInici.value = "";
+    dataFi.value = "";
   }
   // Periode (esperat com a enter)
   periodeSeleccionado.value = (taller.periode ?? "") + "";
-  imatgeFile.value = null; // no canviar imatge per defecte
+  imatgeFile.value = null;
 };
-
 const cerrarModal = () => {
   mostrarModal.value = false;
   limpiarFormulario();
@@ -316,12 +306,15 @@ const limpiarFormulario = () => {
   nom.value = "";
   descripcio.value = "";
   tallerista.value = "";
+  mailtallerista.value = "";
   placesMax.value = "";
   direccio.value = "";
   diaSeleccionado.value = "";
   horaInicio.value = "";
   horaFin.value = "";
   periodeSeleccionado.value = "";
+  dataInici.value = "";
+  dataFi.value = "";
   imatgeFile.value = null;
 };
 
@@ -338,12 +331,15 @@ const crearTaller = async () => {
     !nom.value ||
     !descripcio.value ||
     !tallerista.value ||
+    !mailtallerista.value ||
     !placesMax.value ||
     !direccio.value ||
     !diaSeleccionado.value ||
     !horaInicio.value ||
     !horaFin.value ||
-    !periodeSeleccionado.value
+    !periodeSeleccionado.value ||
+    !dataInici.value ||
+    !dataFi.value
   ) {
     alert("Tots els camps són obligatoris");
     return;
@@ -351,6 +347,8 @@ const crearTaller = async () => {
 
   // Construir horari JSON
   const horariJSON = JSON.stringify({
+    DATAINI: dataInici.value,
+    DATAFI: dataFi.value,
     TORNS: [
       {
         DIA: diaSeleccionado.value,
@@ -365,6 +363,7 @@ const crearTaller = async () => {
   formData.append("nom", nom.value);
   formData.append("descripcio", descripcio.value);
   formData.append("tallerista", tallerista.value);
+  formData.append("mailTallerista", mailtallerista.value);
   formData.append("places_max", Number.parseInt(placesMax.value));
   formData.append("places_disp", Number.parseInt(placesMax.value));
   formData.append("direccio", direccio.value);
@@ -399,12 +398,15 @@ const actualizarTaller = async () => {
     !nom.value ||
     !descripcio.value ||
     !tallerista.value ||
+    !mailtallerista.value ||
     !placesMax.value ||
     !direccio.value ||
     !diaSeleccionado.value ||
     !horaInicio.value ||
     !horaFin.value ||
-    !periodeSeleccionado.value
+    !periodeSeleccionado.value ||
+    !dataInici.value ||
+    !dataFi.value
   ) {
     alert("Tots els camps són obligatoris");
     return;
@@ -412,6 +414,8 @@ const actualizarTaller = async () => {
 
   // Construir horari JSON
   const horariJSON = JSON.stringify({
+    DATAINI: dataInici.value,
+    DATAFI: dataFi.value,
     TORNS: [
       {
         DIA: diaSeleccionado.value,
@@ -427,6 +431,7 @@ const actualizarTaller = async () => {
   formData.append("nom", nom.value);
   formData.append("descripcio", descripcio.value);
   formData.append("tallerista", tallerista.value);
+  formData.append("mailTallerista", mailtallerista.value);
   formData.append("places_max", Number.parseInt(placesMax.value));
   // Manté places_disp si no hi ha lògica específica (aquí igualem a places_max per simplicitat si cal)
   formData.append(
@@ -617,11 +622,13 @@ async function confirmarEliminar(id) {
           <div v-if="filaActiva === taller.id" class="info-desplegable">
             <div class="contenido-detalle">
               <p><strong>Descripció:</strong> {{ taller.descripcio }}</p>
-              <p><strong>Tallerista:</strong> {{ taller.tallerista }}</p>
+              <p><strong>Tallerista:</strong> {{ taller.tallerista }} ({{ taller.mailTallerista }})</p>
               <p>
                 <strong>Places disponibles:</strong> {{ taller.places_disp }}
               </p>
               <p><strong>Modalitat:</strong> {{ taller.modalitat }}</p>
+              <p>Comença el: {{ JSON.parse(taller.horari).DATAINI }}</p>
+              <p>Finalitza el: {{ JSON.parse(taller.horari).DATAFI }}</p>
               <p>
                 <b>Horari - </b>
                 {{ formatHorari(taller.horari) }}
@@ -660,6 +667,13 @@ async function confirmarEliminar(id) {
             <input id="tallerista" v-model="tallerista" type="text" maxlength="191" required />
           </div>
 
+          <!-- Mail Tallerista -->
+          <div class="form-group">
+            <label for="mailtallerista">Mail Tallerista *</label>
+            <input id="mailtallerista" v-model="mailtallerista" type="email" placeholder="tallerista@example.com"
+              maxlength="191" required />
+          </div>
+
           <!-- Places Màximes -->
           <div class="form-group">
             <label for="placesMax">Places Màximes *</label>
@@ -671,6 +685,18 @@ async function confirmarEliminar(id) {
             <label for="direccio">Direcció *</label>
             <input id="direccio" v-model="direccio" type="text" placeholder="c. Salvador Espriu, 3" maxlength="191"
               required />
+          </div>
+
+          <!-- Data Inici -->
+          <div class="form-group">
+            <label for="dataini">Data Inici *</label>
+            <input id="dataini" v-model="dataInici" type="date" required />
+          </div>
+
+          <!-- Data Fi -->
+          <div class="form-group">
+            <label for="datafi">Data Fi *</label>
+            <input id="datafi" v-model="dataFi" type="date" required />
           </div>
 
           <!-- Dia de la setmana -->
@@ -752,6 +778,13 @@ async function confirmarEliminar(id) {
             <input id="tallerista-edit" v-model="tallerista" type="text" maxlength="191" required />
           </div>
 
+          <!-- Mail Tallerista -->
+          <div class="form-group">
+            <label for="mailtallerista-edit">Mail Tallerista *</label>
+            <input id="mailtallerista-edit" v-model="mailtallerista" type="email" placeholder="tallerista@example.com"
+              maxlength="191" required />
+          </div>
+
           <!-- Places Màximes -->
           <div class="form-group">
             <label for="placesMax-edit">Places Màximes *</label>
@@ -763,6 +796,18 @@ async function confirmarEliminar(id) {
             <label for="direccio-edit">Direcció *</label>
             <input id="direccio-edit" v-model="direccio" type="text" placeholder="c. Salvador Espriu, 3" maxlength="191"
               required />
+          </div>
+
+          <!-- Data Inici -->
+          <div class="form-group">
+            <label for="dataini-edit">Data Inici *</label>
+            <input id="dataini-edit" v-model="dataInici" type="date" required />
+          </div>
+
+          <!-- Data Fi -->
+          <div class="form-group">
+            <label for="datafi-edit">Data Fi *</label>
+            <input id="datafi-edit" v-model="dataFi" type="date" required />
           </div>
 
           <!-- Dia de la setmana -->

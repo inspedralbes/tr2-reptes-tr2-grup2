@@ -656,6 +656,7 @@ app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
       !data.nom ||
       !data.descripcio ||
       !data.tallerista ||
+      !data.mailTallerista ||
       !data.direccio ||
       !data.horari ||
       !data.periode ||
@@ -663,7 +664,7 @@ app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
     ) {
       return res.status(400).json({
         error:
-          "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)",
+          "Falten camps obligatoris (nom, descripcio, tallerista, mailTallerista, direccio, horari, periode, admin)",
       });
     }
 

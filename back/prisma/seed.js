@@ -249,6 +249,7 @@ async function main() {
           descripcio: "Activitat educativa (Seed)",
           institucio: inst.id,
           tallerista: "Tallerista Expert",
+          mailTallerista: "tallerista@example.com",
           places_max: workshop.value,
           places_disp: workshop.value,
           modalitat: "A",
@@ -287,10 +288,20 @@ async function main() {
           id_taller: taller.id,
           dia: new Date(),
           llista_alumnes: JSON.stringify([
-            { NOM: "Alumne 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: true },
+            {
+              NOM: "Alumne 1",
+              INSTITUT: inst.id,
+              ASSISTENCIA: true,
+              JUSTIFICAT: true,
+            },
           ]),
           llista_professors: JSON.stringify([
-            { NOM: "Profe 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: flase },
+            {
+              NOM: "Profe 1",
+              INSTITUT: inst.id,
+              ASSISTENCIA: true,
+              JUSTIFICAT: flase,
+            },
           ]),
           autoritzat: false,
         },

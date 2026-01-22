@@ -205,5 +205,5 @@ export async function calcularPuntuacionesDelTaller(tallerId) {
   }
 }
 
-const resultado = await calcularPuntuacion(inscripcioId, tallerId);
-console.log(resultado);
+// const resultado = await calcularPuntuacion(inscripcioId, tallerId);
+// console.log(resultado);
