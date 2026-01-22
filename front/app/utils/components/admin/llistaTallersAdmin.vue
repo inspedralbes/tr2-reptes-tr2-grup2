@@ -1,6 +1,12 @@
 <script setup>
+import Swal from "sweetalert2";
 import { ref, onMounted, computed } from "vue";
-import { getAllTallers, createTaller, updateTaller, deleteTaller } from "~/services/communicationManagerDatabase";
+import {
+  getAllTallers,
+  createTaller,
+  updateTaller,
+  deleteTaller,
+} from "~/services/communicationManagerDatabase";
 
 const BACK_URL = import.meta.env.VITE_URL_BACK;
 
@@ -30,7 +36,6 @@ const horaInicio = ref("");
 const horaFin = ref("");
 const periodeSeleccionado = ref("");
 const imatgeFile = ref(null);
-
 
 const dias = [
   "Dilluns",
@@ -121,7 +126,12 @@ const cargarPeriodes = async () => {
         headers: { "Content-Type": "application/json" },
       },
     );
-    if (!response.ok) throw new Error("Error al cargar periodes");
+    if (!response.ok)
+      throw new Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Error al cargar periodes",
+      });
     periodes.value = await response.json();
     console.log("Periodes carregats:", periodes.value);
   } catch (error) {
@@ -311,7 +321,6 @@ const cerrarModalEditar = () => {
   limpiarFormulario();
 };
 
-
 const limpiarFormulario = () => {
   nom.value = "";
   descripcio.value = "";
@@ -345,7 +354,12 @@ const crearTaller = async () => {
     !horaFin.value ||
     !periodeSeleccionado.value
   ) {
-    alert("Tots els camps són obligatoris");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Tots els camps són obligatoris",
+      confirmButtonText: "Tancar",
+    });
     return;
   }
 
@@ -383,12 +397,22 @@ const crearTaller = async () => {
   try {
     const resultado = await createTaller(formData);
     console.log("Taller creado:", resultado);
-    alert("Taller creat correctament");
+    Swal.fire({
+      icon: "success",
+      title: "Éxit",
+      text: "Taller creat correctament",
+      confirmButtonText: "Tancar",
+    });
     cerrarModal();
     await cargarTallers();
   } catch (error) {
     console.error("Error al crear taller:", error);
-    alert(`Error: ${error.message}`);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: `Error: ${error.message}`,
+      confirmButtonText: "Tancar",
+    });
   }
 };
 
@@ -406,7 +430,12 @@ const actualizarTaller = async () => {
     !horaFin.value ||
     !periodeSeleccionado.value
   ) {
-    alert("Tots els camps són obligatoris");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Tots els camps són obligatoris",
+      confirmButtonText: "Tancar",
+    });
     return;
   }
 
@@ -431,7 +460,9 @@ const actualizarTaller = async () => {
   // Manté places_disp si no hi ha lògica específica (aquí igualem a places_max per simplicitat si cal)
   formData.append(
     "places_disp",
-    Number.parseInt(String(tallerSeleccionado.value.places_disp ?? placesMax.value)),
+    Number.parseInt(
+      String(tallerSeleccionado.value.places_disp ?? placesMax.value),
+    ),
   );
   formData.append("direccio", direccio.value);
   formData.append("horari", horariJSON);
@@ -440,7 +471,10 @@ const actualizarTaller = async () => {
     "institucio",
     Number.parseInt(String(tallerSeleccionado.value.institucio ?? 1)),
   );
-  formData.append("admin", Number.parseInt(String(tallerSeleccionado.value.admin ?? 1)));
+  formData.append(
+    "admin",
+    Number.parseInt(String(tallerSeleccionado.value.admin ?? 1)),
+  );
   formData.append(
     "autoritzat",
     (tallerSeleccionado.value.autoritzat ?? false) ? "true" : "false",
@@ -455,12 +489,22 @@ const actualizarTaller = async () => {
   try {
     const resultado = await updateTaller(formData);
     console.log("Taller actualitzat:", resultado);
-    alert("Taller actualitzat correctament");
+    Swal.fire({
+      icon: "success",
+      title: "Éxit",
+      text: "Taller actualitzat correctament",
+      confirmButtonText: "Tancar",
+    });
     cerrarModalEditar();
     await cargarTallers();
   } catch (error) {
     console.error("Error al actualitzar taller:", error);
-    alert(`Error: ${error.message}`);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: `Error: ${error.message}`,
+      confirmButtonText: "Tancar",
+    });
   }
 };
 
@@ -473,7 +517,13 @@ const getImageUrl = (source) => {
   if (typeof source === "string") {
     path = source;
   } else if (typeof source === "object") {
-    path = source.imatge || source.image || source.foto || source.url || source.path || null;
+    path =
+      source.imatge ||
+      source.image ||
+      source.foto ||
+      source.url ||
+      source.path ||
+      null;
   }
 
   if (!path) return DEFAULT_IMG;
@@ -489,15 +539,36 @@ const onImgError = (e) => {
 };
 
 async function confirmarEliminar(id) {
-  if (confirm("Estàs segur que vols eliminar aquest taller?")) {
+  const result = await Swal.fire({
+    title: "Estas segur?",
+    text: "No podràs revertir això!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    cancelButtonText: "Cancel·la",
+    confirmButtonText: "Sí, elimina-ho!",
+  });
+
+  if (result.isConfirmed) {
     await deleteTaller(id)
       .then(() => {
-        alert("Taller eliminat correctament");
+        Swal.fire({
+          icon: "success",
+          title: "Éxit",
+          text: "Taller eliminat correctament",
+          confirmButtonText: "Tancar",
+        });
         cargarTallers();
       })
       .catch((error) => {
         console.error("Error al eliminar taller:", error);
-        alert(`Error: ${error.message}`);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: `Error: ${error.message}`,
+          confirmButtonText: "Tancar",
+        });
       });
   }
 }
@@ -527,8 +598,13 @@ async function confirmarEliminar(id) {
         </div>
 
         <div v-if="openMonthFilter" class="months-grid">
-          <button v-for="mes in meses" :key="mes" class="month-chip" @click="toggleMonthSelection(mes)"
-            :class="{ 'is-active': selectedMonths.includes(mes) }">
+          <button
+            v-for="mes in meses"
+            :key="mes"
+            class="month-chip"
+            @click="toggleMonthSelection(mes)"
+            :class="{ 'is-active': selectedMonths.includes(mes) }"
+          >
             {{ mes }}
           </button>
           <button class="btn-aplicar" @click="openMonthFilter = false">
@@ -547,21 +623,34 @@ async function confirmarEliminar(id) {
       <!-- Filtro de BÚSQUEDA -->
       <h3>TALLER</h3>
       <div>
-        <input v-model="searchTaller" type="text" class="search-input" placeholder="Cercar taller..." />
+        <input
+          v-model="searchTaller"
+          type="text"
+          class="search-input"
+          placeholder="Cercar taller..."
+        />
       </div>
 
       <!-- Filtro de HORARI -->
       <h3>HORARI</h3>
       <div>
-        <div @click="openHorariFilter = !openHorariFilter" class="select-header">
+        <div
+          @click="openHorariFilter = !openHorariFilter"
+          class="select-header"
+        >
           <span v-if="selectedHoraris.length === 0">Escull el horari...</span>
           <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
           <span class="arrow" :class="{ rotated: openHorariFilter }">▲</span>
         </div>
 
         <div v-if="openHorariFilter" class="horaris-grid">
-          <button v-for="horari in horaris" :key="horari" class="horari-chip" @click="toggleHorariSelection(horari)"
-            :class="{ 'is-active': selectedHoraris.includes(horari) }">
+          <button
+            v-for="horari in horaris"
+            :key="horari"
+            class="horari-chip"
+            @click="toggleHorariSelection(horari)"
+            :class="{ 'is-active': selectedHoraris.includes(horari) }"
+          >
             {{ horari }}
           </button>
           <button class="btn-aplicar" @click="openHorariFilter = false">
@@ -570,7 +659,11 @@ async function confirmarEliminar(id) {
         </div>
 
         <div class="selected-tags-container">
-          <div v-for="horari in selectedHoraris" :key="horari" class="selected-tag">
+          <div
+            v-for="horari in selectedHoraris"
+            :key="horari"
+            class="selected-tag"
+          >
             {{ horari }}
             <span class="remove-icon" @click="removeHorari(horari)">×</span>
           </div>
@@ -583,15 +676,28 @@ async function confirmarEliminar(id) {
         No hi ha tallers disponibles
       </div>
 
-      <div v-for="taller in tallersFiltrados" :key="taller.id" class="bloque-curso">
-        <div class="fila-curso" :style="{ zIndex: filaActiva === taller.id ? 100 : 1 }">
+      <div
+        v-for="taller in tallersFiltrados"
+        :key="taller.id"
+        class="bloque-curso"
+      >
+        <div
+          class="fila-curso"
+          :style="{ zIndex: filaActiva === taller.id ? 100 : 1 }"
+        >
           <div class="col-titulo">
-            <img :src="getImageUrl(taller)" class="img-curso" alt="curso" @error="onImgError" />
+            <img
+              :src="getImageUrl(taller)"
+              class="img-curso"
+              alt="curso"
+              @error="onImgError"
+            />
           </div>
 
           <div class="col-info">
             <div class="text-info">
-              <span class="texto-titulo">{{ taller.nom }}</span><br />
+              <span class="texto-titulo">{{ taller.nom }}</span
+              ><br />
               <span class="info-item">
                 <img src="/img/centro/location.png" class="icon" alt="icon" />
                 {{ taller.direccio }}
@@ -600,14 +706,21 @@ async function confirmarEliminar(id) {
           </div>
 
           <button class="btn-detalls" @click="toggleDetalls(taller.id)">
-            <span class="btn-detalls-text" :class="{ rotar: filaActiva === taller.id }">+</span>
+            <span
+              class="btn-detalls-text"
+              :class="{ rotar: filaActiva === taller.id }"
+              >+</span
+            >
           </button>
 
           <button id="btn-editar-taller" @click="abrirModalEditar(taller)">
             Editar
           </button>
 
-          <button id="btn-eliminar-taller" @click="confirmarEliminar(taller.id)">
+          <button
+            id="btn-eliminar-taller"
+            @click="confirmarEliminar(taller.id)"
+          >
             Eliminar
           </button>
         </div>
@@ -644,33 +757,63 @@ async function confirmarEliminar(id) {
           <!-- Nom -->
           <div class="form-group">
             <label for="nom">Nom del Taller *</label>
-            <input id="nom" v-model="nom" type="text" placeholder="Ej: Robòtica Avançada" maxlength="191" required />
+            <input
+              id="nom"
+              v-model="nom"
+              type="text"
+              placeholder="Ej: Robòtica Avançada"
+              maxlength="191"
+              required
+            />
           </div>
 
           <!-- Descripció -->
           <div class="form-group">
             <label for="descripcio">Descripció *</label>
-            <textarea id="descripcio" v-model="descripcio" placeholder="Descripcio detallada del taller" rows="3"
-              required></textarea>
+            <textarea
+              id="descripcio"
+              v-model="descripcio"
+              placeholder="Descripcio detallada del taller"
+              rows="3"
+              required
+            ></textarea>
           </div>
 
           <!-- Tallerista -->
           <div class="form-group">
             <label for="tallerista">Tallerista *</label>
-            <input id="tallerista" v-model="tallerista" type="text" maxlength="191" required />
+            <input
+              id="tallerista"
+              v-model="tallerista"
+              type="text"
+              maxlength="191"
+              required
+            />
           </div>
 
           <!-- Places Màximes -->
           <div class="form-group">
             <label for="placesMax">Places Màximes *</label>
-            <input id="placesMax" v-model="placesMax" type="number" min="1" required />
+            <input
+              id="placesMax"
+              v-model="placesMax"
+              type="number"
+              min="1"
+              required
+            />
           </div>
 
           <!-- Direcció -->
           <div class="form-group">
             <label for="direccio">Direcció *</label>
-            <input id="direccio" v-model="direccio" type="text" placeholder="c. Salvador Espriu, 3" maxlength="191"
-              required />
+            <input
+              id="direccio"
+              v-model="direccio"
+              type="text"
+              placeholder="c. Salvador Espriu, 3"
+              maxlength="191"
+              required
+            />
           </div>
 
           <!-- Dia de la setmana -->
@@ -708,8 +851,15 @@ async function confirmarEliminar(id) {
           <!-- Imatge -->
           <div class="form-group">
             <label for="imatge">Imatge del Taller</label>
-            <input id="imatge" type="file" accept="image/*" @change="handleFileChange" />
-            <small style="color: #666; margin-top: 5px;">Format: JPG, PNG, GIF (opcional)</small>
+            <input
+              id="imatge"
+              type="file"
+              accept="image/*"
+              @change="handleFileChange"
+            />
+            <small style="color: #666; margin-top: 5px"
+              >Format: JPG, PNG, GIF (opcional)</small
+            >
           </div>
 
           <!-- Botones -->
@@ -735,34 +885,63 @@ async function confirmarEliminar(id) {
           <!-- Nom -->
           <div class="form-group">
             <label for="nom-edit">Nom del Taller *</label>
-            <input id="nom-edit" v-model="nom" type="text" placeholder="Ej: Robòtica Avançada" maxlength="191"
-              required />
+            <input
+              id="nom-edit"
+              v-model="nom"
+              type="text"
+              placeholder="Ej: Robòtica Avançada"
+              maxlength="191"
+              required
+            />
           </div>
 
           <!-- Descripció -->
           <div class="form-group">
             <label for="descripcio-edit">Descripció *</label>
-            <textarea id="descripcio-edit" v-model="descripcio" placeholder="Descripcio detallada del taller" rows="3"
-              required></textarea>
+            <textarea
+              id="descripcio-edit"
+              v-model="descripcio"
+              placeholder="Descripcio detallada del taller"
+              rows="3"
+              required
+            ></textarea>
           </div>
 
           <!-- Tallerista -->
           <div class="form-group">
             <label for="tallerista-edit">Tallerista *</label>
-            <input id="tallerista-edit" v-model="tallerista" type="text" maxlength="191" required />
+            <input
+              id="tallerista-edit"
+              v-model="tallerista"
+              type="text"
+              maxlength="191"
+              required
+            />
           </div>
 
           <!-- Places Màximes -->
           <div class="form-group">
             <label for="placesMax-edit">Places Màximes *</label>
-            <input id="placesMax-edit" v-model="placesMax" type="number" min="1" required />
+            <input
+              id="placesMax-edit"
+              v-model="placesMax"
+              type="number"
+              min="1"
+              required
+            />
           </div>
 
           <!-- Direcció -->
           <div class="form-group">
             <label for="direccio-edit">Direcció *</label>
-            <input id="direccio-edit" v-model="direccio" type="text" placeholder="c. Salvador Espriu, 3" maxlength="191"
-              required />
+            <input
+              id="direccio-edit"
+              v-model="direccio"
+              type="text"
+              placeholder="c. Salvador Espriu, 3"
+              maxlength="191"
+              required
+            />
           </div>
 
           <!-- Dia de la setmana -->
@@ -779,7 +958,12 @@ async function confirmarEliminar(id) {
           <!-- Hora Inici -->
           <div class="form-group">
             <label for="horaInicio-edit">Hora Inici *</label>
-            <input id="horaInicio-edit" v-model="horaInicio" type="time" required />
+            <input
+              id="horaInicio-edit"
+              v-model="horaInicio"
+              type="time"
+              required
+            />
           </div>
 
           <!-- Hora Final -->
@@ -800,8 +984,15 @@ async function confirmarEliminar(id) {
           <!-- Imatge -->
           <div class="form-group">
             <label for="imatge-edit">Imatge del Taller</label>
-            <input id="imatge-edit" type="file" accept="image/*" @change="handleFileChange" />
-            <small style="color: #666; margin-top: 5px;">Format: JPG, PNG, GIF (opcional)</small>
+            <input
+              id="imatge-edit"
+              type="file"
+              accept="image/*"
+              @change="handleFileChange"
+            />
+            <small style="color: #666; margin-top: 5px"
+              >Format: JPG, PNG, GIF (opcional)</small
+            >
           </div>
 
           <!-- Botones -->
@@ -1231,7 +1422,7 @@ async function confirmarEliminar(id) {
   overflow-y: auto;
 }
 
-#popup-filter>button {
+#popup-filter > button {
   float: right;
   background: none;
   border: none;
@@ -1241,7 +1432,7 @@ async function confirmarEliminar(id) {
   margin-bottom: 10px;
 }
 
-#popup-filter>button:hover {
+#popup-filter > button:hover {
   color: #333;
 }
 

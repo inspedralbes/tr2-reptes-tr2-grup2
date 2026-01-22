@@ -52,6 +52,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
 // SelectorAlumnos removed from this component to hide numeric dropdown
 import {
   getAllTallers,
@@ -154,9 +155,13 @@ const guardarSeleccion = () => {
     alumnosAprobados: alumnosSeleccionados(),
   };
   console.log("Inscripciones aprobadas:", resultado);
-  alert(
-    `Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`,
-  );
+  Swal.fire({
+    icon: "success",
+    title: "Éxit",
+    text: `Guardado: ${idsSeleccionados.length} inscripcions amb ${alumnosSeleccionados()} alumnes`,
+    draggable: true,
+    confirmButtonText: "Tancar",
+  });
 };
 
 // Lógica de procesamiento de datos
@@ -262,12 +267,23 @@ async function guardarInscripciones() {
     ).map(Number);
 
     await confirmarInscripciones(tallerIdActual.value, inscripcionesAprobadas);
+    Swal.fire({
+      icon: "success",
+      title: "Éxit",
+      text: `${inscripcionesAprobadas.length} inscripciones aprovades`,
+      draggable: true,
+      confirmButtonText: "Tancar",
+    });
 
-    alert(`${inscripcionesAprobadas.length} inscripciones aprobadas`);
     await cargarInscripciones(tallerIdActual.value);
   } catch (error) {
     console.error(error);
-    alert("Error al guardar");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Error al guardar les inscripcions",
+      confirmButtonText: "Tancar",
+    });
   }
 }
 </script>

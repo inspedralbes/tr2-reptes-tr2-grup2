@@ -1,5 +1,6 @@
 <script setup>
 import Encabezado from "@/layouts/encabezado.vue";
+import Swal from "sweetalert2";
 const pantalla = ref("primero");
 const newUser = ref([]);
 
@@ -16,7 +17,12 @@ const input_confirm_pass = ref("");
 
 function reviewForm1() {
   if (!input_sch_name.value || !input_sch_id.value) {
-    alert("Si us plau, omple tots els camps obligatoris.");
+    Swal.fire({
+      icon: "warning",
+      title: "Atenció",
+      text: "Si us plau, omple tots els camps obligatoris.",
+      confirmButtonText: "Tancar",
+    });
     return;
   }
   pantalla.value = "segundo";
@@ -31,12 +37,23 @@ function reviewForm2() {
     input_confirm_pass.value;
 
   if (!camposCompletos) {
-    alert("Si us plau, omple tots els camps.");
+    Swal.fire({
+      icon: "warning",
+      title: "Atenció",
+      text: "Si us plau, omple tots els camps.",
+      confirmButtonText: "Tancar",
+    });
+
     return;
   }
 
   if (input_pass.value !== input_confirm_pass.value) {
-    alert("Les contrasenyes no coincideixen.");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Les contrasenyes no coincideixen.",
+    });
+
     return;
   }
   sendForm();
@@ -53,36 +70,45 @@ async function sendForm() {
       nom: input_sch_name.value,
       codi_centre: input_sch_id.value,
       direccio: input_sch_map.value,
-      codi_postal: ""
-    }
+      codi_postal: "",
+    },
   };
 
   try {
     const response = await fetch(`${BACK_URL}/register`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json' 
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(datosParaEnviar)
+      body: JSON.stringify(datosParaEnviar),
     });
 
     // Control de errores
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || 'Error en el registre');
+      throw new Error(errorData.error || "Error en el registre");
     }
 
     //Esperamos la respuesta de el back y si todo va bien se registrara
     const data = await response.json();
     console.log("Èxit:", data);
-    alert("Registre completat amb èxit!");
-    
-    // Redirigir al login después del éxito
-    window.location.href = '/forms/log-in';
+    Swal.fire({
+      icon: "success",
+      title: "Registre completat amb èxit!",
+      text: "Ja et pots connectar amb les teves credencials.",
+      confirmButtonText: "Tancar",
+    });
 
+    // Redirigir al login después del éxito
+    window.location.href = "/forms/log-in";
   } catch (error) {
     console.error("Error detallat:", error);
-    alert("No s'ha pogut fer el registre: " + error.message);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      html: "No s'ha pogut fer el registre <br>" + error.message,
+      confirmButtonText: "Tancar",
+    });
   }
 }
 
