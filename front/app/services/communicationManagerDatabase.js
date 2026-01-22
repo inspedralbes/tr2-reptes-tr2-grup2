@@ -170,6 +170,22 @@ export async function updateInscripcion(id, inscripcionData) {
   return await response.json();
 }
 
+export async function procesarInscripcions(periode) {
+  const response = await fetch(`${BACK_URL}/inscripcions/procesar`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      periode: parseInt(periode),
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al processar inscripcions: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
 /* ------------------------------- INSTITUCIONS ------------------------------ */
 
 export async function getAllInstitucions() {
