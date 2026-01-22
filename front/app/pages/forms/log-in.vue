@@ -27,7 +27,6 @@ async function handleLogin() {
     const data = response.user;
 
     if (response) {
-      localStorage.setItem("auth_token", response.accessToken);
       localStorage.setItem("user_id", data.id);
       localStorage.setItem("user_email", data.email);
       localStorage.setItem("user_institution_id", data.institucio || "");

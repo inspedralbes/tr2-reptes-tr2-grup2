@@ -145,7 +145,7 @@ app.post("/register", async (req, res) => {
       responsable: true,
     });
 
-    enviarEmail("registre", { nom, email, id: getUserId(email) });
+    enviarEmail("registre", { nom, email, id: await getUserId(email) });
 
     res.status(201).json({
       message: "Petició d'usuari registrat correctament",
@@ -459,23 +459,23 @@ app.get("/usuaris/:id", async (req, res) => {
   res.json(usuari);
 });
 
-app.put("/usuaris/aceptat/:id", async (req, res) => {
-  const data = req.body;
-  const id = id;
+app.get("/usuaris/aceptat/:id", async (req, res) => {
+  let data = req.body;
+  const id = req.params.id;
   data = { ...data, autoritzat: true };
   try {
     await updateUsuari(id, data);
     // EN UN FUTUR AFEGIR L'ENVIO DEL CORREU ELECTRONIC AQUÍ
-    sendMail("registreAcceptat", { nom: data.nom, email: data.email });
+    enviarEmail("registreAcceptat", { nom: data.nom, email: data.email });
     return res.json({
-      message: "Usuari actualitzat correctament",
+      message: "Usuari acceptat correctament",
     });
   } catch (error) {
     return res.json({ message: "Error al actualizar usuari:", error });
   }
 });
 
-app.delete("/usuaris/denegat/:id", async (req, res) => {
+app.get("/usuaris/denegat/:id", async (req, res) => {
   const { id } = req.params;
   const deletedUsuari = await deleteUsuari(id);
   res.json(deletedUsuari);

@@ -97,11 +97,11 @@ export async function createUsuari(data) {
 export async function updateUsuari(id, data) {
   try {
     const prisma = await getPrisma();
-    return await prisma.usuaris.update({
+    await prisma.usuaris.update({
       where: { id: parseInt(id) },
       data: data,
-      include: { tallers: true, responsable: true, coordinador: true },
     });
+    return { message: "Usuari actualitzat correctament" };
   } catch (error) {
     throw new Error(`Error al actualizar usuari: ${error.message}`);
   }
@@ -111,9 +111,10 @@ export async function updateUsuari(id, data) {
 export async function deleteUsuari(id) {
   try {
     const prisma = await getPrisma();
-    return await prisma.usuaris.delete({
+    await prisma.usuaris.delete({
       where: { id: parseInt(id) },
     });
+    return { message: "Usuari rebutjat correctament" };
   } catch (error) {
     throw new Error(`Error al eliminar usuari: ${error.message}`);
   }
