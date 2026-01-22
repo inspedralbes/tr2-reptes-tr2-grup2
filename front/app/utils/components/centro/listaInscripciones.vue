@@ -268,6 +268,7 @@ onMounted(async () => {
     
     // Filtrar por período seleccionado
     //Alba: Lo he comentado para que se muestren todos los talleres, sin filtrar por periodo ya que me estaba dando problemas de que no se me veian los talleres
+    //Cuando se haga el filtro por periodo, se descomenta y se elimina el const filteredData = rawData;
     // const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
     const filteredData = rawData;
     console.log("Datos crudos de talleres:", filteredData);
