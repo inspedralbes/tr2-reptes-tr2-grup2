@@ -7,7 +7,7 @@ export async function getAllAssistencies() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
 
@@ -23,7 +23,7 @@ export async function getAssistenciaById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -40,7 +40,7 @@ export async function createAssistencia(assistenciaData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(assistenciaData),
   });
@@ -55,7 +55,7 @@ export async function updateAssistencia(id, assistenciaData) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(assistenciaData),
   });
@@ -70,7 +70,7 @@ export async function deleteAssistencia(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -86,7 +86,7 @@ export async function getAllInscripcions() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -100,7 +100,7 @@ export async function createInscripcion(inscripcionData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(inscripcionData),
   });
@@ -115,7 +115,7 @@ export async function deleteInscripcion(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -131,7 +131,7 @@ export async function getAllInstitucions() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
 
@@ -147,7 +147,7 @@ export async function getInstitucionById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -163,7 +163,7 @@ export async function createInstitucion(institucionData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(institucionData),
   });
@@ -178,7 +178,7 @@ export async function updateInstitucion(id, institucionData) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(institucionData),
   });
@@ -193,7 +193,7 @@ export async function deleteInstitucion(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -209,7 +209,7 @@ export async function getAllTallers() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -222,7 +222,7 @@ export async function getTallerById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -236,7 +236,7 @@ export async function createTaller(tallerData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(tallerData),
   });
@@ -252,7 +252,7 @@ export async function updateTaller(id, tallerData) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(tallerData),
   });
@@ -267,7 +267,7 @@ export async function deleteTaller(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -283,7 +283,7 @@ export async function getAllUsuaris() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -297,7 +297,7 @@ export async function getUsuariById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -348,10 +348,6 @@ export async function declineUsuari(id) {
 }
 
 export async function loginUsuari(credentials) {
-  // Truca a l'API de login i en cas d'error de token el refresca
-  // automàticament, en cas de altres errors llença una excepció,
-  // agafa el token donant prioritat al antic token, guarda els tokens
-  // i retorna les dades de l'usuari.
   const response = await fetch(`${BACK_URL}/login`, {
     method: "POST",
     headers: {
@@ -369,20 +365,4 @@ export async function loginUsuari(credentials) {
   localStorage.setItem("refreshToken", data.refreshToken);
 
   return { message: data.message, user: data.user };
-}
-
-async function handleTokenRefresh(refreshToken, userId) {
-  const response = await fetch(`${BACK_URL}/refresh`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refreshToken: refreshToken, id: userId }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Error al refrescar el token: ${response.statusText}`);
-  }
-
-  return await response.json();
 }
