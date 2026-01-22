@@ -466,7 +466,7 @@ const getMesNum = (mes) => {
   border-radius: 20px;
   border: 1px solid #87878779;
   padding: 25px;
-  width: 1050px;
+  width: 950px;
   height: 380px;
   display: flex;
   flex-direction: column;

@@ -88,30 +88,6 @@ function processTallers(allTallers, allInscripcions) {
 }
 
 onMounted(async () => {
-  // DATOS ESTÁTICOS DE PRUEBA (TEMPORAL)
-  tallersFinalitzats.value = [
-    {
-      id: 1,
-      nom: "Taller de Cocina Mediterránea (Demo)",
-      descripcio: "Un taller demostrativo sobre cocina tradicional.",
-      direccio: "Aula Gastronómica 1",
-    },
-    {
-      id: 2,
-      nom: "Introducción a Vue.js (Demo)",
-      descripcio: "Aprende los fundamentos del framework progresivo.",
-      direccio: "Lab de Informática 2",
-    },
-    {
-      id: 3,
-      nom: "Mecánica Básica (Demo)",
-      descripcio: "Mantenimiento preventivo para tu vehículo.",
-      direccio: "Taller de Automoción",
-    },
-  ];
-  isLoading.value = false;
-
-  /* 
   // LÓGICA ORIGINAL COMENTADA TEMPORALMENTE
   try {
     const [fetchedTallers, fetchedInscripcions] = await Promise.all([
@@ -128,7 +104,7 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-  */
+
 });
 </script>
 

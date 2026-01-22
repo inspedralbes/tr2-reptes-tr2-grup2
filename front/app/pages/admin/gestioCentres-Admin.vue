@@ -1,19 +1,17 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
-import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import institucions from "@/utils/components/admin/centresAdmin.vue";
 </script>
 <template>
-  <Encabezado></Encabezado>
-  <div id="body">
-    <navBarAdmin />
-    <div id="content">
-      <div class="header-Centres">
-        <h2>Informació centres</h2>
-      </div>
-      <div class="container-courses">
-        <br />
-        <institucions></institucions>
+  <div>
+    <div id="body">
+      <div id="content">
+        <div class="header-Centres">
+          <h2>Informació centres</h2>
+        </div>
+        <div class="container-courses">
+          <br />
+          <institucions></institucions>
+        </div>
       </div>
     </div>
   </div>
@@ -28,6 +26,7 @@ import institucions from "@/utils/components/admin/centresAdmin.vue";
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
 }
+
 .header-Centres {
   display: flex;
   justify-content: space-between;
@@ -56,6 +55,7 @@ import institucions from "@/utils/components/admin/centresAdmin.vue";
   transform: translateY(-1px);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
 }
+
 .container-courses {
   background-color: #f5f5f5;
   border-radius: 20px;

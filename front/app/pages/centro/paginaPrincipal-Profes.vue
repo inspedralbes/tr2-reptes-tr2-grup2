@@ -1,6 +1,4 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
-import navProfes from "@/layouts/navBarProfes.vue";
 import tallerSliders from "@/utils/components/centro/tallersSlider.vue";
 import { ref, onMounted } from "vue";
 import {
@@ -26,7 +24,7 @@ function processTallers(allTallers, allInscripcions, periodeId) {
   // 1. Filtrar inscripciones por institución del usuario
   const usuarioInstitucionId = localStorage.getItem("user_institution_id");
   let misInscripciones = [];
-  
+
   if (usuarioInstitucionId) {
     misInscripciones = allInscripcions.filter(
       (i) => i.institucio === parseInt(usuarioInstitucionId)
@@ -49,14 +47,14 @@ function processTallers(allTallers, allInscripcions, periodeId) {
   allTallers.forEach((t) => {
     // Filtrar por periodo seleccionado
     if (periodeId && t.periode !== periodeId) return;
-    
+
     if (!talleresIds.has(t.id)) return;
 
     let horari = {};
     try {
       horari = typeof t.horari === "string" && t.horari.trim() !== ""
-          ? JSON.parse(t.horari)
-          : t.horari || {};
+        ? JSON.parse(t.horari)
+        : t.horari || {};
     } catch (e) {
       horari = {};
     }
@@ -66,7 +64,7 @@ function processTallers(allTallers, allInscripcions, periodeId) {
     const year = parts[2] ? parseInt(parts[2], 10) : null;
     const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
     const day = parts[0] ? parseInt(parts[0], 10) : null;
-    
+
     if (year && month !== null && day) {
       const dateObj = new Date(year, month, day);
       const mesNombre = mesesNombres[dateObj.getMonth()];
@@ -107,11 +105,11 @@ function processTallers(allTallers, allInscripcions, periodeId) {
       dias: Object.values(grupoMes.diasMap).sort((a, b) => a.diaNum - b.diaNum)
     };
   });
-  
+
   // Ordenar meses?? El array original no parecía tener orden estricto, 
   // pero podemos ordenar por índice de mes si queremos. 
   // Por ahora lo dejamos como el orden de aparición o iteración.
-  
+
   return result;
 }
 
@@ -122,7 +120,7 @@ async function fetchData() {
       getAllInscripcions(),
       getSystemSettings(),
     ]);
-    
+
     selectedPeriodeId.value = settings.selectedPeriodeId;
     tallers.value = processTallers(fetchedTallers, fetchedInscripcions, selectedPeriodeId.value);
   } catch (error) {
@@ -139,21 +137,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <Encabezado />
-  <div id="cuerpo">
-    <navProfes />
-    <div id="contenido">
-      <h2>
-        Bon dia, <span id="user" >{{ userName }}</span
-        >:
-      </h2>
-      <br />
-      <h3>Tallers actius:</h3>
-      <div id="slider">
-        <tallerSliders :tallers="tallers" />
+  <div>
+    <div id="cuerpo">
+      <div id="contenido">
+        <h2>
+          Bon dia, <span id="user">{{ userName }}</span>:
+        </h2>
+        <br />
+        <h3>Tallers actius:</h3>
+        <div id="slider">
+          <tallerSliders :tallers="tallers" />
+        </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <style scoped>
@@ -161,9 +159,9 @@ onMounted(() => {
   font-family: "Coolvetica";
   src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
 }
+
 #cuerpo {
   display: flex;
-  background-color: #f5f5f5;
   height: calc(100vh - 85px);
   overflow: hidden;
 }
