@@ -5,6 +5,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import fs from "fs";
+import path from "path";
 import {
   comparePassword,
   generateTokens,
@@ -59,7 +61,6 @@ app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
   next();
 });
-
 /* -------------------------------------------------------------------------- */
 /*                                   ROUTES                                   */
 /* -------------------------------------------------------------------------- */
@@ -244,6 +245,28 @@ app.post("/logout", async (req, res) => {
     res.status(500).json({ error: "Error en logout" });
   }
 });
+
+/* ------------------------------- MULTER ------------------------------ */
+
+import uploadImages from "./functions/uploads/images.cjs";
+import uploadOthers from "./functions/uploads/others.cjs";
+
+app.post("/uploadImage", uploadImages.single("file"), (req, res) => {
+  if (req.file) {
+    const filename = Date.now() + path.extname(req.file.originalname);
+    const filePath = path.join("./files/images", filename);
+    fs.writeFileSync(filePath, req.file.buffer);
+    req.file.filename = filename;
+  }
+  res.json({ message: "Imatge Pujada", file: req.file });
+});
+
+app.post("/uploadOther", uploadOthers.single("file"), (req, res) => {
+  res.json({ message: "Arxiu Pujat", file: req.file });
+});
+
+app.use("/files/images", express.static("./files/images"));
+app.use("/files/archives", express.static("./files/archives"));
 
 /* ------------------------------- ASSISTENCIA ------------------------------ */
 
@@ -698,11 +721,9 @@ app.get("/tallers/:id", async (req, res) => {
   res.json(taller);
 });
 
-app.post("/tallers", async (req, res) => {
+app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
   try {
     const data = req.body;
-
-    // Validacions bàsiques
     if (
       !data.nom ||
       !data.descripcio ||
@@ -718,11 +739,110 @@ app.post("/tallers", async (req, res) => {
       });
     }
 
+    // Convertir camps numèrics i booleans
+    data.places_max = parseInt(data.places_max);
+    data.places_disp = parseInt(data.places_disp);
+    data.periode = parseInt(data.periode);
+    data.institucio = parseInt(data.institucio);
+    data.admin = parseInt(data.admin);
+    data.autoritzat = data.autoritzat === "true" || data.autoritzat === true;
+
+    let filename;
+    if (req.file) {
+      filename = Date.now() + path.extname(req.file.originalname);
+      data.imatge = `/files/images/${filename}`;
+    } else {
+      data.imatge = "/files/images/example.png";
+    }
+
     const newTaller = await createTaller(data);
+
+    if (req.file) {
+      const filePath = path.join("./files/images", filename);
+      fs.writeFileSync(filePath, req.file.buffer);
+    }
+
     res.status(201).json(newTaller);
   } catch (error) {
     console.error("Error al crear taller:", error);
     res.status(500).json({ error: error.message || "Error al crear taller" });
+  }
+});
+
+app.put("/tallers", uploadImages.single("imatge"), async (req, res) => {
+  try {
+    const data = req.body;
+
+    // Convertir camps numèrics i booleans
+    data.places_max = parseInt(data.places_max);
+    data.places_disp = parseInt(data.places_disp);
+    data.periode = parseInt(data.periode);
+    data.institucio = parseInt(data.institucio);
+    data.admin = parseInt(data.admin);
+    data.autoritzat = data.autoritzat === "true" || data.autoritzat === true;
+
+    let filename;
+    let oldImagePathToDelete;
+
+    // Actualitzar imatge si s'ha pujat una nova
+    if (req.file) {
+      filename = Date.now() + path.extname(req.file.originalname);
+      data.imatge = `/files/images/${filename}`;
+
+      const tallerActual = await getTallerById(data.id);
+      if (tallerActual && tallerActual.imatge) {
+        oldImagePathToDelete = tallerActual.imatge;
+      }
+    }
+
+    const updatedTaller = await updateTaller(data);
+
+    if (req.file) {
+      const filePath = path.join("./files/images", filename);
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      // Eliminar la imatge antiga si no és la d'exemple
+      if (oldImagePathToDelete) {
+        const oldImageName = oldImagePathToDelete.replace("/files/images/", "");
+        const fullPath = path.join("./", "files", "images", oldImageName);
+
+        if (oldImageName !== "example.png" && fs.existsSync(fullPath)) {
+          fs.unlinkSync(fullPath);
+        }
+      }
+    }
+
+    res.json(updatedTaller);
+  } catch (error) {
+    console.error("Error al actualitzar taller:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Error al actualitzar taller" });
+  }
+});
+
+app.delete("/tallers", async (req, res) => {
+  try {
+    const { id } = req.body;
+    const tallerActual = await getTallerById(id);
+
+    // Eliminar la imatge si existeix i no és la d'exemple
+    if (tallerActual && tallerActual.imatge) {
+      const imageName = tallerActual.imatge.replace("/files/images/", "");
+      const fullPath = path.join("./files/images", imageName);
+
+      if (imageName !== "example.png" && fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
+    }
+
+    const deletedTaller = await deleteTaller(id);
+    res.json(deletedTaller);
+  } catch (error) {
+    console.error("Error al eliminar taller:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Error al eliminar taller" });
   }
 });
 
@@ -754,13 +874,6 @@ app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
 
 app.put("/tallers", async (req, res) => {
   const data = req.body;
-  const updatedTaller = await updateTaller(data);
-  res.json(updatedTaller);
-});
-
-app.put("/tallers/:id", async (req, res) => {
-  const { id } = req.params;
-  const data = { ...req.body, id: parseInt(id) };
   const updatedTaller = await updateTaller(data);
   res.json(updatedTaller);
 });
