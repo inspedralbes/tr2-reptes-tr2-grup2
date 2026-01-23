@@ -15,12 +15,12 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     // Si eres admin pero intentas acceder a /profes
     if (role !== "Admin" && currentRoute.includes("/admin")) {
-      return navigateTo("/centro");
+      return navigateTo("/centro/paginaPrincipal-Profes");
     }
 
     // Si eres profes pero intentas acceder a /admin
     if (role !== "Professorat" && currentRoute.includes("/centro")) {
-      return navigateTo("/admin/");
+      return navigateTo("/admin/paginaPrincipal-Admin");
     }
   }
 });
