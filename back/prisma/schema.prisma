@@ -32,7 +32,7 @@ model Tallers {
   comentari_tallerista String?
   mailTallerista String?
   imatge      String?
-
+  
   admin Int
 
   admet_insc Boolean?

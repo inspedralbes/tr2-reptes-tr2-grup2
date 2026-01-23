@@ -5,8 +5,10 @@ import {
   getAllTallers,
   getAllInscripcions,
   getInstitucionById,
-  getUsuariById, deleteInscripcion, updateInscripcion,
-  getSystemSettings
+  getUsuariById,
+  deleteInscripcion,
+  updateInscripcion,
+  getSystemSettings,
 } from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
@@ -32,8 +34,18 @@ const toggleDetalles = (id) => {
 
 //Para los filtros
 const meses = [
-  "Gener", "Febrer", "Març", "Abril", "Maig", "Juny",
-  "Juliol", "Agost", "Setembre", "Octubre", "Novembre", "Desembre"
+  "Gener",
+  "Febrer",
+  "Març",
+  "Abril",
+  "Maig",
+  "Juny",
+  "Juliol",
+  "Agost",
+  "Setembre",
+  "Octubre",
+  "Novembre",
+  "Desembre",
 ];
 
 function toggleMonthSelection(mes) {
@@ -45,7 +57,7 @@ function toggleMonthSelection(mes) {
   }
 }
 function removeMonth(mes) {
-  selectedMonths.value = selectedMonths.value.filter(m => m !== mes);
+  selectedMonths.value = selectedMonths.value.filter((m) => m !== mes);
 }
 
 function toggleHorariSelection(horari) {
@@ -58,7 +70,7 @@ function toggleHorariSelection(horari) {
 }
 
 function removeHorari(horari) {
-  selectedHoraris.value = selectedHoraris.value.filter(h => h !== horari);
+  selectedHoraris.value = selectedHoraris.value.filter((h) => h !== horari);
 }
 
 // Obtener lista de horarios únicos
@@ -122,14 +134,20 @@ const processTallers = (data, inscritos) => {
   // Filtrar solo los talleres a los que hay inscripción
   data.forEach((t) => {
     // Buscar si hay inscripción para este taller
-    const inscripcion = inscritos.find(i => {
+    const inscripcion = inscritos.find((i) => {
       let alumnesArray = [];
       try {
-        alumnesArray = typeof i.alumnes === 'string' ? JSON.parse(i.alumnes) : i.alumnes || [];
+        alumnesArray =
+          typeof i.alumnes === "string"
+            ? JSON.parse(i.alumnes)
+            : i.alumnes || [];
       } catch (e) {
         return false;
       }
-      return Array.isArray(alumnesArray) && alumnesArray.some(a => a.TALLER === t.id);
+      return (
+        Array.isArray(alumnesArray) &&
+        alumnesArray.some((a) => a.TALLER === t.id)
+      );
     });
 
     // Si no hay inscripción, no incluir el taller
@@ -146,7 +164,9 @@ const processTallers = (data, inscritos) => {
     }
 
     const dataStr = horari.DATAINI || "";
-    let year = null, month = null, day = null;
+    let year = null,
+      month = null,
+      day = null;
 
     if (dataStr.includes("/")) {
       const parts = dataStr.split("/");
@@ -160,10 +180,17 @@ const processTallers = (data, inscritos) => {
       day = parts[2] ? parseInt(parts[2], 10) : null;
     }
 
-    const dateObj = year && month !== null && month >= 0 && day ? new Date(year, month, day) : null;
+    const dateObj =
+      year && month !== null && month >= 0 && day
+        ? new Date(year, month, day)
+        : null;
     const mesNombre = dateObj ? mesesNombres[dateObj.getMonth()] : "Desconegut";
     const diaNum = dateObj ? dateObj.getDate() : day || null;
-    const mesNum = dateObj ? dateObj.getMonth() + 1 : (month !== null ? month + 1 : null);
+    const mesNum = dateObj
+      ? dateObj.getMonth() + 1
+      : month !== null
+      ? month + 1
+      : null;
 
     // Si el mes no existe en nuestro objeto agrupador, lo creamos
     if (!grouped[mesNombre]) {
@@ -185,7 +212,15 @@ const processTallers = (data, inscritos) => {
       mesNum: mesNum,
       diaNum: diaNum,
       rawHorari: horari,
-      estadoInscripcion: inscripcion.estat !== null ? (inscripcion.estat ? "Aprovada" : "Pendent") : "Pendent",
+      // Si el taller no está autorizado, siempre mostrar Pendent
+      // Si está autorizado, mostrar el estado real de la inscripción
+      estadoInscripcion: !t.autoritzat
+        ? "Pendent"
+        : inscripcion.estat !== null
+        ? inscripcion.estat
+          ? "Aprovada"
+          : "Pendent"
+        : "Pendent",
       autoritzat: inscripcion.autoritzat || false,
     });
   });
@@ -205,7 +240,9 @@ const loadData = async () => {
     ]);
 
     // Filtrar talleres por período seleccionado
-    const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
+    const filteredData = rawData.filter(
+      (t) => t.periode === settings.selectedPeriodeId
+    );
 
     horaris.value = extractHoraris(filteredData);
 
@@ -224,13 +261,14 @@ const loadData = async () => {
     for (const i of inscripcionesFiltridas) {
       let alumnesArray = [];
       try {
-        alumnesArray = typeof i.alumnes === 'string' ? JSON.parse(i.alumnes) : i.alumnes;
+        alumnesArray =
+          typeof i.alumnes === "string" ? JSON.parse(i.alumnes) : i.alumnes;
       } catch (e) {
         alumnesArray = [];
       }
 
       if (Array.isArray(alumnesArray)) {
-        alumnesArray.forEach(alumne => {
+        alumnesArray.forEach((alumne) => {
           if (alumne.TALLER) {
             // Clau única per Taller
             if (!inscripcionsMap.value[alumne.TALLER]) {
@@ -277,7 +315,6 @@ const filteredTallers = computed(() => {
     // 2. Filtrar cursos dentro de la sección
     const cursosFiltrados = [];
     for (const curso of seccion.cursos) {
-
       // Filtro de Horario
       let horarioValido = true;
       if (selectedHoraris.value.length > 0) {
@@ -310,7 +347,7 @@ const filteredTallers = computed(() => {
     if (cursosFiltrados.length > 0) {
       resultadoFinal.push({
         mes: seccion.mes,
-        cursos: cursosFiltrados
+        cursos: cursosFiltrados,
       });
     }
   }
@@ -356,11 +393,18 @@ const getMesNum = (mes) => {
         </div>
 
         <div v-if="openMonthFilter" class="months-grid">
-          <button v-for="mes in meses" :key="mes" class="month-chip" @click="toggleMonthSelection(mes)"
-            :class="{ 'is-active': selectedMonths.includes(mes) }">
+          <button
+            v-for="mes in meses"
+            :key="mes"
+            class="month-chip"
+            @click="toggleMonthSelection(mes)"
+            :class="{ 'is-active': selectedMonths.includes(mes) }"
+          >
             {{ mes }}
           </button>
-          <button class="btn-aplicar" @click="openMonthFilter = false">Aplicar</button>
+          <button class="btn-aplicar" @click="openMonthFilter = false">
+            Aplicar
+          </button>
         </div>
 
         <div class="selected-tags-container">
@@ -373,27 +417,46 @@ const getMesNum = (mes) => {
 
       <h3>TALLER</h3>
       <div>
-        <input v-model="searchTaller" type="text" placeholder="Cercar taller..." class="search-input" />
+        <input
+          v-model="searchTaller"
+          type="text"
+          placeholder="Cercar taller..."
+          class="search-input"
+        />
       </div>
 
       <h3>HORARI</h3>
       <div>
-        <div @click="openHorariFilter = !openHorariFilter" class="select-header">
+        <div
+          @click="openHorariFilter = !openHorariFilter"
+          class="select-header"
+        >
           <span v-if="selectedHoraris.length === 0">Escull l'horari...</span>
           <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
           <span>▲</span>
         </div>
 
         <div v-if="openHorariFilter" class="horaris-grid">
-          <button v-for="horari in horaris" :key="horari" class="horari-chip" @click="toggleHorariSelection(horari)"
-            :class="{ 'is-active': selectedHoraris.includes(horari) }">
+          <button
+            v-for="horari in horaris"
+            :key="horari"
+            class="horari-chip"
+            @click="toggleHorariSelection(horari)"
+            :class="{ 'is-active': selectedHoraris.includes(horari) }"
+          >
             {{ horari }}
           </button>
-          <button class="btn-aplicar" @click="openHorariFilter = false">Aplicar</button>
+          <button class="btn-aplicar" @click="openHorariFilter = false">
+            Aplicar
+          </button>
         </div>
 
         <div class="selected-tags-container">
-          <div v-for="horari in selectedHoraris" :key="horari" class="selected-tag">
+          <div
+            v-for="horari in selectedHoraris"
+            :key="horari"
+            class="selected-tag"
+          >
             {{ horari }}
             <span class="remove-icon" @click="removeHorari(horari)">×</span>
           </div>
@@ -405,18 +468,30 @@ const getMesNum = (mes) => {
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
 
-      <div v-for="seccion in filteredTallers" :key="seccion.mes" class="seccion-mes">
+      <div
+        v-for="seccion in filteredTallers"
+        :key="seccion.mes"
+        class="seccion-mes"
+      >
         <h2 class="mes-titulo">{{ seccion.mes }}</h2>
 
-        <div v-for="curso in seccion.cursos" :key="curso.id" class="bloque-curso">
-          <div class="fila-curso" :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }">
+        <div
+          v-for="curso in seccion.cursos"
+          :key="curso.id"
+          class="bloque-curso"
+        >
+          <div
+            class="fila-curso"
+            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
+          >
             <div class="col-titulo">
               <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
             </div>
 
             <div class="col-info">
               <div class="text-info">
-                <span class="texto-titulo">{{ curso.titulo }}</span><br />
+                <span class="texto-titulo">{{ curso.titulo }}</span
+                ><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
                   {{ curso.diaNum }}/{{ getMesNum(seccion.mes) }}
@@ -427,18 +502,32 @@ const getMesNum = (mes) => {
             </div>
 
             <button class="btn-detalls" @click="toggleDetalles(curso.id)">
-              <span class="btn-detalls-text" :class="{ rotar: cursoExpandido === curso.id }">+</span>
+              <span
+                class="btn-detalls-text"
+                :class="{ rotar: cursoExpandido === curso.id }"
+                >+</span
+              >
             </button>
 
             <div class="col-estado">
-              <span class="estado-badge"
-                :class="{ 'estado-aprovada': curso.estadoInscripcion === 'Aprovada', 'estado-pendent': curso.estadoInscripcion === 'Pendent', 'estado-denegado': curso.estadoInscripcion === 'Denegada' }">
+              <span
+                class="estado-badge"
+                :class="{
+                  'estado-aprovada': curso.estadoInscripcion === 'Aprovada',
+                  'estado-pendent': curso.estadoInscripcion === 'Pendent',
+                  'estado-denegado': curso.estadoInscripcion === 'Denegada',
+                }"
+              >
                 {{ curso.estadoInscripcion }}
               </span>
             </div>
             <div id="col-btn">
-              <AccionesInscripcion :tallerId="curso.id" :inscripcion="inscripcionsMap[curso.id]" @refresh="loadData"
-                @active="(val) => filaActiva = val ? curso.id : null" />
+              <AccionesInscripcion
+                :tallerId="curso.id"
+                :inscripcion="inscripcionsMap[curso.id]"
+                @refresh="loadData"
+                @active="(val) => (filaActiva = val ? curso.id : null)"
+              />
             </div>
           </div>
 
@@ -488,7 +577,7 @@ const getMesNum = (mes) => {
   overflow-y: auto;
 }
 
-#popup-filter>button {
+#popup-filter > button {
   float: right;
   background: none;
   border: none;
@@ -498,7 +587,7 @@ const getMesNum = (mes) => {
   margin-bottom: 10px;
 }
 
-#popup-filter>button:hover {
+#popup-filter > button:hover {
   color: #333;
 }
 
@@ -821,27 +910,27 @@ const getMesNum = (mes) => {
 }
 
 .estado-aprovada {
-  background-color: #AECAAF;
-  border-color: #8DA88D;
+  background-color: #aecaaf;
+  border-color: #8da88d;
   border-style: solid;
   border-width: 4px;
-  color: #1D1D1D;
+  color: #1d1d1d;
 }
 
 .estado-pendent {
-  background-color: #FFBA94;
-  border-color: #D39D80;
+  background-color: #ffba94;
+  border-color: #d39d80;
   border-style: solid;
   border-width: 4px;
-  color: #1D1D1D;
+  color: #1d1d1d;
 }
 
 .estado-denegado {
-  background-color: #EB7A7A;
-  border-color: #B26060;
+  background-color: #eb7a7a;
+  border-color: #b26060;
   border-style: solid;
   border-width: 4px;
-  color: #1D1D1D;
+  color: #1d1d1d;
 }
 
 /* --- DESPLEGABLE DE INFORMACIÓN --- */
@@ -891,65 +980,65 @@ const getMesNum = (mes) => {
 
 /* --- BOTONES --- */
 #btn-inscripcion {
-  background-color: #9FACFE;
+  background-color: #9facfe;
   color: #141414;
   border: none;
   border-radius: 20px;
-  border-color: #717ED3;
+  border-color: #717ed3;
   border-style: solid;
   border-width: 4px;
   padding: 5px 15px;
   cursor: pointer;
-  font-family: 'Coolvetica';
+  font-family: "Coolvetica";
   transition: all 0.3s ease;
 }
 
 #btn-inscripcion:hover {
-  background-color: #687DFF;
+  background-color: #687dff;
   border-style: solid;
   border-width: 4px;
-  border-color: #4956AA;
+  border-color: #4956aa;
 }
 
 #btn-update {
-  background-color: #9FACFE;
+  background-color: #9facfe;
   color: #141414;
   border: none;
   border-radius: 20px;
-  border-color: #717ED3;
+  border-color: #717ed3;
   border-style: solid;
   border-width: 4px;
   padding: 5px 15px;
   cursor: pointer;
-  font-family: 'Coolvetica';
+  font-family: "Coolvetica";
   transition: all 0.3s ease;
 }
 
 #btn-update:hover {
-  background-color: #687DFF;
+  background-color: #687dff;
   border-style: solid;
   border-width: 4px;
-  border-color: #4956AA;
+  border-color: #4956aa;
 }
 
 #btn-delete {
-  background-color: #9FACFE;
+  background-color: #9facfe;
   color: #141414;
   border: none;
   border-radius: 20px;
-  border-color: #717ED3;
+  border-color: #717ed3;
   border-style: solid;
   border-width: 4px;
   padding: 5px 15px;
   cursor: pointer;
-  font-family: 'Coolvetica';
+  font-family: "Coolvetica";
   transition: all 0.3s ease;
 }
 
 #btn-delete:hover {
-  background-color: #687DFF;
+  background-color: #687dff;
   border-style: solid;
   border-width: 4px;
-  border-color: #4956AA;
+  border-color: #4956aa;
 }
 </style>

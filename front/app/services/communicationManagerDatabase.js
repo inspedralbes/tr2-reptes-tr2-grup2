@@ -28,7 +28,7 @@ export async function getAssistenciaById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir assistència per ID: ${response.statusText}`,
+      `Error al obtenir assistència per ID: ${response.statusText}`
     );
   }
 
@@ -44,7 +44,7 @@ export async function getAssistenciesByTallerId(tallerId) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir assistències del taller: ${response.statusText}`,
+      `Error al obtenir assistències del taller: ${response.statusText}`
     );
   }
   return await response.json();
@@ -90,6 +90,22 @@ export async function deleteAssistencia(id) {
   });
   if (!response.ok) {
     throw new Error(`Error al eliminar assistència: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function afegirPersonalAssistencia(data) {
+  const response = await fetch(`${BACK_URL}/assistencies/afegirPersonal`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al afegir personal a assistència: ${response.statusText}`
+    );
   }
   return await response.json();
 }
@@ -214,7 +230,7 @@ export async function getInstitucionById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir institució per ID: ${response.statusText}`,
+      `Error al obtenir institució per ID: ${response.statusText}`
     );
   }
   return await response.json();
@@ -293,6 +309,21 @@ export async function getTallerById(id) {
   return await response.json();
 }
 
+export async function getTallersByPeriode(periodeId) {
+  const response = await fetch(`${BACK_URL}/tallers?periode=${periodeId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir tallers per període: ${response.statusText}`
+    );
+  }
+  return await response.json();
+}
+
 export async function createTaller(formData) {
   const response = await fetch(`${BACK_URL}/tallers`, {
     method: "POST",
@@ -355,11 +386,11 @@ export async function pointsTallers(tallerId) {
         "Content-Type": "application/json",
         //   Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-    },
+    }
   );
   if (!response.ok) {
     throw new Error(
-      `Error al calcular puntuacions del taller: ${response.statusText}`,
+      `Error al calcular puntuacions del taller: ${response.statusText}`
     );
   }
   return await response.json();
@@ -481,14 +512,17 @@ async function handleTokenRefresh(refreshToken, userId) {
 /* ------------------------------- COMENTARIS ------------------------------ */
 
 export async function saveComentariProfe(tallerId, idInstitucio, comentari) {
-  const response = await fetch(`${BACK_URL}/tallers/${tallerId}/comentari-profe`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      idInstitucio: parseInt(idInstitucio),
-      comentari,
-    }),
-  });
+  const response = await fetch(
+    `${BACK_URL}/tallers/${tallerId}/comentari-profe`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idInstitucio: parseInt(idInstitucio),
+        comentari,
+      }),
+    }
+  );
   if (!response.ok) {
     throw new Error(`Error al guardar comentari: ${response.statusText}`);
   }
@@ -500,7 +534,7 @@ export async function saveInscripcions(selecciones, docentRef, comentari) {
     ([tallerId, numAlumnos]) => ({
       tallerId: Number(tallerId),
       numAlumnos: Number(numAlumnos),
-    }),
+    })
   );
 
   const payload = {
@@ -528,7 +562,9 @@ export async function getCriterisWeights() {
     headers: { "Content-Type": "application/json" },
   });
   if (!response.ok) {
-    throw new Error(`Error al obtenir pesos de criteris: ${response.statusText}`);
+    throw new Error(
+      `Error al obtenir pesos de criteris: ${response.statusText}`
+    );
   }
   return await response.json();
 }
@@ -540,7 +576,9 @@ export async function updateCriterisWeight(id, peso) {
     body: JSON.stringify({ peso: parseInt(peso) }),
   });
   if (!response.ok) {
-    throw new Error(`Error al actualitzar pes de criterio: ${response.statusText}`);
+    throw new Error(
+      `Error al actualitzar pes de criterio: ${response.statusText}`
+    );
   }
   return await response.json();
 }
@@ -623,7 +661,9 @@ export async function getSystemSettings() {
     },
   });
   if (!response.ok) {
-    throw new Error(`Error al obtenir configuració del sistema: ${response.statusText}`);
+    throw new Error(
+      `Error al obtenir configuració del sistema: ${response.statusText}`
+    );
   }
   return await response.json();
 }
@@ -639,7 +679,9 @@ export async function updateSystemSettings(id, selectedPeriodeId) {
     }),
   });
   if (!response.ok) {
-    throw new Error(`Error al actualitzar configuració del sistema: ${response.statusText}`);
+    throw new Error(
+      `Error al actualitzar configuració del sistema: ${response.statusText}`
+    );
   }
   return await response.json();
 }
