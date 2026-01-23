@@ -87,33 +87,59 @@ const fetchData = async () => {
     ]);
 
     // 1. Obtenir tots els anys únics disponibles als tallers
-    const uniqueYears = [...new Set(tallers.map((t) => t.curs))].sort();
+    const yearsSet = {};
+    for (let i = 0; i < tallers.length; i++) {
+      yearsSet[tallers[i].curs] = true;
+    }
+    const uniqueYears = Object.keys(yearsSet).sort();
 
     // 2. Construir la sèrie per a cada institució
-    const series = institucions.map((inst) => {
+    const series = [];
+    for (let i = 0; i < institucions.length; i++) {
+      const inst = institucions[i];
+
       // Per a cada any, sumem les places dels tallers d'aquesta institució
-      const dataPerYear = uniqueYears.map((year) => {
+      const dataPerYear = [];
+      for (let j = 0; j < uniqueYears.length; j++) {
+        const year = uniqueYears[j];
+
         // Filtrem tallers d'aquesta inst i aquest any
-        const tallersDeInstEnAny = tallers.filter(
-          (t) => t.institucio === inst.id && t.curs === year,
-        );
+        const tallersDeInstEnAny = [];
+        for (let k = 0; k < tallers.length; k++) {
+          if (tallers[k].institucio === inst.id && tallers[k].curs === year) {
+            tallersDeInstEnAny.push(tallers[k]);
+          }
+        }
 
         // Sumem les seves places
-        const totalPlazas = tallersDeInstEnAny.reduce(
-          (sum, t) => sum + (t.places_max || 0),
-          0,
-        );
-        return totalPlazas;
-      });
+        let totalPlazas = 0;
+        for (let k = 0; k < tallersDeInstEnAny.length; k++) {
+          totalPlazas += tallersDeInstEnAny[k].places_max || 0;
+        }
 
-      return {
+        dataPerYear.push(totalPlazas);
+      }
+
+      series.push({
         name: inst.nom,
         data: dataPerYear,
-      };
-    });
+      });
+    }
 
     // Filtrar institucions que no tenen cap alumne en cap any (opcional, per netejar el gràfic)
-    const activeSeries = series.filter((s) => s.data.some((val) => val > 0));
+    const activeSeries = [];
+    for (let i = 0; i < series.length; i++) {
+      let hasData = false;
+      for (let j = 0; j < series[i].data.length; j++) {
+        if (series[i].data[j] > 0) {
+          hasData = true;
+          break;
+        }
+      }
+      if (hasData) {
+        activeSeries.push(series[i]);
+      }
+    }
 
     initChart(uniqueYears, activeSeries);
   } catch (error) {

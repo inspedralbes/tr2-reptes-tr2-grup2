@@ -130,6 +130,8 @@ function exportCSV() {
       </div>
 
       <!-- AQUÍ IRÍAN LOS INFORMES (solo estructura visual) -->
+       
+      <!-- Gráfica para las solicitudes de los talleres y los que han sido asignados -->
       <div class="reports-grid">
         <div class="card">
           <div class="card-title">Tallers sol·licitats vs assignats</div>
@@ -138,6 +140,7 @@ function exportCSV() {
           </div>
         </div>
 
+        <!-- Gráfica para la participación de los talleres --->
         <div class="card">
           <div class="card-title">Estadístiques de participació</div>
           <div class="chart-placeholder">
@@ -145,6 +148,7 @@ function exportCSV() {
           </div>
         </div>
 
+        
         <div class="card">
           <div class="card-title">Estat dels checklists</div>
           <div class="chart-placeholder">Gràfic (placeholder)</div>

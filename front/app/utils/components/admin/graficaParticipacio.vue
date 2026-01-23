@@ -9,14 +9,19 @@ const error = ref("");
 
 // Calcular participación por taller
 const participacioPerTaller = computed(() => {
-  if (!assistencies.value.length || !tallers.value.length) return [];
+  // Verificación inicial
+  if (assistencies.value.length === 0 || tallers.value.length === 0) {
+    return [];
+  }
 
-  // Agrupar asistencias por taller
+  // Agrupar asistencias por taller usando un objeto temporal
   const tallerStats = {};
 
-  assistencies.value.forEach(assistencia => {
+  for (let i = 0; i < assistencies.value.length; i++) {
+    const assistencia = assistencies.value[i];
     const tallerId = assistencia.id_taller;
 
+    // Si el taller no existe en nuestro acumulador, lo inicializamos
     if (!tallerStats[tallerId]) {
       tallerStats[tallerId] = {
         totalAlumnes: 0,
@@ -27,63 +32,47 @@ const participacioPerTaller = computed(() => {
 
     try {
       const alumnes = JSON.parse(assistencia.llista_alumnes || "[]");
-      const alumnesAssistits = alumnes.filter(a => a.ASSISTENCIA === true).length;
+      let contadorAsistentes = 0;
+      for (let j = 0; j < alumnes.length; j++) {
+        if (alumnes[j].ASSISTENCIA === true) {
+          contadorAsistentes++;
+        }
+      }
 
       tallerStats[tallerId].totalAlumnes += alumnes.length;
-      tallerStats[tallerId].alumnesAssistits += alumnesAssistits;
+      tallerStats[tallerId].alumnesAssistits += contadorAsistentes;
       tallerStats[tallerId].sessions += 1;
     } catch (e) {
       console.error("Error parsing alumnes:", e);
     }
-  });
+  }
 
-  // Crear array con datos para el gráfico
-  return tallers.value
-    .map(taller => {
-      const stats = tallerStats[taller.id];
-      if (!stats || stats.totalAlumnes === 0) return null;
+  // Transformar el objeto en un array
+  const resultadoFinal = [];
 
+  for (let k = 0; k < tallers.value.length; k++) {
+    const taller = tallers.value[k];
+    const stats = tallerStats[taller.id];
+
+    // Solo procesamos si hay estadísticas y hay alumnos (Equivale al .filter)
+    if (stats && stats.totalAlumnes > 0) {
       const percentatge = Math.round((stats.alumnesAssistits / stats.totalAlumnes) * 100);
 
-      return {
+      resultadoFinal.push({
         id: taller.id,
         nom: taller.nom,
-        percentatge,
+        percentatge: percentatge,
         alumnesAssistits: stats.alumnesAssistits,
         totalAlumnes: stats.totalAlumnes,
         sessions: stats.sessions
-      };
-    })
-    .filter(item => item !== null)
-    .sort((a, b) => b.percentatge - a.percentatge); // Ordenar de mayor a menor
-});
-
-const cargarDades = async () => {
-  loading.value = true;
-  error.value = "";
-  try {
-    [assistencies.value, tallers.value] = await Promise.all([
-      getAllAssistencies(),
-      getAllTallers()
-    ]);
-  } catch (err) {
-    error.value = "Error al cargar dades: " + err.message;
-  } finally {
-    loading.value = false;
+      });
+    }
   }
-};
 
-// Función para obtener color según el porcentaje (paleta azul/índigo)
-const getColor = (percentatge) => {
-  if (percentatge >= 80) return "#3949ab"; // Índigo oscuro
-  if (percentatge >= 60) return "#5c6bc0"; // Índigo medio
-  if (percentatge >= 40) return "#7986cb"; // Índigo claro
-  if (percentatge >= 20) return "#9fa8da"; // Azul lavanda
-  return "#c5cae9"; // Azul muy claro
-};
+  // Ordenar de mayor a menor porcentaje
+  resultadoFinal.sort((a, b) => b.percentatge - a.percentatge);
 
-onMounted(() => {
-  cargarDades();
+  return resultadoFinal;
 });
 </script>
 
