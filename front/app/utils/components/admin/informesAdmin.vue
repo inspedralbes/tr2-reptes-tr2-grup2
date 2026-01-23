@@ -165,20 +165,19 @@ function exportCSV() {
         <div class="chart-placeholder wide">Comparativa (placeholder)</div>
       </div>
 
-      <!-- EXPORTACIÓN -->
+      <!-- EXPORTACIÓN
       <div class="export-section">
         <span class="export-label">Exportar informes:</span>
         <button class="btn-export" @click="exportPDF">PDF</button>
         <button class="btn-export secondary" @click="exportCSV">CSV</button>
       </div>
-
-      <!-- mini texto para confirmar filtros aplicados -->
+      mini texto para confirmar filtros aplicados
       <p class="filters-summary">
         Filtres aplicats:
         <strong>{{ filters.taller }}</strong> ·
         <strong>{{ filters.centre }}</strong> ·
         <strong>{{ filters.modalitat }}</strong>
-      </p>
+      </p> -->
     </div>
   </div>
 </template>
