@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import Encabezado from "@/layouts/encabezado.vue";
+import { loginUsuari } from "~/services/communicationManagerDatabase";
 
 // Variables reactivas para el formulario
 const input_email = ref("");
@@ -18,36 +19,25 @@ async function handleLogin() {
   cargando.value = true;
 
   try {
-    const response = await fetch(`${BACK_URL}/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: input_email.value,
-        password: input_pass.value,
-      }),
+    const response = await loginUsuari({
+      email: input_email.value,
+      password: input_pass.value,
     });
 
-    const data = await response.json();
+    const data = response.user;
 
-    if (response.ok) {
-      console.log("Login correcto:", data);
+    if (response) {
+      localStorage.setItem("auth_token", response.accessToken);
+      localStorage.setItem("user_id", data.id);
+      localStorage.setItem("user_email", data.email);
+      localStorage.setItem("user_institution_id", data.institucio || "");
+      localStorage.setItem("user_rol", data.rol);
       alert("Login exitós! Benvingut/da.");
-      localStorage.setItem("auth_token", data.accessToken);
-      localStorage.setItem("user_id", data.user.id);
-      localStorage.setItem("user_email", data.user.email);
-      localStorage.setItem("user_institution_id", data.user.institucio || "");
-      localStorage.setItem("user_rol", data.user.rol);
-      // navigateTo('/dashboard');
-      alert(
-        data.message ||
-          "Login completat correctament"
-      );
+      navigateTo(setPath(data.rol));
     } else {
       alert(
         data.error ||
-          "Credencials incorrectes. Revisa el teu email i contrasenya."
+          "Credencials incorrectes. Revisa el teu email i contrasenya.",
       );
     }
   } catch (error) {
@@ -56,6 +46,11 @@ async function handleLogin() {
   } finally {
     cargando.value = false;
   }
+}
+
+function setPath(rol) {
+  if (rol === "Admin") return "../admin/paginaPrincipal-Admin";
+  if (rol === "Professorat") return "../centro/paginaPrincipal-Profes";
 }
 </script>
 

@@ -1,29 +1,27 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
-import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import graficaTallers from "@/utils/components/admin/graficaTallers.vue";
 import graficaInstitucions from "@/utils/components/admin/graficaInstitucions.vue";
 import calendari from "@/utils/components/admin/calendari.vue";
 import recordatorisAdmin from "@/utils/components/admin/recordatorisAdmin.vue";
 </script>
 <template>
-  <Encabezado />
-  <div id="cuerpo">
-    <navBarAdmin />
-    <div id="contenido">
-      <h2>Bon día, <span id="user">*AdminName*</span>:</h2>
-      <div class="panell-admin">
-        <div class="tarjetas-admin">
-          <recordatorisAdmin />
-        </div>
-        <div class="tarjetas-admin">
-          <graficaTallers />
-        </div>
-        <div class="tarjetas-admin">
-          <calendari />
-        </div>
-        <div class="tarjetas-admin">
-          <graficaInstitucions />
+  <div>
+    <div id="cuerpo">
+      <div id="contenido">
+        <h2>Bon día, <span id="user">*AdminName*</span>:</h2>
+        <div class="panell-admin">
+          <div class="tarjetas-admin">
+            <recordatorisAdmin />
+          </div>
+          <div class="tarjetas-admin">
+            <graficaTallers />
+          </div>
+          <div class="tarjetas-admin">
+            <calendari />
+          </div>
+          <div class="tarjetas-admin">
+            <graficaInstitucions />
+          </div>
         </div>
       </div>
     </div>

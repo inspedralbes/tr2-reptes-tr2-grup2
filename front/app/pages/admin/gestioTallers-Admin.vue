@@ -1,19 +1,17 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
-import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import llistaTallers from "@/utils/components/admin/llistaTallersAdmin.vue";
 </script>
 <template>
-  <Encabezado></Encabezado>
-  <div id="body">
-    <navBarAdmin />
-    <div id="content">
-      <div class="header-Tallers">
-        <h2>Gestió tallers</h2>
-      </div>
-      <div class="container-courses">
-        <br />
-        <llistaTallers></llistaTallers>
+  <div>
+    <div id="body">
+      <div id="content">
+        <div class="header-Tallers">
+          <h2>Gestió tallers</h2>
+        </div>
+        <div class="container-courses">
+          <br />
+          <llistaTallers></llistaTallers>
+        </div>
       </div>
     </div>
   </div>
@@ -22,6 +20,7 @@ import llistaTallers from "@/utils/components/admin/llistaTallersAdmin.vue";
 #body {
   display: flex;
 }
+
 #content {
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;

@@ -1,48 +1,28 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
 </script>
 <template>
-  <Encabezado></Encabezado>
-  <div id="cuerpo">
-    <div id="contenidor">
-      <div id="prim-menu">
-        <h3>A quina area vols accedir?</h3>
-        <br />
-        <NuxtLink
-          to="/admin/paginaPrincipal-Admin"
-          custom
-          v-slot="{ navigate }"
-        >
-          <button @click="navigate">Personal Consorci</button>
-        </NuxtLink>
-
-        <br />
-
-        <NuxtLink
-          to="/centro/paginaPrincipal-Profes"
-          custom
-          v-slot="{ navigate }"
-        >
-          <button @click="navigate">Personal del Centre</button>
-        </NuxtLink>
-        <br />
-
-        <NuxtLink
-          to="/forms/log-in"
-          custom
-          v-slot="{ navigate }"
-        >
-          <button @click="navigate">Formulario Login</button>
-        </NuxtLink>
-        <br />
-
-        <NuxtLink
-          to="/forms/sign-in"
-          custom
-          v-slot="{ navigate }"
-        >
-          <button @click="navigate">Formulario Registro</button>
-        </NuxtLink>
+  <div>
+    <div id="cuerpo">
+      <div id="contenidor">
+        <div id="prim-menu">
+          <h3>A quina area vols accedir?</h3>
+          <br />
+          <NuxtLink to="/admin/paginaPrincipal-Admin" custom v-slot="{ navigate }">
+            <button @click="navigate">Personal Consorci</button>
+          </NuxtLink>
+          <br />
+          <NuxtLink to="/centro/paginaPrincipal-Profes" custom v-slot="{ navigate }">
+            <button @click="navigate">Personal del Centre</button>
+          </NuxtLink>
+          <br />
+          <NuxtLink to="/forms/log-in" custom v-slot="{ navigate }">
+            <button @click="navigate">Formulario Login</button>
+          </NuxtLink>
+          <br />
+          <NuxtLink to="/forms/sign-in" custom v-slot="{ navigate }">
+            <button @click="navigate">Formulario Registro</button>
+          </NuxtLink>
+        </div>
       </div>
     </div>
   </div>
@@ -101,17 +81,17 @@ import Encabezado from "@/layouts/encabezado.vue";
   #cuerpo {
     margin-top: 80px;
   }
-  
+
   #contenidor {
     width: 95%;
     margin: 10px;
     padding: 15px;
   }
-  
+
   #prim-menu h3 {
     font-size: 1.2rem;
   }
-  
+
   #prim-menu button {
     font-size: 16px;
     height: 50px;
@@ -124,12 +104,13 @@ import Encabezado from "@/layouts/encabezado.vue";
     width: 85%;
   }
 }
+
 /* Mobile: < 480px */
-@media (max-width: 480px) { }
+@media (max-width: 480px) {}
 
 /* Tablet: 481px - 768px */
-@media (min-width: 481px) and (max-width: 768px) { }
+@media (min-width: 481px) and (max-width: 768px) {}
 
 /* Desktop: > 769px */
-@media (min-width: 769px) { }
+@media (min-width: 769px) {}
 </style>

@@ -1,0 +1,38 @@
+<div
+  style="
+    font-family: Arial, sans-serif;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 10px;
+  "
+>
+  <h1 style="color: #e63946">¡Hola!</h1>
+  <p>
+    L'usuari <strong>{{nom}}</strong> amb el email <strong>{{email}}</strong>,
+    vol inscriure's a l'aplicatiu:
+  </p>
+
+  <a
+    href="{{url}}/aceptat/{{id}}"
+    style="
+      background-color: #1d3557;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+    "
+    >Confirmar</a
+  >
+  <a
+    href="{{url}}/denegat/{{id}}"
+    style="
+      background-color: #e63946;
+      color: white;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-left: 10px;
+    "
+    >Rebutjar</a
+  >
+</div>

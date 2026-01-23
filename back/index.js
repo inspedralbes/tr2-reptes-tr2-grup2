@@ -14,12 +14,32 @@ import {
   secretKey,
   hashPassword,
 } from "./functions/auth.js";
+import { enviarEmail } from "./functions/smtp/smtp.js";
 import {
   getUsuariForAuth,
   updateUsuariToken,
+  getUserId,
 } from "./functions/database/CRUD/Usuaris.js";
 import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
+import {
+  getAllCriterisWeights,
+  getCriterisWeightById,
+  getCriterisWeightByCriterio,
+  updateCriterisWeight,
+  getCriterisWeightsForPeriod,
+} from "./functions/database/CRUD/CriterisWeights.js";
+import { reloadWeights } from "./functions/database/Criteris.js";
+import {
+  getSystemSettings,
+  updateSystemSettings,
+} from "./functions/database/CRUD/SystemSettings.js";
+import {
+  getAllPeriodes,
+  createPeriode as createPeriodeDB,
+} from "./functions/database/CRUD/Periodes.js";
+import { getInstitucioByCodiCentre } from "./functions/database/CRUD/Institucions.js";
+import { getUsuariByEmail } from "./functions/database/CRUD/Usuaris.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                   CONFIG                                   */
@@ -36,13 +56,22 @@ console.log("Hola pokiwokie");
 app.use(express.json());
 app.use(
   cors({
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:5173",
+    ],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["Content-Type", "Authorization"],
+  })
 );
 
 app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
 });
 /* -------------------------------------------------------------------------- */
@@ -61,48 +90,36 @@ app.get("/", (req, res) => {
 // Ruta de login
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-
   try {
-    const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m,
-    );
+    const existingUser = await getUsuariByEmail(email, true);
 
-    const user = await prisma.usuaris.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      return res.status(400).json({ error: "Usuari no trobat" });
+    if (!existingUser) {
+      return res
+        .status(409)
+        .json({ error: "Ja existeix un usuari amb el correu donat." });
     }
 
-    if (!user.autoritzat) {
+    if (!existingUser.autoritzat) {
       return res.status(403).json({ error: "Usuari no autoritzat" });
     }
 
-    const match = await comparePassword(password, user.password);
-    if (!match) {
+    const comparingPassword = await comparePassword(
+      password,
+      existingUser.password
+    );
+
+    if (!comparingPassword) {
       return res.status(400).json({ error: "Contrasenya incorrecta" });
     }
 
-    const { accessToken, refreshToken } = generateTokens(user);
-
-    // Guardar el refresh token en la base de datos
-    await prisma.usuaris.update({
-      where: { email },
-      data: { token: refreshToken },
-    });
+    const { accessToken, refreshToken } = generateTokens(existingUser);
+    await updateUsuariToken(parseInt(existingUser.id), refreshToken);
 
     res.status(200).json({
       message: "Login correcte",
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        nom: user.nom,
-        email: user.email,
-        rol: user.rol,
-        institucio: user.institucio,
-      },
+      user: existingUser,
     });
   } catch (error) {
     console.error("Error de base de dades:", error);
@@ -114,7 +131,6 @@ app.post("/login", async (req, res) => {
 app.post("/register", async (req, res) => {
   const { nom, email, password, rol, responsable } = req.body;
 
-  // Validar camps obligatoris
   if (!nom || !email || !password) {
     return res
       .status(400)
@@ -122,61 +138,43 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    const prisma = await import("./generated/prisma/index.js").then(
-      (m) => m.default || m,
-    );
-
-    // Verificar si l'usuari ja existeix
-    const existingUser = await prisma.usuaris.findUnique({
-      where: { email },
-    });
+    const existingUser = await getUsuariByEmail(email, false);
     if (existingUser) {
-      return res.status(409).json({ error: "L'email ja existeix" });
+      return res
+        .status(409)
+        .json({ error: "Ja existeix un usuari amb el correu donat." });
     }
 
-    // Hashear la contrasenya
-    const hashedPassword = await hashPassword(password);
-
-    let newInstitucio = null;
-
-    // Si s'envia dades de responsable, crear la institució
-    if (responsable && responsable.nom && responsable.codi_centre) {
-      newInstitucio = await prisma.institucions.create({
-        data: {
-          nom: responsable.nom,
-          codi_centre: responsable.codi_centre,
-          direccio: responsable.direccio || "",
-          codi_postal: responsable.codi_postal || "",
-        },
+    const codi_centre = responsable.codi_centre;
+    if (!codi_centre) {
+      return res.status(400).json({
+        error: "Falta el codi del centre a la informació de responsable.",
       });
     }
+    const existingInstitucio = await getInstitucioByCodiCentre(codi_centre);
+    if (existingInstitucio === false) {
+      return res
+        .status(409)
+        .json({ error: "No existeix una institució amb el codi donat." });
+    }
 
-    // Crear el nou usuari
-    const newUser = await prisma.usuaris.create({
-      data: {
-        nom,
-        email,
-        password: hashedPassword,
-        telefon: 0,
-        rol: rol || "Professorat",
-        autoritzat: false, // Per defecte no autoritzat fins que un admin l'aprovi
-        responsable: !!newInstitucio, // Si s'ha creat institució, és responsable
-        institucio: newInstitucio ? newInstitucio.id : null,
-      },
+    const hashedPassword = await hashPassword(password);
+
+    await createUsuari({
+      nom,
+      email,
+      password: hashedPassword,
+      rol: rol || "Professorat",
+      autoritzat: false,
+      institucio: existingInstitucio.id,
+      telefon: 0,
+      responsable: true,
     });
 
+    enviarEmail("registre", { nom, email, id: getUserId(email) });
+
     res.status(201).json({
-      message: "Usuari i institució registrats correctament",
-      user: {
-        id: newUser.id,
-        nom: newUser.nom,
-        email: newUser.email,
-        rol: newUser.rol,
-        responsable: newUser.responsable,
-      },
-      institucio: newInstitucio
-        ? { id: newInstitucio.id, nom: newInstitucio.nom }
-        : null,
+      message: "Petició d'usuari registrat correctament",
     });
   } catch (error) {
     console.error("Error al registrar usuari:", error);
@@ -206,10 +204,11 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
     res.json({ accessToken: newAccessToken });
+    enviarEmail("registreAcceptat", { nom: user.nom, email: user.email });
   } catch (err) {
     console.error("Error en refresh:", err);
     res.status(403).json({ error: "Token invàlid o expirat" });
@@ -257,14 +256,20 @@ app.use("/files/archives", express.static("./files/archives"));
 import {
   getAllAssistencies,
   getAssistenciaById,
+  getAssistenciesByTallerId,
   createAssistencia,
   updateAssistencia,
   deleteAssistencia,
-  getAssistenciaByTaller,
 } from "./functions/database/CRUD/Assistencia.js";
 
 app.get("/assistencies", async (req, res) => {
   const assistencies = await getAllAssistencies();
+  res.json(assistencies);
+});
+
+app.get("/assistencies/taller/:tallerId", async (req, res) => {
+  const { tallerId } = req.params;
+  const assistencies = await getAssistenciesByTallerId(tallerId);
   res.json(assistencies);
 });
 
@@ -314,7 +319,7 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
     }
 
     // Obtenir totes les assistències del taller
-    const assistencias = await getAssistenciaByTaller(tallerID);
+    const assistencias = await getAssistenciesByTallerId(tallerID);
 
     if (!assistencias || assistencias.length === 0) {
       return res.status(404).json({
@@ -349,10 +354,10 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
 
       // Esborrar tots els alumnos/profes de la mateixa institució
       llista_alumnes = llista_alumnes.filter(
-        (alumne) => alumne.INSTITUT !== institucioId,
+        (alumne) => alumne.INSTITUT !== institucioId
       );
       llista_professors = llista_professors.filter(
-        (profe) => profe.INSTITUT !== institucioId,
+        (profe) => profe.INSTITUT !== institucioId
       );
 
       // Afegir els nous alumnes
@@ -381,6 +386,54 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
     res.status(500).json({
       error: "Error al afegir alumnes: " + error.message,
     });
+  }
+});
+
+/* ------------------------------- HISTORIC ------------------------------ */
+
+import {
+  getAllHistoric,
+  getHistoricByInstitucion,
+  createHistoric,
+  deleteHistoric,
+} from "./functions/database/CRUD/Historic.js";
+
+app.get("/historic", async (req, res) => {
+  try {
+    const historic = await getAllHistoric();
+    res.json(historic);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/historic/institucion/:institucion", async (req, res) => {
+  try {
+    const { institucion } = req.params;
+    const historic = await getHistoricByInstitucion(institucion);
+    res.json(historic);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/historic", async (req, res) => {
+  try {
+    const { idInstitucion, periode, assistencia } = req.body;
+    const result = await createHistoric(idInstitucion, periode, assistencia);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/historic/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await deleteHistoric(id);
+    res.json(deleted);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -429,7 +482,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null,
+      comentari || null
     );
 
     return res.status(200).json({
@@ -494,7 +547,7 @@ app.post("/inscripcions/procesar", async (req, res) => {
         if (!horari.TORNS || !Array.isArray(horari.TORNS)) {
           console.warn(
             `Horari no té estructura correcta per taller ${taller.id}:`,
-            horari,
+            horari
           );
           continue;
         }
@@ -521,7 +574,7 @@ app.post("/inscripcions/procesar", async (req, res) => {
 
           if (indexDia === undefined) {
             console.warn(
-              `Dia no reconegut: ${diaSemana} per taller ${taller.id}`,
+              `Dia no reconegut: ${diaSemana} per taller ${taller.id}`
             );
             continue;
           }
@@ -541,10 +594,16 @@ app.post("/inscripcions/procesar", async (req, res) => {
             dataActual.setDate(dataActual.getDate() + 1);
           }
         }
+
+        // Actualizar taller a autorizado después de crear las asistencias
+        await updateTaller({
+          id: taller.id,
+          autoritzat: true,
+        });
       } catch (parseError) {
         console.error(
           `Error processant horari del taller ${taller.id}:`,
-          parseError,
+          parseError
         );
         continue;
       }
@@ -636,10 +695,19 @@ import {
   updateTaller,
   deleteTaller,
   getTallersByPeriode,
+  addComentariProfe,
 } from "./functions/database/CRUD/Tallers.js";
 
 app.get("/tallers", async (req, res) => {
-  const tallers = await getAllTallers();
+  const { periode } = req.query;
+
+  let tallers;
+  if (periode) {
+    tallers = await getTallersByPeriode(periode);
+  } else {
+    tallers = await getAllTallers();
+  }
+
   res.json(tallers);
 });
 
@@ -652,10 +720,13 @@ app.get("/tallers/:id", async (req, res) => {
 app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
   try {
     const data = req.body;
+
+    // Validaciones básicas
     if (
       !data.nom ||
       !data.descripcio ||
       !data.tallerista ||
+      !data.mailTallerista ||
       !data.direccio ||
       !data.horari ||
       !data.periode ||
@@ -663,7 +734,7 @@ app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
     ) {
       return res.status(400).json({
         error:
-          "Falten camps obligatoris (nom, descripcio, tallerista, direccio, horari, periode, admin)",
+          "Falten camps obligatoris (nom, descripcio, tallerista, mailTallerista, direccio, horari, periode, admin)",
       });
     }
 
@@ -806,6 +877,29 @@ app.delete("/tallers/:id", async (req, res) => {
   res.json(deletedTaller);
 });
 
+app.post("/tallers/:id/comentari-profe", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { idInstitucio, comentari } = req.body;
+
+    if (!idInstitucio || !comentari) {
+      return res.status(400).json({ error: "Falten idInstitucio i comentari" });
+    }
+
+    const resultado = await addComentariProfe(id, idInstitucio, comentari);
+    res.status(200).json({
+      ok: true,
+      message: "Comentari guardat correctament",
+      data: resultado,
+    });
+  } catch (error) {
+    console.error("Error en /tallers/:id/comentari-profe:", error.message);
+    res.status(500).json({
+      error: error.message || "Error al guardar comentari",
+    });
+  }
+});
+
 /* ------------------------------- USUARIS ------------------------------ */
 
 import {
@@ -827,22 +921,143 @@ app.get("/usuaris/:id", async (req, res) => {
   res.json(usuari);
 });
 
-app.post("/usuaris", async (req, res) => {
+app.put("/usuaris/aceptat/:id", async (req, res) => {
   const data = req.body;
-  const newUsuari = await createUsuari(data);
-  res.json(newUsuari);
+  const id = id;
+  data = { ...data, autoritzat: true };
+  try {
+    await updateUsuari(id, data);
+    // EN UN FUTUR AFEGIR L'ENVIO DEL CORREU ELECTRONIC AQUÍ
+    sendMail("registreAcceptat", { nom: data.nom, email: data.email });
+    return res.json({
+      message: "Usuari actualitzat correctament",
+    });
+  } catch (error) {
+    return res.json({ message: "Error al actualizar usuari:", error });
+  }
 });
 
-app.put("/usuaris", async (req, res) => {
-  const data = req.body;
-  const updatedUsuari = await updateUsuari(data);
-  res.json(updatedUsuari);
-});
-
-app.delete("/usuaris/:id", async (req, res) => {
+app.delete("/usuaris/denegat/:id", async (req, res) => {
   const { id } = req.params;
   const deletedUsuari = await deleteUsuari(id);
   res.json(deletedUsuari);
+});
+
+/* ------------------------------- CRITERIS WEIGHTS ------------------------------ */
+
+app.get("/criteris-weights", async (req, res) => {
+  try {
+    const weights = await getAllCriterisWeights();
+    res.json(weights);
+  } catch (error) {
+    console.error("Error al obtener pesos de criterios:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const weight = await getCriterisWeightById(id);
+    res.json(weight);
+  } catch (error) {
+    console.error("Error al obtener peso de criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/criterio/:criterio", async (req, res) => {
+  try {
+    const { criterio } = req.params;
+    const weight = await getCriterisWeightByCriterio(criterio);
+    res.json(weight);
+  } catch (error) {
+    console.error("Error al obtener peso por criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/criteris-weights/periodo/:periodeId", async (req, res) => {
+  try {
+    const { periodeId } = req.params;
+    const weights = await getCriterisWeightsForPeriod(periodeId);
+    res.json(weights);
+  } catch (error) {
+    console.error("Error al obtener pesos del período:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/criteris-weights/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { peso } = req.body;
+
+    if (peso === undefined) {
+      return res.status(400).json({ error: "El campo 'peso' es requerido" });
+    }
+
+    const updatedWeight = await updateCriterisWeight(id, peso);
+
+    // Recargar pesos en memoria
+    await reloadWeights();
+
+    res.json(updatedWeight);
+  } catch (error) {
+    console.error("Error al actualizar peso de criterio:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* ------------------------------- PERIODES ------------------------------ */
+
+app.get("/periodes", async (req, res) => {
+  try {
+    const periodes = await getAllPeriodes();
+    res.json(periodes);
+  } catch (error) {
+    console.error("Error al obtener periodes:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/periodes", async (req, res) => {
+  try {
+    const { dataIni, dataFi } = req.body;
+    const periode = await createPeriodeDB(dataIni, dataFi);
+    res.json(periode);
+  } catch (error) {
+    console.error("Error al crear periode:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/* ------------------------------- SYSTEM SETTINGS ------------------------------ */
+
+app.get("/system-settings", async (req, res) => {
+  try {
+    const settings = await getSystemSettings();
+    res.json(settings);
+  } catch (error) {
+    console.error("Error al obtener configuración del sistema:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/system-settings/:id", async (req, res) => {
+  try {
+    const { selectedPeriodeId } = req.body;
+
+    if (!selectedPeriodeId) {
+      return res.status(400).json({ error: "selectedPeriodeId es requerido" });
+    }
+
+    const settings = await updateSystemSettings(selectedPeriodeId);
+    res.json(settings);
+  } catch (error) {
+    console.error("Error al actualizar configuración del sistema:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /* -------------------------------------------------------------------------- */

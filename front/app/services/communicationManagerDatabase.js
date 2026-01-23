@@ -1,4 +1,4 @@
-const BACK_URL = import.meta.env.VITE_URL_BACK;
+const BACK_URL = import.meta.env.VITE_URL_BACK || "http://localhost:8000";
 
 /* ------------------------------- ASSISTENCIA ------------------------------ */
 
@@ -28,10 +28,25 @@ export async function getAssistenciaById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir assistència per ID: ${response.statusText}`,
+      `Error al obtenir assistència per ID: ${response.statusText}`
     );
   }
 
+  return await response.json();
+}
+
+export async function getAssistenciesByTallerId(tallerId) {
+  const response = await fetch(`${BACK_URL}/assistencies/taller/${tallerId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir assistències del taller: ${response.statusText}`
+    );
+  }
   return await response.json();
 }
 
@@ -50,8 +65,8 @@ export async function createAssistencia(assistenciaData) {
   return await response.json();
 }
 
-export async function updateAssistencia(id, assistenciaData) {
-  const response = await fetch(`${BACK_URL}/assistencies/${id}`, {
+export async function updateAssistencia(assistenciaData) {
+  const response = await fetch(`${BACK_URL}/assistencies`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -75,6 +90,22 @@ export async function deleteAssistencia(id) {
   });
   if (!response.ok) {
     throw new Error(`Error al eliminar assistència: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function afegirPersonalAssistencia(data) {
+  const response = await fetch(`${BACK_URL}/assistencies/afegirPersonal`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al afegir personal a assistència: ${response.statusText}`
+    );
   }
   return await response.json();
 }
@@ -141,6 +172,36 @@ export async function confirmarInscripciones(tallerId, inscripcionesAprobadas) {
   return await response.json();
 }
 
+export async function updateInscripcion(id, inscripcionData) {
+  const response = await fetch(`${BACK_URL}/inscripcions/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(inscripcionData),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al actualitzar inscripció: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function procesarInscripcions(periode) {
+  const response = await fetch(`${BACK_URL}/inscripcions/procesar`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      periode: parseInt(periode),
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al processar inscripcions: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
 /* ------------------------------- INSTITUCIONS ------------------------------ */
 
 export async function getAllInstitucions() {
@@ -169,7 +230,7 @@ export async function getInstitucionById(id) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir institució per ID: ${response.statusText}`,
+      `Error al obtenir institució per ID: ${response.statusText}`
     );
   }
   return await response.json();
@@ -248,6 +309,21 @@ export async function getTallerById(id) {
   return await response.json();
 }
 
+export async function getTallersByPeriode(periodeId) {
+  const response = await fetch(`${BACK_URL}/tallers?periode=${periodeId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir tallers per període: ${response.statusText}`
+    );
+  }
+  return await response.json();
+}
+
 export async function createTaller(formData) {
   const response = await fetch(`${BACK_URL}/tallers`, {
     method: "POST",
@@ -310,11 +386,11 @@ export async function pointsTallers(tallerId) {
         "Content-Type": "application/json",
         //   Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-    },
+    }
   );
   if (!response.ok) {
     throw new Error(
-      `Error al calcular puntuacions del taller: ${response.statusText}`,
+      `Error al calcular puntuacions del taller: ${response.statusText}`
     );
   }
   return await response.json();
@@ -345,32 +421,30 @@ export async function getUsuariById(id) {
     },
   });
   if (!response.ok) {
-    throw new Error(`Error al obtenir usuari per ID: ${response.statusText}`);
+    throw new Error(`Error al obtenir usuari per ID: ${response.error}`);
   }
   return await response.json();
 }
 
-export async function createUsuari(usuariData) {
-  const response = await fetch(`${BACK_URL}/usuaris`, {
+export async function registerUsuari(usuariData) {
+  const response = await fetch(`${BACK_URL}/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify(usuariData),
   });
   if (!response.ok) {
-    throw new Error(`Error al crear usuari: ${response.statusText}`);
+    throw new Error(`Error al crear usuari: ${response.error}`);
   }
   return await response.json();
 }
 
-export async function updateUsuari(id, usuariData) {
-  const response = await fetch(`${BACK_URL}/usuaris/${id}`, {
+export async function acceptUsuari(usuariData) {
+  const response = await fetch(`${BACK_URL}/usuaris/acceptat/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
     body: JSON.stringify(usuariData),
   });
@@ -380,16 +454,234 @@ export async function updateUsuari(id, usuariData) {
   return await response.json();
 }
 
-export async function deleteUsuari(id) {
-  const response = await fetch(`${BACK_URL}/usuaris/${id}`, {
+export async function declineUsuari(id) {
+  const response = await fetch(`${BACK_URL}/usuaris/denegat/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
   });
   if (!response.ok) {
-    throw new Error(`Error al eliminar usuari: ${response.statusText}`);
+    throw new Error(`Error al denegar usuari: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- LOGIN ------------------------------ */
+
+export async function loginUsuari(credentials) {
+  // Truca a l'API de login i en cas d'error de token el refresca
+  // automàticament, en cas de altres errors llença una excepció,
+  // agafa el token donant prioritat al antic token, guarda els tokens
+  // i retorna les dades de l'usuari.
+  const response = await fetch(`${BACK_URL}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al iniciar sessió: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  localStorage.setItem("accessToken", data.accessToken);
+  localStorage.setItem("refreshToken", data.refreshToken);
+
+  return { message: data.message, user: data.user };
+}
+
+async function handleTokenRefresh(refreshToken, userId) {
+  const response = await fetch(`${BACK_URL}/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken: refreshToken, id: userId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error al refrescar el token: ${response.statusText}`);
+  }
+
+  return await response.json();
+}
+
+/* ------------------------------- COMENTARIS ------------------------------ */
+
+export async function saveComentariProfe(tallerId, idInstitucio, comentari) {
+  const response = await fetch(
+    `${BACK_URL}/tallers/${tallerId}/comentari-profe`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idInstitucio: parseInt(idInstitucio),
+        comentari,
+      }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Error al guardar comentari: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function saveInscripcions(selecciones, docentRef, comentari) {
+  const selectionsArray = Object.entries(selecciones).map(
+    ([tallerId, numAlumnos]) => ({
+      tallerId: Number(tallerId),
+      numAlumnos: Number(numAlumnos),
+    })
+  );
+
+  const payload = {
+    selecciones: selectionsArray,
+    "docents-ref": docentRef?.trim() || null,
+    comentari: comentari?.trim() || null,
+  };
+
+  const response = await fetch(`${BACK_URL}/inscripcions/dadesinsc`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar inscripciones: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- CRITERIS WEIGHTS ------------------------------ */
+
+export async function getCriterisWeights() {
+  const response = await fetch(`${BACK_URL}/criteris-weights`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir pesos de criteris: ${response.statusText}`
+    );
+  }
+  return await response.json();
+}
+
+export async function updateCriterisWeight(id, peso) {
+  const response = await fetch(`${BACK_URL}/criteris-weights/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ peso: parseInt(peso) }),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al actualitzar pes de criterio: ${response.statusText}`
+    );
+  }
+  return await response.json();
+}
+
+/* ------------------------------- HISTORIC ------------------------------ */
+
+export async function createHistoric(idInstitucion, periode, assistencia) {
+  const response = await fetch(`${BACK_URL}/historic`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idInstitucion: parseInt(idInstitucion),
+      periode: parseInt(periode),
+      assistencia: parseFloat(assistencia),
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al guardar historic: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function getHistoricByInstitucion(institucion) {
+  const response = await fetch(
+    `${BACK_URL}/historic/institucion/${institucion}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Error al obtenir historic: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- PERIODES ------------------------------ */
+
+export async function getPeriodes() {
+  const response = await fetch(`${BACK_URL}/periodes`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtenir periodes: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+export async function createPeriode(dataIni, dataFi) {
+  const response = await fetch(`${BACK_URL}/periodes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      dataIni,
+      dataFi,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al crear periode: ${response.statusText}`);
+  }
+  return await response.json();
+}
+
+/* ------------------------------- SYSTEM SETTINGS ------------------------------ */
+
+export async function getSystemSettings() {
+  const response = await fetch(`${BACK_URL}/system-settings`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al obtenir configuració del sistema: ${response.statusText}`
+    );
+  }
+  return await response.json();
+}
+
+export async function updateSystemSettings(id, selectedPeriodeId) {
+  const response = await fetch(`${BACK_URL}/system-settings/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      selectedPeriodeId,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(
+      `Error al actualitzar configuració del sistema: ${response.statusText}`
+    );
   }
   return await response.json();
 }

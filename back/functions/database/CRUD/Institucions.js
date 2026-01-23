@@ -25,6 +25,22 @@ export async function getInstitucioById(id) {
   }
 }
 
+export async function getInstitucioByCodiCentre(codi_centre) {
+  try {
+    const prisma = await getPrisma();
+    const institucionFinder = await prisma.institucions.findUnique({
+      where: { codi_centre: codi_centre },
+    });
+
+    if (institucionFinder) return institucionFinder;
+    return false;
+  } catch (error) {
+    console.error("Error completo:", error);
+    console.error("Código de error Prisma:", error.code);
+    throw new Error(`Error al obtenir institució: ${error.message}`);
+  }
+}
+
 // INSERT nova institució
 export async function createInstitucio(data) {
   try {

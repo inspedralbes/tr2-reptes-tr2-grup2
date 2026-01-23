@@ -91,63 +91,48 @@ const tallers = computed(() => props.tallers);
 </script>
 
 <template>
-  <div class="slider-container" ref="containerElement">
-    <button
-      class="arrow-prev"
-      @click="scrollPrev"
-      :style="{ opacity: isAtStart ? '0.3' : '1' }"
-    >
-      <img src="/img/centro/flecha-izq.png" alt="Anterior" />
-    </button>
+  <div v-if="tallers.length > 0">
+    <div class="slider-container" ref="containerElement">
+      <button class="arrow-prev" @click="scrollPrev" :style="{ opacity: isAtStart ? '0.3' : '1' }">
+        <img src="/img/centro/flecha-izq.png" alt="Anterior" />
+      </button>
 
-    <div class="slider-wrapper" ref="sliderElement" @scroll="handleScroll">
-      <template v-for="grupo in tallers" :key="grupo.mes">
-        <div
-          v-for="(dia, index) in grupo.dias"
-          :key="dia.diaNum"
-          class="day-group"
-        >
-          <p class="month-label" :class="{ 'hidden-label': index !== 0 }">
-            {{ grupo.mes }}
-          </p>
+      <div class="slider-wrapper" ref="sliderElement" @scroll="handleScroll">
+        <template v-for="grupo in tallers" :key="grupo.mes">
+          <div v-for="(dia, index) in grupo.dias" :key="dia.diaNum" class="day-group">
+            <p class="month-label" :class="{ 'hidden-label': index !== 0 }">
+              {{ grupo.mes }}
+            </p>
 
-          <h3 class="date-label">{{ dia.diaSemana }}, {{ dia.diaNum }}</h3>
+            <h3 class="date-label">{{ dia.diaSemana }}, {{ dia.diaNum }}</h3>
 
-          <div class="cards-container">
-            <div
-              v-for="taller in dia.cursos"
-              :key="taller.titulo"
-              class="card"
-              :style="getCardStyle(taller.titulo)"
-            >
-              <div class="card-info">
-                <p class="title">{{ taller.titulo }}</p>
-                <p class="location">{{ taller.lugar }}</p>
-              </div>
-              <div class="card-time">
-                <span>
-                  <img
-                    src="/img/centro/clock.png"
-                    alt="Reloj"
-                    class="clock-icon"
-                  />
-                  {{ taller.hora }}
-                </span>
+            <div class="cards-container">
+              <div v-for="taller in dia.cursos" :key="taller.titulo" class="card" :style="getCardStyle(taller.titulo)">
+                <div class="card-info">
+                  <p class="title">{{ taller.titulo }}</p>
+                  <p class="location">{{ taller.lugar }}</p>
+                </div>
+                <div class="card-time">
+                  <span>
+                    <img src="/img/centro/clock.png" alt="Reloj" class="clock-icon" />
+                    {{ taller.hora }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </template>
-    </div>
+        </template>
+      </div>
 
-    <button
-      class="arrow-next"
-      @click="scrollNext"
-      :style="{ opacity: isAtEnd ? '0.3' : '1' }"
-    >
-      <img src="/img/centro/flecha-drc.png" alt="Siguiente" />
-    </button>
+      <button class="arrow-next" @click="scrollNext" :style="{ opacity: isAtEnd ? '0.3' : '1' }">
+        <img src="/img/centro/flecha-drc.png" alt="Siguiente" />
+      </button>
+    </div>
   </div>
+  <div v-else class="empty-state">
+    <p>No hi ha tallers actius de moment.</p>
+  </div>
+
 </template>
 
 <style scoped>
@@ -166,20 +151,16 @@ const tallers = computed(() => props.tallers);
   padding: 10px 40px;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    rgba(0, 0, 0, calc(1 - var(--grad-left))) 0%,
-    black 10%,
-    black 90%,
-    rgba(0, 0, 0, calc(1 - var(--grad-right))) 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    rgba(0, 0, 0, calc(1 - var(--grad-left))) 0%,
-    black 10%,
-    black 90%,
-    rgba(0, 0, 0, calc(1 - var(--grad-right))) 100%
-  );
+  -webkit-mask-image: linear-gradient(to right,
+      rgba(0, 0, 0, calc(1 - var(--grad-left))) 0%,
+      black 10%,
+      black 90%,
+      rgba(0, 0, 0, calc(1 - var(--grad-right))) 100%);
+  mask-image: linear-gradient(to right,
+      rgba(0, 0, 0, calc(1 - var(--grad-left))) 0%,
+      black 10%,
+      black 90%,
+      rgba(0, 0, 0, calc(1 - var(--grad-right))) 100%);
 }
 
 .slider-wrapper::-webkit-scrollbar {
@@ -187,7 +168,8 @@ const tallers = computed(() => props.tallers);
 }
 
 .day-group {
-  min-width: 300px; /* Tamaño fijo para consistencia */
+  min-width: 300px;
+  /* Tamaño fijo para consistencia */
   flex-shrink: 0;
   scroll-snap-align: center;
 }
@@ -205,6 +187,7 @@ const tallers = computed(() => props.tallers);
 .cards-container::-webkit-scrollbar {
   width: 4px;
 }
+
 .cards-container::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
@@ -230,24 +213,29 @@ const tallers = computed(() => props.tallers);
   margin-bottom: 2px;
   min-height: 1rem;
 }
+
 .hidden-label {
   visibility: hidden;
 }
+
 .date-label {
   font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 10px;
   color: #333;
 }
+
 .title {
   font-weight: bold;
   font-size: 1rem;
   margin: 0;
 }
+
 .location {
   font-size: 0.8rem;
   opacity: 0.8;
 }
+
 .clock-icon {
   width: 16px;
   height: 16px;
@@ -278,12 +266,23 @@ const tallers = computed(() => props.tallers);
 .arrow-prev {
   left: -5px;
 }
+
 .arrow-next {
   right: -5px;
 }
+
 .arrow-prev img,
 .arrow-next img {
   width: 25px;
   height: 25px;
+}
+
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 1.1rem;
+  
 }
 </style>

@@ -1,19 +1,17 @@
 <script setup>
-import Encabezado from "@/layouts/encabezado.vue";
-import navBarAdmin from "@/layouts/navBarAdmin.vue";
 import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
 </script>
 <template>
-  <Encabezado></Encabezado>
-  <div id="body">
-    <navBarAdmin />
-    <div id="content">
-      <div class="header-Peticions">
-        <h2>Gestió peticions</h2>
-      </div>
-      <div class="container-courses">
-        <br />
-        <listaPeticions></listaPeticions>
+  <div>
+    <div id="body">
+      <div id="content">
+        <div class="header-Peticions">
+          <h2>Gestió peticions</h2>
+        </div>
+        <div class="container-courses">
+          <br />
+          <listaPeticions></listaPeticions>
+        </div>
       </div>
     </div>
   </div>
@@ -22,11 +20,13 @@ import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
 #body {
   display: flex;
 }
+
 #content {
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
 }
+
 .container-courses {
   background-color: #f5f5f5;
   border-radius: 20px;

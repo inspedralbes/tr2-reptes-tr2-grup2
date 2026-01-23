@@ -1,7 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
-import { getAllTallers } from "@/services/communicationManagerDatabase";
+import { 
+  getAllTallers, 
+  getAllInscripcions, 
+  confirmarInscripciones, 
+  saveInscripcions,
+  getSystemSettings 
+} from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
 const tallersGrouped = ref([]);
@@ -53,26 +59,7 @@ const enviarTodasSeleccionadas = () => {
 // Paula: funcion para enviar datos al backend desde el modal
 const confirmarEnvio = async () => {
   try {
-    const selectionsArray = Object.entries(selecciones.value).map(
-      ([tallerId, numAlumnos]) => ({
-        tallerId: Number(tallerId),
-        numAlumnos: Number(numAlumnos),
-      })
-    );
-
-    const payload = {
-      selecciones: selectionsArray,
-      "docents-ref": docentRef.value.trim() || null,
-      comentari: comentari.value.trim() || null,
-    };
-
-    const backendBase = import.meta.env.VITE_URL_BACK || "";
-    const res = await fetch(`${backendBase}/inscripcions/dadesinsc`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error("Error al guardar selecciones");
+    await saveInscripcions(selecciones.value, docentRef.value, comentari.value);
     console.log("Guardadas todas las selecciones");
 
     // Limpiar y cerrar
@@ -108,7 +95,14 @@ function toggleMonthSelection(mes) {
   }
 }
 function removeMonth(mes) {
-  selectedMonths.value = selectedMonths.value.filter((m) => m !== mes);
+  // Buscamos la posición del mes en el array
+  for (let i = 0; i < selectedMonths.value.length; i++) {
+    if (selectedMonths.value[i] === mes) {
+      // Si lo encontramos, lo borramos en esa posición y salimos del bucle
+      selectedMonths.value.splice(i, 1);
+      break; 
+    }
+  }
 }
 
 function toggleHorariSelection(horari) {
@@ -121,7 +115,12 @@ function toggleHorariSelection(horari) {
 }
 
 function removeHorari(horari) {
-  selectedHoraris.value = selectedHoraris.value.filter((h) => h !== horari);
+  for (let i = 0; i < selectedHoraris.value.length; i++) {
+    if (selectedHoraris.value[i] === horari) {
+      selectedHoraris.value.splice(i, 1);
+      break;
+    }
+  }
 }
 
 function toggleFilter() {
@@ -203,13 +202,34 @@ const processTallers = (data) => {
       horari = {};
     }
 
-    const parts = (horari.DATAINI || "").split("/");
-    const year = parts[2] ? parseInt(parts[2], 10) : null;
-    const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
-    const day = parts[0] ? parseInt(parts[0], 10) : null;
-    const dateObj = year && month >= 0 ? new Date(year, month, day) : null;
+    const dataStr = horari.DATAINI || "";
+    let year = null,
+      month = null,
+      day = null;
+
+    if (dataStr.includes("/")) {
+      const parts = dataStr.split("/");
+      day = parts[0] ? parseInt(parts[0], 10) : null;
+      month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+      year = parts[2] ? parseInt(parts[2], 10) : null;
+    } else if (dataStr.includes("-")) {
+      const parts = dataStr.split("-");
+      year = parts[0] ? parseInt(parts[0], 10) : null;
+      month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
+      day = parts[2] ? parseInt(parts[2], 10) : null;
+    }
+
+    const dateObj =
+      year && month !== null && month >= 0 && day
+        ? new Date(year, month, day)
+        : null;
     const mesNombre = dateObj ? mesesNombres[dateObj.getMonth()] : "Desconegut";
     const diaNum = dateObj ? dateObj.getDate() : day || null;
+    const mesNum = dateObj
+      ? dateObj.getMonth() + 1
+      : month !== null
+        ? month + 1
+        : null;
 
     // Si el mes no existe en nuestro objeto agrupador, lo creamos
     if (!grouped[mesNombre]) {
@@ -228,7 +248,8 @@ const processTallers = (data) => {
       imagen: "/img/centro/image.png",
       descripcio: t.descripcio,
       direccio: t.direccio,
-      mesNum: parts[1] || null,
+      mesNum: mesNum,
+      diaNum: diaNum,
       rawHorari: horari,
     });
   });
@@ -240,14 +261,23 @@ const processTallers = (data) => {
 // Carga inicial
 onMounted(async () => {
   try {
-    const rawData = await getAllTallers();
-    console.log("Datos crudos de talleres:", rawData);
+    const [rawData, settings] = await Promise.all([
+      getAllTallers(),
+      getSystemSettings(),
+    ]);
+    
+    // Filtrar por período seleccionado
+    //Alba: Lo he comentado para que se muestren todos los talleres, sin filtrar por periodo ya que me estaba dando problemas de que no se me veian los talleres
+    //Cuando se haga el filtro por periodo, se descomenta y se elimina el const filteredData = rawData;
+    // const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
+    const filteredData = rawData;
+    console.log("Datos crudos de talleres:", filteredData);
 
     // Extraer horarios únicos
-    horaris.value = extractHoraris(rawData);
+    horaris.value = extractHoraris(filteredData);
     console.log("Horarios disponibles:", horaris.value);
 
-    tallersGrouped.value = processTallers(rawData);
+    tallersGrouped.value = processTallers(filteredData);
   } catch (error) {
     console.error("Error cargando talleres:", error);
   } finally {
@@ -472,7 +502,7 @@ const getMesNum = (mes) => {
                 ><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
-                  {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
+                  {{ curso.diaNum }}/{{ getMesNum(seccion.mes) }}
                   <img src="/img/centro/clock.png" class="icon" />
                   {{ curso.hora }}
                 </span>

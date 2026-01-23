@@ -12,7 +12,6 @@ export async function getAllUsuaris() {
         rol: true,
         tallers: true,
         responsable: true,
-        coordinador: true,
       },
     });
   } catch (error) {
@@ -33,11 +32,52 @@ export async function getUsuariById(id) {
         rol: true,
         tallers: true,
         responsable: true,
-        coordinador: true,
       },
     });
   } catch (error) {
     throw new Error(`Error al obtenir usuari: ${error.message}`);
+  }
+}
+
+export async function getUsuariByEmail(email, login) {
+  try {
+    const prisma = await getPrisma();
+    const userFinder = await prisma.usuaris.findUnique({
+      where: { email: email },
+      select: {
+        id: true,
+        nom: true,
+        email: true,
+        password: true,
+        rol: true,
+        tallers: true,
+        autoritzat: true,
+        responsable: true,
+      },
+    });
+
+    if (login) {
+      if (userFinder) return userFinder;
+      throw new Error(`No existeix el usuari especificat`);
+    }
+
+    if (userFinder) return true;
+    return false;
+  } catch (error) {
+    throw new Error(`Error al obtenir usuari: ${error.message}`);
+  }
+}
+
+export async function getUserId(email) {
+  try {
+    const prisma = await getPrisma();
+    const user = await prisma.usuaris.findUnique({
+      where: { email: email },
+      select: { id: true },
+    });
+    return parseInt(user.id);
+  } catch (error) {
+    throw new Error(`Error al obtenir ID de l'usuari: ${error.message}`);
   }
 }
 
@@ -47,7 +87,7 @@ export async function createUsuari(data) {
     const prisma = await getPrisma();
     return await prisma.usuaris.create({
       data,
-      include: { tallers: true, responsable: true, coordinador: true },
+      include: { tallers: true, responsable: true },
     });
   } catch (error) {
     throw new Error(`Error al crear usuari: ${error.message}`);
@@ -55,14 +95,13 @@ export async function createUsuari(data) {
 }
 
 // UPDATE usuari
-export async function updateUsuari(data) {
+export async function updateUsuari(id, data) {
   try {
     const prisma = await getPrisma();
-    const { id, ...updateData } = data;
     return await prisma.usuaris.update({
       where: { id: parseInt(id) },
-      data: updateData,
-      include: { tallers: true, responsable: true, coordinador: true },
+      data: data,
+      include: { tallers: true, responsable: true },
     });
   } catch (error) {
     throw new Error(`Error al actualizar usuari: ${error.message}`);

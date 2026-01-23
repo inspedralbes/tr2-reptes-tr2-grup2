@@ -26,7 +26,7 @@ const workshopsData = [
 async function main() {
   prisma = await getPrisma();
   console.log(
-    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)...",
+    "🚀 [INICI] Seed Adaptat v4: Schema nou (Institucions independents)..."
   );
 
   const periodsIds = [];
@@ -249,6 +249,7 @@ async function main() {
           descripcio: "Activitat educativa (Seed)",
           institucio: inst.id,
           tallerista: "Tallerista Expert",
+          mailTallerista: "tallerista@example.com",
           places_max: workshop.value,
           places_disp: workshop.value,
           modalitat: "A",
@@ -276,7 +277,7 @@ async function main() {
           ]),
           referents: "Cap d'Estudis",
           docents_referents: "docent@centre.cat",
-          autoritzat: true,
+          autoritzat: false,
           tallerId: taller.id,
         },
       });
@@ -287,10 +288,15 @@ async function main() {
           id_taller: taller.id,
           dia: new Date(),
           llista_alumnes: JSON.stringify([
-            { NOM: "Alumne 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: true },
+            {
+              NOM: "Alumne 1",
+              INSTITUT: inst.id,
+              ASSISTENCIA: true,
+              JUSTIFICAT: true,
+            },
           ]),
           llista_professors: JSON.stringify([
-            { NOM: "Profe 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: flase },
+            { NOM: "Profe 1", INSTITUT: inst.id, ASSISTENCIA: true, JUSTIFICAT: false },
           ]),
           autoritzat: false,
         },
@@ -316,7 +322,30 @@ async function main() {
           assistencia: assistencia,
         },
       });
-    } catch (e) {}
+    } catch (e) { }
+  }
+  console.log("\n🚀 [6/7] Creant pesos de criterios...");
+  const pesos = [
+    { criterio: "FIRST_TIME", peso: 20 },
+    { criterio: "ATTENDANCE_RISK", peso: -30 },
+    { criterio: "DIVERSITY", peso: 15 },
+    { criterio: "NO_CAPACITY", peso: -30 },
+    { criterio: "NE", peso: 30 },
+  ];
+
+  for (const p of pesos) {
+    const existe = await prisma.criterisWeights.findUnique({
+      where: { criteri: p.criterio },
+    });
+    if (!existe) {
+      await prisma.criterisWeights.create({
+        data: {
+          criteri: p.criterio,
+          pes: p.peso,
+          periode: null, // Aplica globalmente
+        },
+      });
+    }
   }
 
   console.log("\n🏁 [FIN] Seed completat correctament.");
