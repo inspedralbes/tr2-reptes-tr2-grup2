@@ -1,12 +1,7 @@
 <template>
   <div class="stats-container">
     <div v-if="loading" class="loading-state">
-      <img
-        src="/assets/gifs/loading.gif"
-        alt="Carregant..."
-        width="30"
-        height="30"
-      />
+      <img src="/assets/gifs/loading.gif" alt="Carregant..." width="30" height="30" />
     </div>
     <div ref="chartRef" class="main-chart"></div>
   </div>
@@ -32,49 +27,153 @@ const initChart = (processedData) => {
 
   const years = Object.keys(processedData).sort();
 
+  // Paleta de colores azules (de más oscuro a más claro)
+  const blueColors = [
+    '#1a237e', // Índigo oscuro
+    '#283593', // Índigo
+    '#3949ab', // Índigo medio
+    '#5c6bc0', // Índigo claro
+    '#7986cb', // Índigo muy claro
+    '#9fa8da'  // Índigo pastel
+  ];
+
   const option = {
     title: {
-      text: "Top 3 Tallers per Any",
-      left: "center",
-      top: 10,
+      text: 'Top 3 Tallers per Any',
+      subtext: 'Tallers més demandats',
+      left: 'center',
       textStyle: {
-        fontSize: 17,
+        fontSize: 16,
+        fontWeight: 600,
+        color: '#333'
       },
+      subtextStyle: {
+        fontSize: 12,
+        color: '#666'
+      }
     },
     legend: {
       data: years,
       bottom: 10,
     },
     tooltip: {
-      trigger: "axis",
-      axisPointer: { type: "shadow" },
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow',
+        shadowStyle: {
+          color: 'rgba(57, 73, 171, 0.1)'
+        }
+      },
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: '#5c6bc0',
+      borderWidth: 1,
+      textStyle: {
+        color: '#333'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      top: '20%',
+      containLabel: true
     },
     xAxis: {
-      type: "category",
+      type: 'category',
       // Etiquetes fixes per a la posició 1, 2 i 3
-      data: ["1r Més demanat", "2n Més demanat", "3r Més demanat"],
+      data: ['1r Més demanat', '2n Més demanat', '3r Més demanat'],
+      axisLabel: {
+        color: '#666',
+        fontSize: 10,
+        fontWeight: 500
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#ddd'
+        }
+      },
+      axisTick: {
+        show: false
+      }
     },
     yAxis: {
-      type: "value",
-      name: "Alumnes (Places)",
-    },
-    series: years.map((year) => ({
-      name: year,
-      type: "bar",
-      barGap: "10%",
-      label: {
-        show: true,
-        position: "top",
-        formatter: (params) => {
-          // Evitem error si no hi ha dades per a aquesta posició (ex. any amb < 3 tallers)
-          const item = processedData[year][params.dataIndex];
-          return item ? item.name : "";
-        },
-        fontSize: 10,
+      type: 'value',
+      name: 'Alumnes (Places)',
+      nameTextStyle: {
+        color: '#666',
+        fontSize: 11,
+        fontWeight: 500
       },
-      // Mapegem els valors. Si hi ha menys de 3 tallers, omplim amb 0 o null
-      data: processedData[year].map((d) => d.value),
-    })),
+      axisLabel: {
+        color: '#999',
+        fontSize: 10
+      },
+      axisLine: {
+        show: false
+      },
+      axisTick: {
+        show: false
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#f0f0f0',
+          type: 'dashed'
+        }
+      }
+    },
+    series: (() => {
+      const seriesArray = [];
+
+      // Recorrer cada año
+      for (let yearIndex = 0; yearIndex < years.length; yearIndex++) {
+        const year = years[yearIndex];
+
+        // Preparar los datos de este año
+        const yearData = [];
+        for (let i = 0; i < processedData[year].length; i++) {
+          const d = processedData[year][i];
+          yearData.push({
+            value: d.value,
+            itemStyle: {
+              color: blueColors[yearIndex % blueColors.length],
+              borderRadius: [6, 6, 0, 0],
+              shadowColor: 'rgba(0, 0, 0, 0.2)',
+              shadowBlur: 8,
+              shadowOffsetY: 3
+            }
+          });
+        }
+
+        // Agregar la serie completa
+        seriesArray.push({
+          name: year,
+          type: 'bar',
+          barGap: '10%',
+          label: {
+            show: true,
+            position: 'top',
+            formatter: (params) => {
+              // Evitem error si no hi ha dades per a aquesta posició (ex. any amb < 3 tallers)
+              const item = processedData[year][params.dataIndex];
+              return item ? item.name : '';
+            },
+            fontSize: 10,
+            fontWeight: 600,
+            color: '#333'
+          },
+          data: yearData,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 15,
+              shadowOffsetY: 5,
+              shadowColor: 'rgba(57, 73, 171, 0.4)'
+            }
+          }
+        });
+      }
+
+      return seriesArray;
+    })()
   };
 
   myChart.setOption(option);
@@ -86,23 +185,52 @@ const fetchData = async () => {
     const tallers = await getAllTallers();
 
     // 1. Agrupar tallers per any (camp 'curs')
-    const groupedByYear = tallers.reduce((acc, taller) => {
-      const year = taller.curs || "Sense any"; // Fallback per si de cas
-      if (!acc[year]) acc[year] = [];
+    const groupedByYear = {};
 
-      acc[year].push({
+    // Recorrer cada taller y agruparlo por año
+    for (let i = 0; i < tallers.length; i++) {
+      const taller = tallers[i];
+      const year = taller.curs || "Sense any"; // Fallback per si de cas
+
+      // Si este año no existe en el objeto, crear un array vacío
+      if (!groupedByYear[year]) {
+        groupedByYear[year] = [];
+      }
+
+      // Agregar el taller a este año
+      groupedByYear[year].push({
         name: taller.nom,
         // Utilitzem places_max com a indicador d'"alumnes" segons el teu seed
         value: taller.places_max,
       });
-      return acc;
-    }, {});
+    }
 
     // 2. Ordenar per valor (desc) i agafar el TOP 3
-    Object.keys(groupedByYear).forEach((year) => {
-      groupedByYear[year].sort((a, b) => b.value - a.value);
-      groupedByYear[year] = groupedByYear[year].slice(0, 3);
-    });
+    const years = Object.keys(groupedByYear);
+
+    for (let i = 0; i < years.length; i++) {
+      const year = years[i];
+      const tallersDelAny = groupedByYear[year];
+
+      // Ordenar usando bubble sort (de mayor a menor)
+      for (let j = 0; j < tallersDelAny.length - 1; j++) {
+        for (let k = 0; k < tallersDelAny.length - j - 1; k++) {
+          if (tallersDelAny[k].value < tallersDelAny[k + 1].value) {
+            // Intercambiar
+            const temp = tallersDelAny[k];
+            tallersDelAny[k] = tallersDelAny[k + 1];
+            tallersDelAny[k + 1] = temp;
+          }
+        }
+      }
+
+      // Tomar solo los primeros 3
+      const top3 = [];
+      for (let j = 0; j < Math.min(3, tallersDelAny.length); j++) {
+        top3.push(tallersDelAny[j]);
+      }
+      groupedByYear[year] = top3;
+    }
 
     initChart(groupedByYear);
   } catch (error) {
