@@ -57,7 +57,11 @@ function exportCSV() {
   <div id="container">
     <div class="container-informs">
       <!-- PANEL FLOTANTE DE FILTROS -->
-      <div v-if="showFilters" class="filters-overlay" @click.self="cancelFilters">
+      <div
+        v-if="showFilters"
+        class="filters-overlay"
+        @click.self="cancelFilters"
+      >
         <div class="filters-pop">
           <div class="filters-head">
             <h3>Filtres</h3>
@@ -86,20 +90,36 @@ function exportCSV() {
             <div class="field">
               <label>Modalitat</label>
               <div class="segmented">
-                <button class="seg" :class="{ active: filters.modalitat === 'Totes' }"
-                  @click="filters.modalitat = 'Totes'" type="button">
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'Totes' }"
+                  @click="filters.modalitat = 'Totes'"
+                  type="button"
+                >
                   Totes
                 </button>
-                <button class="seg" :class="{ active: filters.modalitat === 'A' }" @click="filters.modalitat = 'A'"
-                  type="button">
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'A' }"
+                  @click="filters.modalitat = 'A'"
+                  type="button"
+                >
                   A
                 </button>
-                <button class="seg" :class="{ active: filters.modalitat === 'B' }" @click="filters.modalitat = 'B'"
-                  type="button">
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'B' }"
+                  @click="filters.modalitat = 'B'"
+                  type="button"
+                >
                   B
                 </button>
-                <button class="seg" :class="{ active: filters.modalitat === 'C' }" @click="filters.modalitat = 'C'"
-                  type="button">
+                <button
+                  class="seg"
+                  :class="{ active: filters.modalitat === 'C' }"
+                  @click="filters.modalitat = 'C'"
+                  type="button"
+                >
                   C
                 </button>
               </div>
@@ -130,10 +150,10 @@ function exportCSV() {
       </div>
 
       <!-- AQUÍ IRÍAN LOS INFORMES (solo estructura visual) -->
-       
+
       <!-- Gráfica para las solicitudes de los talleres y los que han sido asignados -->
       <div class="reports-grid">
-        <div class="card">
+        <div class="card-solicituts">
           <div class="card-title">Tallers sol·licitats vs assignats</div>
           <div class="chart-placeholder">
             <graficaSolicitatsAssignats />
@@ -141,26 +161,20 @@ function exportCSV() {
         </div>
 
         <!-- Gráfica para la participación de los talleres --->
-        <div class="card">
+        <div class="card-wider">
           <div class="card-title">Estadístiques de participació</div>
-          <div class="chart-placeholder">
+          <div class="chart-placeholder bigger">
             <graficaParticipacio />
           </div>
         </div>
 
-        
         <div class="card">
           <div class="card-title">Estat dels checklists</div>
           <div class="chart-placeholder">Gràfic (placeholder)</div>
         </div>
-
-        <div class="card">
-          <div class="card-title">Satisfacció general</div>
-          <div class="chart-placeholder">Mitjanes (placeholder)</div>
-        </div>
       </div>
 
-      <div class="card card-wide">
+      <div class="card">
         <div class="card-title">Comparatives entre edicions o períodes</div>
         <div class="chart-placeholder wide">Comparativa (placeholder)</div>
       </div>
@@ -381,6 +395,22 @@ function exportCSV() {
   padding: 18px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
+.card-solicituts {
+  background: #f5f5f5;
+  border-radius: 20px;
+  height: 240px;
+  padding: 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.card-wider {
+  background: #f5f5f5;
+  border-radius: 20px;
+  height: 460px;
+  padding: 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  grid-row: span 2;
+}
 
 .card-title {
   font-weight: 700;
@@ -396,6 +426,10 @@ function exportCSV() {
   justify-content: center;
   font-weight: 600;
   opacity: 0.8;
+}
+
+.chart-placeholder.bigger {
+  height: 100%;
 }
 
 .chart-placeholder.wide {

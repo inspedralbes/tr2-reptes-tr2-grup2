@@ -10,7 +10,6 @@
     </div>
 
     <div v-else-if="totalInscripcions === 0" class="no-data">
-      <span>📭</span>
       <p>No hi ha inscripcions disponibles</p>
     </div>
 
@@ -331,7 +330,9 @@ onMounted(() => {
 }
 
 .pie-chart {
+  margin-top: 70px;
   height: 160px;
+  margin-right: 20px;
   width: 100%;
 }
 
