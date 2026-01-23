@@ -53,6 +53,7 @@ export async function getUsuariByEmail(email, login) {
         tallers: true,
         autoritzat: true,
         responsable: true,
+        institucio: true,
       },
     });
 
@@ -87,7 +88,7 @@ export async function createUsuari(data) {
     const prisma = await getPrisma();
     return await prisma.usuaris.create({
       data,
-      include: { tallers: true, responsable: true },
+      include: { tallers: true },
     });
   } catch (error) {
     throw new Error(`Error al crear usuari: ${error.message}`);
@@ -101,7 +102,7 @@ export async function updateUsuari(id, data) {
     await prisma.usuaris.update({
       where: { id: parseInt(id) },
       data: data,
-      include: { tallers: true, responsable: true },
+      include: { tallers: true },
     });
     return { message: "Usuari actualitzat correctament" };
   } catch (error) {

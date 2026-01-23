@@ -72,7 +72,7 @@ async function sendForm() {
 </script>
 
 <template>
-  <Encabezado></Encabezado>
+  <!-- <Encabezado></Encabezado> -->
   <div id="cuerpo">
     <div id="contenidor">
       <h2>Registre del Centre</h2>
@@ -181,6 +181,7 @@ async function sendForm() {
 h2 {
   margin-bottom: 5px;
 }
+
 h4 {
   margin-bottom: 25px;
   color: #555;

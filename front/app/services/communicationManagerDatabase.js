@@ -316,12 +316,10 @@ export async function getTallersByPeriode(periodeId) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
-    body: JSON.stringify(tallerData),
-    },
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir tallers per període: ${response.statusText}`
+      `Error al obtenir tallers per període: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -524,7 +522,7 @@ export async function saveComentariProfe(tallerId, idInstitucio, comentari) {
         idInstitucio: parseInt(idInstitucio),
         comentari,
       }),
-    }
+    },
   );
   if (!response.ok) {
     throw new Error(`Error al guardar comentari: ${response.statusText}`);
@@ -537,7 +535,7 @@ export async function saveInscripcions(selecciones, docentRef, comentari) {
     ([tallerId, numAlumnos]) => ({
       tallerId: Number(tallerId),
       numAlumnos: Number(numAlumnos),
-    })
+    }),
   );
 
   const payload = {
@@ -566,7 +564,7 @@ export async function getCriterisWeights() {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir pesos de criteris: ${response.statusText}`
+      `Error al obtenir pesos de criteris: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -580,7 +578,7 @@ export async function updateCriterisWeight(id, peso) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al actualitzar pes de criterio: ${response.statusText}`
+      `Error al actualitzar pes de criterio: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -614,7 +612,7 @@ export async function getHistoricByInstitucion(institucion) {
       headers: {
         "Content-Type": "application/json",
       },
-    }
+    },
   );
   if (!response.ok) {
     throw new Error(`Error al obtenir historic: ${response.statusText}`);
@@ -665,7 +663,7 @@ export async function getSystemSettings() {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir configuració del sistema: ${response.statusText}`
+      `Error al obtenir configuració del sistema: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -683,7 +681,7 @@ export async function updateSystemSettings(id, selectedPeriodeId) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al actualitzar configuració del sistema: ${response.statusText}`
+      `Error al actualitzar configuració del sistema: ${response.statusText}`,
     );
   }
   return await response.json();

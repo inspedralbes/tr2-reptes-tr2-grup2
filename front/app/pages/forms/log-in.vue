@@ -36,7 +36,7 @@ async function handleLogin() {
     } else {
       alert(
         data.error ||
-          "Credencials incorrectes. Revisa el teu email i contrasenya.",
+        "Credencials incorrectes. Revisa el teu email i contrasenya.",
       );
     }
   } catch (error) {
@@ -54,7 +54,7 @@ function setPath(rol) {
 </script>
 
 <template>
-  <Encabezado></Encabezado>
+  <!-- <Encabezado></Encabezado> -->
   <div id="cuerpo">
     <div id="contenidor">
       <div id="prim-menu">
@@ -63,21 +63,11 @@ function setPath(rol) {
 
         <form @submit.prevent="handleLogin">
           <div class="form-group">
-            <input
-              v-model="input_email"
-              type="email"
-              placeholder="Email"
-              required
-            />
+            <input v-model="input_email" type="email" placeholder="Email" required />
           </div>
           <br />
           <div class="form-group">
-            <input
-              v-model="input_pass"
-              type="password"
-              placeholder="Contrasenya"
-              required
-            />
+            <input v-model="input_pass" type="password" placeholder="Contrasenya" required />
           </div>
           <br />
 
