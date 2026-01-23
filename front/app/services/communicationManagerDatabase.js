@@ -7,7 +7,7 @@ export async function getAllAssistencies() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
 
@@ -23,12 +23,12 @@ export async function getAssistenciaById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir assistència per ID: ${response.statusText}`
+      `Error al obtenir assistència per ID: ${response.statusText}`,
     );
   }
 
@@ -44,7 +44,7 @@ export async function getAssistenciesByTallerId(tallerId) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir assistències del taller: ${response.statusText}`
+      `Error al obtenir assistències del taller: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -55,7 +55,7 @@ export async function createAssistencia(assistenciaData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(assistenciaData),
   });
@@ -70,7 +70,7 @@ export async function updateAssistencia(assistenciaData) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(assistenciaData),
   });
@@ -85,7 +85,7 @@ export async function deleteAssistencia(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -104,7 +104,7 @@ export async function afegirPersonalAssistencia(data) {
   });
   if (!response.ok) {
     throw new Error(
-      `Error al afegir personal a assistència: ${response.statusText}`
+      `Error al afegir personal a assistència: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -117,7 +117,7 @@ export async function getAllInscripcions() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -131,7 +131,7 @@ export async function createInscripcion(inscripcionData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(inscripcionData),
   });
@@ -146,7 +146,7 @@ export async function deleteInscripcion(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -209,7 +209,7 @@ export async function getAllInstitucions() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
 
@@ -225,12 +225,12 @@ export async function getInstitucionById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
     throw new Error(
-      `Error al obtenir institució per ID: ${response.statusText}`
+      `Error al obtenir institució per ID: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -241,7 +241,7 @@ export async function createInstitucion(institucionData) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(institucionData),
   });
@@ -256,7 +256,7 @@ export async function updateInstitucion(id, institucionData) {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify(institucionData),
   });
@@ -271,7 +271,7 @@ export async function deleteInstitucion(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -287,7 +287,7 @@ export async function getAllTallers() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -300,7 +300,7 @@ export async function getTallerById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -314,6 +314,9 @@ export async function getTallersByPeriode(periodeId) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+    body: JSON.stringify(tallerData),
     },
   });
   if (!response.ok) {
@@ -346,6 +349,10 @@ export async function createTaller(formData) {
 export async function updateTaller(formData) {
   const response = await fetch(`${BACK_URL}/tallers`, {
     method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
     body: formData,
   });
 
@@ -367,7 +374,7 @@ export async function deleteTaller(id) {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify({ id }),
   });
@@ -386,11 +393,11 @@ export async function pointsTallers(tallerId) {
         "Content-Type": "application/json",
         //   Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-    }
+    },
   );
   if (!response.ok) {
     throw new Error(
-      `Error al calcular puntuacions del taller: ${response.statusText}`
+      `Error al calcular puntuacions del taller: ${response.statusText}`,
     );
   }
   return await response.json();
@@ -403,7 +410,7 @@ export async function getAllUsuaris() {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -417,7 +424,7 @@ export async function getUsuariById(id) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      //   Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
   });
   if (!response.ok) {
@@ -470,10 +477,6 @@ export async function declineUsuari(id) {
 /* ------------------------------- LOGIN ------------------------------ */
 
 export async function loginUsuari(credentials) {
-  // Truca a l'API de login i en cas d'error de token el refresca
-  // automàticament, en cas de altres errors llença una excepció,
-  // agafa el token donant prioritat al antic token, guarda els tokens
-  // i retorna les dades de l'usuari.
   const response = await fetch(`${BACK_URL}/login`, {
     method: "POST",
     headers: {

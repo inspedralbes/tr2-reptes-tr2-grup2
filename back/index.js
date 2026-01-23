@@ -66,7 +66,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     exposedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 app.use((req, res, next) => {
@@ -105,7 +105,7 @@ app.post("/login", async (req, res) => {
 
     const comparingPassword = await comparePassword(
       password,
-      existingUser.password
+      existingUser.password,
     );
 
     if (!comparingPassword) {
@@ -171,7 +171,7 @@ app.post("/register", async (req, res) => {
       responsable: true,
     });
 
-    enviarEmail("registre", { nom, email, id: getUserId(email) });
+    enviarEmail("registre", { nom, email, id: await getUserId(email) });
 
     res.status(201).json({
       message: "Petició d'usuari registrat correctament",
@@ -204,11 +204,10 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     res.json({ accessToken: newAccessToken });
-    enviarEmail("registreAcceptat", { nom: user.nom, email: user.email });
   } catch (err) {
     console.error("Error en refresh:", err);
     res.status(403).json({ error: "Token invàlid o expirat" });
@@ -263,6 +262,10 @@ import {
 } from "./functions/database/CRUD/Assistencia.js";
 
 app.get("/assistencies", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const assistencies = await getAllAssistencies();
   res.json(assistencies);
 });
@@ -274,18 +277,30 @@ app.get("/assistencies/taller/:tallerId", async (req, res) => {
 });
 
 app.get("/assistencies/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const assistencia = await getAssistenciaById(id);
   res.json(assistencia);
 });
 
 app.post("/assistencies", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const data = req.body;
   const newAssistencia = await createAssistencia(data);
   res.json(newAssistencia);
 });
 
 app.put("/assistencies", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const data = req.body;
   const updatedAssistencia = await updateAssistencia(data);
   res.json(updatedAssistencia);
@@ -354,10 +369,10 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
 
       // Esborrar tots els alumnos/profes de la mateixa institució
       llista_alumnes = llista_alumnes.filter(
-        (alumne) => alumne.INSTITUT !== institucioId
+        (alumne) => alumne.INSTITUT !== institucioId,
       );
       llista_professors = llista_professors.filter(
-        (profe) => profe.INSTITUT !== institucioId
+        (profe) => profe.INSTITUT !== institucioId,
       );
 
       // Afegir els nous alumnes
@@ -451,23 +466,39 @@ import {
 } from "./functions/database/CRUD/Inscripcions.js";
 
 app.get("/inscripcions", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const inscripcions = await getAllInscripcions();
   res.json(inscripcions);
 });
 
 app.get("/inscripcions/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const inscripcio = await getInscripcioById(id);
   res.json(inscripcio);
 });
 
 app.post("/inscripcions", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const data = req.body;
   const newInscripcio = await createInscripcio(data);
   res.json(newInscripcio);
 });
 
 app.post("/inscripcions/dadesinsc", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   try {
     const { selecciones, "docents-ref": docentRef, comentari } = req.body;
 
@@ -482,7 +513,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null
+      comentari || null,
     );
 
     return res.status(200).json({
@@ -547,7 +578,7 @@ app.post("/inscripcions/procesar", async (req, res) => {
         if (!horari.TORNS || !Array.isArray(horari.TORNS)) {
           console.warn(
             `Horari no té estructura correcta per taller ${taller.id}:`,
-            horari
+            horari,
           );
           continue;
         }
@@ -574,7 +605,7 @@ app.post("/inscripcions/procesar", async (req, res) => {
 
           if (indexDia === undefined) {
             console.warn(
-              `Dia no reconegut: ${diaSemana} per taller ${taller.id}`
+              `Dia no reconegut: ${diaSemana} per taller ${taller.id}`,
             );
             continue;
           }
@@ -603,7 +634,7 @@ app.post("/inscripcions/procesar", async (req, res) => {
       } catch (parseError) {
         console.error(
           `Error processant horari del taller ${taller.id}:`,
-          parseError
+          parseError,
         );
         continue;
       }
@@ -636,12 +667,20 @@ app.post("/inscripcions/confirmar", async (req, res) => {
 });
 
 app.put("/inscripcions", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const data = req.body;
   const updatedInscripcio = await updateInscripcio(data);
   res.json(updatedInscripcio);
 });
 
 app.delete("/inscripcions/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const deletedInscripcio = await deleteInscripcio(id);
   res.json(deletedInscripcio);
@@ -658,29 +697,49 @@ import {
 } from "./functions/database/CRUD/Institucions.js";
 
 app.get("/institucions", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const institucions = await getAllInstitucions();
   res.json(institucions);
 });
 
 app.get("/institucions/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const institucio = await getInstitucioById(id);
   res.json(institucio);
 });
 
 app.post("/institucions", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const data = req.body;
   const newInstitucio = await createInstitucio(data);
   res.json(newInstitucio);
 });
 
 app.put("/institucions", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const data = req.body;
   const updatedInstitucio = await updateInstitucio(data);
   res.json(updatedInstitucio);
 });
 
 app.delete("/institucions/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const deletedInstitucio = await deleteInstitucio(id);
   res.json(deletedInstitucio);
@@ -699,6 +758,10 @@ import {
 } from "./functions/database/CRUD/Tallers.js";
 
 app.get("/tallers", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { periode } = req.query;
 
   let tallers;
@@ -712,12 +775,20 @@ app.get("/tallers", async (req, res) => {
 });
 
 app.get("/tallers/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const taller = await getTallerById(id);
   res.json(taller);
 });
 
 app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   try {
     const data = req.body;
 
@@ -769,6 +840,10 @@ app.post("/tallers", uploadImages.single("imatge"), async (req, res) => {
 });
 
 app.put("/tallers", uploadImages.single("imatge"), async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   try {
     const data = req.body;
 
@@ -846,6 +921,10 @@ app.delete("/tallers", async (req, res) => {
 });
 
 app.get("/tallers/:id/inscripcions", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   try {
     const { id } = req.params;
     const inscripcions = await getInscripciosByTallerId(id);
@@ -859,6 +938,10 @@ app.get("/tallers/:id/inscripcions", async (req, res) => {
 });
 
 app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   try {
     const { id } = req.params;
     const resultado = await calcularPuntuacionesDelTaller(id);
@@ -872,6 +955,10 @@ app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
 });
 
 app.delete("/tallers/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const deletedTaller = await deleteTaller(id);
   res.json(deletedTaller);
@@ -911,33 +998,40 @@ import {
 } from "./functions/database/CRUD/Usuaris.js";
 
 app.get("/usuaris", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const usuaris = await getAllUsuaris();
   res.json(usuaris);
 });
 
 app.get("/usuaris/:id", async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const { id } = req.params;
   const usuari = await getUsuariById(id);
   res.json(usuari);
 });
 
-app.put("/usuaris/aceptat/:id", async (req, res) => {
-  const data = req.body;
-  const id = id;
+app.get("/usuaris/aceptat/:id", async (req, res) => {
+  let data = req.body;
+  const id = req.params.id;
   data = { ...data, autoritzat: true };
   try {
     await updateUsuari(id, data);
-    // EN UN FUTUR AFEGIR L'ENVIO DEL CORREU ELECTRONIC AQUÍ
-    sendMail("registreAcceptat", { nom: data.nom, email: data.email });
+    enviarEmail("registreAcceptat", { nom: data.nom, email: data.email });
     return res.json({
-      message: "Usuari actualitzat correctament",
+      message: "Usuari acceptat correctament",
     });
   } catch (error) {
     return res.json({ message: "Error al actualizar usuari:", error });
   }
 });
 
-app.delete("/usuaris/denegat/:id", async (req, res) => {
+app.get("/usuaris/denegat/:id", async (req, res) => {
   const { id } = req.params;
   const deletedUsuari = await deleteUsuari(id);
   res.json(deletedUsuari);
