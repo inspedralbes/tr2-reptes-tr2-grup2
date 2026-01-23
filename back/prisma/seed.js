@@ -277,7 +277,7 @@ async function main() {
           ]),
           referents: "Cap d'Estudis",
           docents_referents: "docent@centre.cat",
-          autoritzat: true,
+          autoritzat: false,
           tallerId: taller.id,
         },
       });

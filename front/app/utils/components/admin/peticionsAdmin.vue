@@ -55,8 +55,11 @@ import { ref, onMounted } from "vue";
 // SelectorAlumnos removed from this component to hide numeric dropdown
 import {
   getAllTallers,
+  getTallersByPeriode,
   confirmarInscripciones,
   pointsTallers,
+  getSystemSettings,
+  procesarInscripcions,
 } from "@/services/communicationManagerDatabase";
 import "@fortawesome/fontawesome-free/css/all.css";
 
@@ -73,6 +76,7 @@ const placesDisp = ref(0);
 const placesMax = ref(0);
 const inscripcionesExpandidas = ref({});
 const inscripcionesSeleccionadas = ref({});
+const periodeActual = ref(null);
 
 // Funciones de UI
 const toggleDetalles = (id) => {
@@ -132,7 +136,7 @@ const selectInscripcion = (id, alumnos) => {
 const alumnosSeleccionados = () => {
   return Object.values(inscripcionesSeleccionadas.value).reduce(
     (sum, alumnos) => sum + alumnos,
-    0,
+    0
   );
 };
 
@@ -146,7 +150,7 @@ const puedeSeleccionar = (alumnos) => {
 
 const guardarSeleccion = () => {
   const idsSeleccionados = Object.keys(inscripcionesSeleccionadas.value).map(
-    (id) => Number(id),
+    (id) => Number(id)
   );
   const resultado = {
     tallerId: tallerIdActual.value,
@@ -155,7 +159,9 @@ const guardarSeleccion = () => {
   };
   console.log("Inscripciones aprobadas:", resultado);
   alert(
-    `Guardado: ${idsSeleccionados.length} inscripciones con ${alumnosSeleccionados()} alumnos`,
+    `Guardado: ${
+      idsSeleccionados.length
+    } inscripciones con ${alumnosSeleccionados()} alumnos`
   );
 };
 
@@ -227,7 +233,13 @@ const processTallers = (data) => {
 // Carga inicial
 onMounted(async () => {
   try {
-    const rawData = await getAllTallers();
+    // Obtener el periodo actual
+    const settings = await getSystemSettings();
+    periodeActual.value = settings.selectedPeriodeId;
+    console.log("Periodo actual:", periodeActual.value);
+
+    // Obtener solo los talleres del periodo actual
+    const rawData = await getTallersByPeriode(periodeActual.value);
     tallersGrouped.value = processTallers(rawData);
   } catch (error) {
     console.error("Error cargando talleres:", error);
@@ -258,7 +270,7 @@ const getMesNum = (mes) => {
 async function guardarInscripciones() {
   try {
     const inscripcionesAprobadas = Object.keys(
-      inscripcionesSeleccionadas.value,
+      inscripcionesSeleccionadas.value
     ).map(Number);
 
     await confirmarInscripciones(tallerIdActual.value, inscripcionesAprobadas);
@@ -268,6 +280,12 @@ async function guardarInscripciones() {
   } catch (error) {
     console.error(error);
     alert("Error al guardar");
+  }
+}
+
+function enviarsInscripciones() {
+  if (confirm("Estàs segur que vols enviar les inscripcions seleccionades?")) {
+    procesarInscripcions(periodeActual.value);
   }
 }
 </script>
@@ -456,6 +474,9 @@ async function guardarInscripciones() {
         </div>
       </div>
     </div>
+    <button class="btn-veure-inscripcions" @click="enviarsInscripciones">
+      <p>Enviar Les Inscripcions</p>
+    </button>
   </div>
 </template>
 
@@ -508,9 +529,7 @@ async function guardarInscripciones() {
   border-radius: 20px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease,
+  transition: background-color 0.2s ease, transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
@@ -630,9 +649,7 @@ async function guardarInscripciones() {
   border-radius: 8px;
   cursor: pointer;
   margin-left: 40px;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-veure-inscripcions:hover {
@@ -689,9 +706,7 @@ async function guardarInscripciones() {
   align-items: center;
   justify-content: center;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -854,9 +869,7 @@ async function guardarInscripciones() {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-expandir:hover {
@@ -936,9 +949,7 @@ async function guardarInscripciones() {
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-guardar:hover {

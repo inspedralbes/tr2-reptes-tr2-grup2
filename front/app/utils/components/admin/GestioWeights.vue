@@ -11,8 +11,11 @@
         <div class="section">
           <h3 class="section-title">Pesos dels Criteris</h3>
           <div class="intro-text">
-            <p>Ajusta els pesos dels criteris per modular com es prioritzen les sol·licituds de tallers. Els valors més
-              alts augmenten la prioritat, mentre que els negatius la disminueixen.</p>
+            <p>
+              Ajusta els pesos dels criteris per modular com es prioritzen les
+              sol·licituds de tallers. Els valors més alts augmenten la
+              prioritat, mentre que els negatius la disminueixen.
+            </p>
           </div>
 
           <div v-if="loading" class="loading">Carregant criteris...</div>
@@ -36,7 +39,13 @@
                 <span class="pes-badge">{{ weight.peso }}</span>
               </div>
               <div class="col-input">
-                <input v-model.number="editedWeights[weight.id]" type="number" min="-100" max="100" class="input-pes" />
+                <input
+                  v-model.number="editedWeights[weight.id]"
+                  type="number"
+                  min="-100"
+                  max="100"
+                  class="input-pes"
+                />
               </div>
             </div>
           </div>
@@ -46,8 +55,10 @@
         <div class="section">
           <h3 class="section-title">Periode Actual</h3>
           <div class="intro-text">
-            <p>Selecciona el periode que es mostrarà a totes les vistes. Només es veuran tallers i inscripcions d'aquest
-              periode.</p>
+            <p>
+              Selecciona el periode que es mostrarà a totes les vistes. Només es
+              veuran tallers i inscripcions d'aquest periode.
+            </p>
           </div>
 
           <div class="periode-selector">
@@ -57,7 +68,11 @@
                 {{ formatDate(p.dataIni) }} - {{ formatDate(p.dataFi) }}
               </option>
             </select>
-            <button class="btn-guardar-periode" @click="guardarPeriode" :disabled="!selectedPeriodeId">
+            <button
+              class="btn-guardar-periode"
+              @click="guardarPeriode"
+              :disabled="!selectedPeriodeId"
+            >
               Guardar
             </button>
           </div>
@@ -73,11 +88,21 @@
           <div class="create-periode">
             <div class="input-group">
               <label for="dataIni">Data d'Inici:</label>
-              <input id="dataIni" v-model="newPeriodeDataIni" type="date" class="date-input" />
+              <input
+                id="dataIni"
+                v-model="newPeriodeDataIni"
+                type="date"
+                class="date-input"
+              />
             </div>
             <div class="input-group">
               <label for="dataFi">Data Final:</label>
-              <input id="dataFi" v-model="newPeriodeDataFi" type="date" class="date-input" />
+              <input
+                id="dataFi"
+                v-model="newPeriodeDataFi"
+                type="date"
+                class="date-input"
+              />
             </div>
             <button class="btn-crear-periode" @click="crearPeriode">
               Crear Periode
@@ -115,7 +140,7 @@ import {
   updateSystemSettings,
   getPeriodes,
   createPeriode,
-  procesarInscripcions
+  procesarInscripcions,
 } from "@/services/communicationManagerDatabase.js";
 
 const emit = defineEmits(["close"]);
@@ -244,12 +269,6 @@ const guardarPeriode = async () => {
     await updateSystemSettings(systemSettingsId.value, selectedPeriodeId.value);
 
     // Enviar el periode al backend para procesar inscripcions
-    try {
-      await procesarInscripcions(selectedPeriodeId.value);
-    } catch (procError) {
-      console.warn("Error al processar inscripcions:", procError);
-      // No mostrar error al usuario, solo registrar en consola
-    }
 
     successMessage.value = "✓ Periode actualitzat correctament";
     setTimeout(() => {
@@ -273,7 +292,10 @@ const crearPeriode = async () => {
   successMessage.value = "";
 
   try {
-    const newPeriode = await createPeriode(newPeriodeDataIni.value, newPeriodeDataFi.value);
+    const newPeriode = await createPeriode(
+      newPeriodeDataIni.value,
+      newPeriodeDataFi.value
+    );
     successMessage.value = "✓ Periode creat correctament";
     newPeriodeDataIni.value = "";
     newPeriodeDataFi.value = "";

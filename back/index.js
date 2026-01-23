@@ -66,7 +66,7 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     exposedHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
 app.use((req, res, next) => {
@@ -105,7 +105,7 @@ app.post("/login", async (req, res) => {
 
     const comparingPassword = await comparePassword(
       password,
-      existingUser.password,
+      existingUser.password
     );
 
     if (!comparingPassword) {
@@ -204,7 +204,7 @@ app.post("/refresh", async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decoded.id, nom: decoded.nom, rol: decoded.rol },
       secretKey,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
     res.json({ accessToken: newAccessToken });
@@ -354,10 +354,10 @@ app.put("/assistencies/afegirPersonal", async (req, res) => {
 
       // Esborrar tots els alumnos/profes de la mateixa institució
       llista_alumnes = llista_alumnes.filter(
-        (alumne) => alumne.INSTITUT !== institucioId,
+        (alumne) => alumne.INSTITUT !== institucioId
       );
       llista_professors = llista_professors.filter(
-        (profe) => profe.INSTITUT !== institucioId,
+        (profe) => profe.INSTITUT !== institucioId
       );
 
       // Afegir els nous alumnes
@@ -482,7 +482,7 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
-      comentari || null,
+      comentari || null
     );
 
     return res.status(200).json({
@@ -547,7 +547,7 @@ app.post("/inscripcions/procesar", async (req, res) => {
         if (!horari.TORNS || !Array.isArray(horari.TORNS)) {
           console.warn(
             `Horari no té estructura correcta per taller ${taller.id}:`,
-            horari,
+            horari
           );
           continue;
         }
@@ -574,7 +574,7 @@ app.post("/inscripcions/procesar", async (req, res) => {
 
           if (indexDia === undefined) {
             console.warn(
-              `Dia no reconegut: ${diaSemana} per taller ${taller.id}`,
+              `Dia no reconegut: ${diaSemana} per taller ${taller.id}`
             );
             continue;
           }
@@ -594,10 +594,16 @@ app.post("/inscripcions/procesar", async (req, res) => {
             dataActual.setDate(dataActual.getDate() + 1);
           }
         }
+
+        // Actualizar taller a autorizado después de crear las asistencias
+        await updateTaller({
+          id: taller.id,
+          autoritzat: true,
+        });
       } catch (parseError) {
         console.error(
           `Error processant horari del taller ${taller.id}:`,
-          parseError,
+          parseError
         );
         continue;
       }
@@ -693,7 +699,15 @@ import {
 } from "./functions/database/CRUD/Tallers.js";
 
 app.get("/tallers", async (req, res) => {
-  const tallers = await getAllTallers();
+  const { periode } = req.query;
+
+  let tallers;
+  if (periode) {
+    tallers = await getTallersByPeriode(periode);
+  } else {
+    tallers = await getAllTallers();
+  }
+
   res.json(tallers);
 });
 
@@ -984,10 +998,10 @@ app.put("/criteris-weights/:id", async (req, res) => {
     }
 
     const updatedWeight = await updateCriterisWeight(id, peso);
-    
+
     // Recargar pesos en memoria
     await reloadWeights();
-    
+
     res.json(updatedWeight);
   } catch (error) {
     console.error("Error al actualizar peso de criterio:", error);
@@ -1033,11 +1047,11 @@ app.get("/system-settings", async (req, res) => {
 app.put("/system-settings/:id", async (req, res) => {
   try {
     const { selectedPeriodeId } = req.body;
-    
+
     if (!selectedPeriodeId) {
       return res.status(400).json({ error: "selectedPeriodeId es requerido" });
     }
-    
+
     const settings = await updateSystemSettings(selectedPeriodeId);
     res.json(settings);
   } catch (error) {
