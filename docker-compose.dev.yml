@@ -21,7 +21,6 @@ services:
     environment:
       HOST: 0.0.0.0
       CHOKIDAR_USEPOLLING: "true"
-
   tr2g2-back:
     build:
       dockerfile: ./back/dev.Dockerfile
