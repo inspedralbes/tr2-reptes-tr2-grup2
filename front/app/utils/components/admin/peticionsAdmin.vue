@@ -297,11 +297,35 @@ async function guardarInscripciones() {
   }
 }
 
-function enviarsInscripciones() {
-  if (confirm("Estàs segur que vols enviar les inscripcions seleccionades?")) {
-    procesarInscripcions(periodeActual.value);
+async function enviarsInscripciones() {
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "Estàs segur que vols enviar les inscripcions? (No hi ha marxa enrere)",
+    showCancelButton: true,
+    confirmButtonText: "Enviar"
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await procesarInscripcions(periodeActual.value);
+      await Swal.fire({
+        icon: "success",
+        title: "Èxit",
+        text: "Les inscripcions s'han enviat correctament",
+        confirmButtonText: "Tancar",
+      });
+    } catch (error) {
+      console.error("Error al enviar les inscripcions:", error);
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al enviar les inscripcions. Si us plau, intenta-ho més tard.",
+        confirmButtonText: "Tancar",
+      });
+    }
   }
 }
+
 </script>
 
 <template>

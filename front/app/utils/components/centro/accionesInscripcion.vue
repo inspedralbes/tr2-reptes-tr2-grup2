@@ -1,9 +1,11 @@
 <script setup>
 import { ref, watch } from "vue";
+import Swal from "sweetalert2";
 import {
   updateInscripcion,
   deleteInscripcion,
   afegirPersonalAssistencia,
+  getAssistenciesByTallerId,
 } from "@/services/communicationManagerDatabase";
 
 const props = defineProps({
@@ -14,16 +16,15 @@ const props = defineProps({
 const emit = defineEmits(["refresh", "active"]);
 
 // --- ESTADOS ---
-const showEditModal = ref(false);
-const showInscripcioModal = ref(false);
+const showInscriptionModal = ref(false);
 
 // --- WATCHERS ---
 // Vigilamos si algún modal se abre para avisar al padre y que suba el z-index de la fila
-watch([showEditModal, showInscripcioModal], ([edit, create]) => {
-  emit("active", edit || create);
+watch(showInscriptionModal, (isOpen) => {
+  emit("active", isOpen);
 });
 
-const formIscripcio = ref({
+const formInscription = ref({
   id: null,
   institucioId: null,
   tallerID: null,
@@ -31,76 +32,121 @@ const formIscripcio = ref({
   profesAfegir: [""],
   autoritzat: true,
 });
-const formCrear = ref({
-  institucioId: null,
-  tallerID: null,
-  alumnesAfegir: [""],
-  profesAfegir: [""],
-});
 
 // --- FUNCIONES ---
-const openEditModal = () => {
+const openInscriptionModal = async () => {
   if (props.inscripcion) {
-    // Inicializamos con arrays vacíos si no existen, o mapeamos si es necesario.
-    // Asumimos que queremos editar/añadir sobre lo existente o empezar de cero en el update segun requerimiento.
-    // Aquí inicializamos para cumplir con la estructura del payload.
-    formIscripcio.value = {
-      id: props.inscripcion.id,
-      institucioId: props.inscripcion.institucioId || null,
-      tallerID: props.inscripcion.tallerID || props.tallerId,
-      alumnesAfegir: props.inscripcion.alumnesAfegir || [""],
-      profesAfegir: props.inscripcion.profesAfegir || [""],
-      autoritzat: true,
+    try {
+      // Obtener las assistencias del taller
+      const assistencias = await getAssistenciesByTallerId(props.tallerId);
+      const miInstitucionId = Number.parseInt(localStorage.getItem("user_institution_id"));
+
+      let alumnesExistentes = [];
+      let profesoresExistentes = [];
+
+      // Extraer alumnos y profesores de las assistencias
+      if (assistencias && assistencias.length > 0) {
+        for (const assistencia of assistencias) {
+          // Parsear los JSONs de alumnos
+          const llista_alumnes = assistencia.llista_alumnes
+            ? JSON.parse(assistencia.llista_alumnes)
+            : [];
+          // Parsear los JSONs de profesores
+          const llista_professors = assistencia.llista_professors
+            ? JSON.parse(assistencia.llista_professors)
+            : [];
+
+          // Extraer nombres de alumnos que pertenecen a mi institución (evitar duplicados)
+          llista_alumnes.forEach((alumne) => {
+            if (
+              alumne.NOM &&
+              alumne.INSTITUT === miInstitucionId &&
+              !alumnesExistentes.includes(alumne.NOM)
+            ) {
+              alumnesExistentes.push(alumne.NOM);
+            }
+          });
+
+          // Extraer nombres de profesores que pertenecen a mi institución (evitar duplicados)
+          llista_professors.forEach((profe) => {
+            if (
+              profe.NOM &&
+              profe.INSTITUT === miInstitucionId &&
+              !profesoresExistentes.includes(profe.NOM)
+            ) {
+              profesoresExistentes.push(profe.NOM);
+            }
+          });
+        }
+      }
+
+      // Pre-completar el formulario con los datos existentes
+      formInscription.value = {
+        id: props.inscripcion.id,
+        institucioId: miInstitucionId,
+        tallerID: props.tallerId,
+        alumnesAfegir: alumnesExistentes.length > 0 ? alumnesExistentes : [""],
+        profesAfegir: profesoresExistentes.length > 0 ? profesoresExistentes : [""],
+        autoritzat: true,
+      };
+      showInscriptionModal.value = true;
+    } catch (error) {
+      console.error("Error al cargar datos de assistencia:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al carregar les dades d'assistència.",
+      });
+    }
+  }
+};
+
+const handleInscriptionUpdate = async () => {
+  try {
+    // Filtrar nombres vacíos de los arrays
+    const alumnesLimpios = formInscription.value.alumnesAfegir.filter(
+      (alumne) => alumne && alumne.trim() !== "",
+    );
+    const profesLimpios = formInscription.value.profesAfegir.filter(
+      (profe) => profe && profe.trim() !== "",
+    );
+
+    // Enviar solo los datos que necesita el endpoint
+    const dataToSend = {
+      institucioId: formInscription.value.institucioId,
+      tallerID: formInscription.value.tallerID,
+      alumnesAfegir: alumnesLimpios,
+      profesAfegir: profesLimpios,
     };
-    showEditModal.value = true;
-  }
-};
-
-const handleUpdate = async () => {
-  try {
-    await updateInscripcion(formIscripcio.value.id, formIscripcio.value);
-    showEditModal.value = false;
+    console.log("Datos a enviar:", dataToSend);
+    await afegirPersonalAssistencia(dataToSend);
+    showInscriptionModal.value = false;
     emit("refresh");
-    alert("Actualitzat correctament");
+    Swal.fire({
+      icon: "success",
+      title: "Actualitzat",
+      text: "Assistència actualitzada correctament.",
+    });
   } catch (error) {
-    alert("Error al actualizar");
+    console.error("Error en handleInscriptionUpdate:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Error al actualitzar la assistència.",
+    });
   }
 };
 
-const openInscripcioModal = () => {
-  const institucioId = localStorage.getItem("user_institution_id");
-  formCrear.value = {
-    institucioId: parseInt(institucioId),
-    tallerID: props.tallerId,
-    alumnesAfegir: [""],
-    profesAfegir: [""],
-  };
-  showInscripcioModal.value = true;
-};
 
-const addAlumne = () => formCrear.value.alumnesAfegir.push("");
-const removeAlumne = (i) => formCrear.value.alumnesAfegir.splice(i, 1);
-const addProfe = () => formCrear.value.profesAfegir.push("");
-const removeProfe = (i) => formCrear.value.profesAfegir.splice(i, 1);
 
-// Funcions per al form d'edició (Update)
-const addAlumneUpdate = () => formIscripcio.value.alumnesAfegir.push("");
-const removeAlumneUpdate = (i) =>
-  formIscripcio.value.alumnesAfegir.splice(i, 1);
-const addProfeUpdate = () => formIscripcio.value.profesAfegir.push("");
-const removeProfeUpdate = (i) => formIscripcio.value.profesAfegir.splice(i, 1);
+// Funciones per al form d'edició (Update)
+const addAlumneInscription = () => formInscription.value.alumnesAfegir.push("");
+const removeAlumneInscription = (i) =>
+  formInscription.value.alumnesAfegir.splice(i, 1);
+const addProfeInscription = () => formInscription.value.profesAfegir.push("");
+const removeProfeInscription = (i) => formInscription.value.profesAfegir.splice(i, 1);
 
-const handleCreateInscripcio = async () => {
-  try {
-    console.log("Creant inscripció amb dades:", formCrear.value);
-    await afegirPersonalAssistencia(formCrear.value);
-    showInscripcioModal.value = false;
-    emit("refresh");
-    alert("Inscrit correctament!");
-  } catch (error) {
-    alert("Error al inscribir");
-  }
-};
+
 
 const handleDelete = async () => {
   if (!props.inscripcion || !confirm("Segur que vols eliminar?")) return;
@@ -108,7 +154,11 @@ const handleDelete = async () => {
     await deleteInscripcion(props.inscripcion.id);
     emit("refresh");
   } catch (error) {
-    alert("Error al eliminar");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Error al eliminar la inscripció.",
+    });
   }
 };
 </script>
@@ -116,46 +166,43 @@ const handleDelete = async () => {
 <template>
   <div class="acciones-wrapper">
     <!-- Botones principales -->
-    <button @click="openInscripcioModal" id="btn-inscripcion">
-      Inscripció
-    </button>
-    <button @click="openEditModal" id="btn-update">Actualitzar</button>
+    <button @click="openInscriptionModal" id="btn-update">Alumnes i Profesors</button>
     <button @click="handleDelete" id="btn-delete">Eliminar</button>
 
-    <!-- Modal Editar -->
-    <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+    <!-- Modal Inscription -->
+    <div v-if="showInscriptionModal" class="modal-overlay" @click.self="showInscriptionModal = false">
       <div class="modal-content">
-        <h2>Actualitzar inscripció</h2>
-        <form @submit.prevent="handleUpdate">
+        <h2>Llista d'assistents</h2>
+        <form @submit.prevent="handleInscriptionUpdate">
           <div class="form-section">
             <h3>Alumnes</h3>
-            <div v-for="(n, i) in formIscripcio.alumnesAfegir" :key="i" class="input-dynamic">
-              <input v-model="formIscripcio.alumnesAfegir[i]" placeholder="Nom alumne" />
-              <button type="button" @click="removeAlumneUpdate(i)" v-if="formIscripcio.alumnesAfegir.length > 1"
+            <div v-for="(n, i) in formInscription.alumnesAfegir" :key="i" class="input-dynamic">
+              <input v-model="formInscription.alumnesAfegir[i]" placeholder="Nom alumne" />
+              <button type="button" @click="removeAlumneInscription(i)" v-if="formInscription.alumnesAfegir.length > 1"
                 class="btn-remove">
                 ×
               </button>
             </div>
-            <button type="button" @click="addAlumneUpdate" class="btn-add">
+            <button type="button" @click="addAlumneInscription" class="btn-add">
               + Alumne
             </button>
           </div>
           <hr />
           <div class="form-section">
             <h3>Professors</h3>
-            <div v-for="(n, i) in formIscripcio.profesAfegir" :key="i" class="input-dynamic">
-              <input v-model="formIscripcio.profesAfegir[i]" placeholder="Nom profe" />
-              <button type="button" @click="removeProfeUpdate(i)" v-if="formIscripcio.profesAfegir.length > 1"
+            <div v-for="(n, i) in formInscription.profesAfegir" :key="i" class="input-dynamic">
+              <input v-model="formInscription.profesAfegir[i]" placeholder="Nom profe" />
+              <button type="button" @click="removeProfeInscription(i)" v-if="formInscription.profesAfegir.length > 1"
                 class="btn-remove">
                 ×
               </button>
             </div>
-            <button type="button" @click="addProfeUpdate" class="btn-add">
+            <button type="button" @click="addProfeInscription" class="btn-add">
               + Professor
             </button>
           </div>
           <div class="modal-buttons">
-            <button type="button" @click="showEditModal = false" class="btn-cancel">
+            <button type="button" @click="showInscriptionModal = false" class="btn-cancel">
               Cancel·lar
             </button>
             <button type="submit" class="btn-save">Guardar</button>
@@ -164,46 +211,7 @@ const handleDelete = async () => {
       </div>
     </div>
 
-    <!-- Modal Crear -->
-    <div v-if="showInscripcioModal" class="modal-overlay" @click.self="showInscripcioModal = false">
-      <div class="modal-content modal-large">
-        <h2>Nova Inscripció</h2>
-        <form @submit.prevent="handleCreateInscripcio">
-          <div class="form-section">
-            <h3>Alumnes</h3>
-            <div v-for="(n, i) in formCrear.alumnesAfegir" :key="i" class="input-dynamic">
-              <input v-model="formCrear.alumnesAfegir[i]" placeholder="Nom alumne" />
-              <button type="button" @click="removeAlumne(i)" v-if="formCrear.alumnesAfegir.length > 1"
-                class="btn-remove">
-                ×
-              </button>
-            </div>
-            <button type="button" @click="addAlumne" class="btn-add">
-              + Alumne
-            </button>
-          </div>
-          <hr />
-          <div class="form-section">
-            <h3>Professors</h3>
-            <div v-for="(n, i) in formCrear.profesAfegir" :key="i" class="input-dynamic">
-              <input v-model="formCrear.profesAfegir[i]" placeholder="Nom profe" />
-              <button type="button" @click="removeProfe(i)" v-if="formCrear.profesAfegir.length > 1" class="btn-remove">
-                ×
-              </button>
-            </div>
-            <button type="button" @click="addProfe" class="btn-add">
-              + Professor
-            </button>
-          </div>
-          <div class="modal-buttons">
-            <button type="button" @click="showInscripcioModal = false" class="btn-cancel">
-              Cancel·lar
-            </button>
-            <button type="submit" class="btn-save">Inscriure</button>
-          </div>
-        </form>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -215,7 +223,6 @@ const handleDelete = async () => {
   align-items: center;
 }
 
-#btn-inscripcion,
 #btn-update,
 #btn-delete {
   background-color: #9facfe;
@@ -230,7 +237,6 @@ const handleDelete = async () => {
   text-align: center;
 }
 
-#btn-inscripcion:hover,
 #btn-update:hover,
 #btn-delete:hover {
   background-color: #687dff;

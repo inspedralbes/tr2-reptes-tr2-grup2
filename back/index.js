@@ -463,6 +463,7 @@ import {
   procesarInscripcio,
   updateEstatInscripcions,
   getInscripcionsByPeriode,
+  autorizarInscripcionsPeriode,
 } from "./functions/database/CRUD/Inscripcions.js";
 
 app.get("/inscripcions", async (req, res) => {
@@ -537,8 +538,16 @@ app.post("/inscripcions/procesar", async (req, res) => {
   try {
     const { periode } = req.body;
 
+    if (!periode) {
+      return res
+        .status(400)
+        .json({ error: "El paràmetre 'periode' és obligatori" });
+    }
+
     // Obternir totes les inscripcions per periode
-    const inscripcions = await getInscripcionsByPeriode(periode);
+    const inscripcions = await getInscripcionsByPeriode(
+      Number.parseInt(periode),
+    );
 
     // Processar inscripcions per a cada taller
     for (const inscripcio of inscripcions) {
@@ -640,7 +649,12 @@ app.post("/inscripcions/procesar", async (req, res) => {
       }
     }
 
-    res.status(200).json({ message: "Assistències creades correctament" });
+    // Autorizar todas les inscripcions del periode
+    await autorizarInscripcionsPeriode(periode);
+
+    res.status(200).json({
+      message: "Assistències creades i inscripcions autoritzades correctament",
+    });
   } catch (error) {
     console.error("Error al crear assistències:", error);
     res

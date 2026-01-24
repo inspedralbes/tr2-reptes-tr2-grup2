@@ -30,7 +30,7 @@ export async function getInscripcionsByPeriode(periodeId) {
   try {
     const prisma = await getPrisma();
     return await prisma.inscripcions.findMany({
-      where: { periode: parseInt(periodeId) },
+      where: { periode: Number.parseInt(periodeId) },
       include: { id_institucio: true, periode_relacio: true },
     });
   } catch (error) {
@@ -164,7 +164,13 @@ export async function getInscripciosByTallerId(tallerId) {
 }
 /* ------------------------------- FUNCIONALIDADES ------------------------------ */
 
-export async function procesarInscripcio(selections, docentRef, comentari, institucioId = 3, periode = 2) {
+export async function procesarInscripcio(
+  selections,
+  docentRef,
+  comentari,
+  institucioId = 3,
+  periode = 2,
+) {
   try {
     const prisma = await getPrisma();
 
@@ -191,5 +197,19 @@ export async function procesarInscripcio(selections, docentRef, comentari, insti
     return inscripcio;
   } catch (error) {
     throw new Error(`Error al procesar inscripció: ${error.message}`);
+  }
+}
+
+// UPDATE autoritzat a totes les inscripcions d'un periode
+export async function autorizarInscripcionsPeriode(periodeId) {
+  try {
+    const prisma = await getPrisma();
+    const result = await prisma.inscripcions.updateMany({
+      where: { periode: Number.parseInt(periodeId) },
+      data: { autoritzat: true },
+    });
+    return result;
+  } catch (error) {
+    throw new Error(`Error al autorizar inscripcions: ${error.message}`);
   }
 }
