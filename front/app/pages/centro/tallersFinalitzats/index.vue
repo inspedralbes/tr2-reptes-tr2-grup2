@@ -4,7 +4,7 @@ import listaFinalizados from "@/utils/components/centro/listaFinalizados.vue";
 <template>
   <div class="page-container">
     <div id="cuerpo">
-      <div id="contenedor">
+      <div id="contenido">
         <div class="header-with-tooltip">
           <h3>Tallers finalitzats:</h3>
           <div class="tooltip-container">
@@ -12,7 +12,7 @@ import listaFinalizados from "@/utils/components/centro/listaFinalizados.vue";
             <div class="tooltip-text">Consulta els tallers que ja han finalitzat i els seus resultats.</div>
           </div>
         </div>
-        <div id="contenido">
+        <div id="list-wrapper">
           <listaFinalizados />
         </div>
       </div>
@@ -31,7 +31,6 @@ import listaFinalizados from "@/utils/components/centro/listaFinalizados.vue";
 }
 
 #cuerpo {
-  display: flex;
   min-height: calc(100vh - 100px);
   height: auto;
   overflow-y: auto;
@@ -69,6 +68,21 @@ h3 {
   display: flex;
   flex-direction: column;
 }
+
+@media (max-width: 768px) {
+  #cuerpo {
+    min-height: calc(100vh - 60px);
+    align-items: flex-start;
+  }
+
+  #contenido {
+    width: 95%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: auto;
+  }
+}
+
 
 .header-with-tooltip {
   display: flex;
