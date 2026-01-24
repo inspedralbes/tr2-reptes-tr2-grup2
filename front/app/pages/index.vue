@@ -83,7 +83,7 @@ function setPath(rol) {
           <a href="#" class="link-small">He oblidat la meva contrasenya.</a>
           <br />
 
-          <NuxtLink to="/forms/sign-in" class="link-small">
+          <NuxtLink to="/sign-in" class="link-small">
             No tens compte? Dona't d'alta!
           </NuxtLink>
 
