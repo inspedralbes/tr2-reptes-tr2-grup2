@@ -257,7 +257,7 @@ const guardarCambios = async () => {
     // Mostrar alerta de éxito con SweetAlert
     await Swal.fire({
       icon: "success",
-      title: "Configuració actualitzada",
+      title: "  Configuració actualitzada",
       text: "Els criteris i periode han estat guardats correctament",
       confirmButtonText: "D'acord",
       confirmButtonColor: "#5c6bc0",

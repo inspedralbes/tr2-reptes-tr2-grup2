@@ -38,8 +38,9 @@ const initChart = (institutionNames, seriesData) => {
       text: 'Institucions amb Major Volum d\'Alumnes',
       subtext: 'Total de places disponibles',
       left: 'center',
+      top: '1%',
       textStyle: {
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: 600,
         color: '#333'
       },
@@ -255,5 +256,51 @@ onUnmounted(() => {
   margin-left: 70px;
   width: 100%;
   height: 270px;
+}
+
+/* RESPONSIVE PARA TABLETS (768px - 1024px) */
+@media (max-width: 1024px) {
+  .stats-container {
+    width: 100%;
+  }
+
+  .main-chart {
+    margin-left: 50px;
+    height: 240px;
+  }
+}
+
+/* RESPONSIVE PARA MÓVILES (hasta 768px) */
+@media (max-width: 768px) {
+  .stats-container {
+    width: 100%;
+    padding: 5px;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .main-chart {
+    margin-left: 0;
+    height: 250px;
+    width: 100%;
+    overflow: hidden;
+  }
+}
+
+/* RESPONSIVE PARA IPHONE Y MÓVILES PEQUEÑOS (hasta 480px) */
+@media (max-width: 480px) {
+  .stats-container {
+    width: 100%;
+    padding: 0;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .main-chart {
+    margin-left: 0;
+    height: 280px;
+    width: 100%;
+    overflow: hidden;
+  }
 }
 </style>

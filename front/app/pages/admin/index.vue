@@ -49,6 +49,7 @@ onMounted(() => {
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 20px;
+  width: 100%;
 }
 
 #contenido::-webkit-scrollbar {
@@ -62,6 +63,11 @@ onMounted(() => {
 #contenido::-webkit-scrollbar-thumb {
   background: #878787;
   border-radius: 10px;
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
 }
 
 #user {
@@ -87,5 +93,111 @@ onMounted(() => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   max-height: 250px;
   width: 100%;
+}
+
+/* RESPONSIVE PARA TABLETS (768px - 1024px) */
+@media (max-width: 1024px) {
+  #contenido {
+    margin-left: 30px;
+    padding-right: 15px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .panell-admin {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .tarjetas-admin {
+    max-height: 300px;
+  }
+}
+
+/* RESPONSIVE PARA MÓVILES (hasta 768px) */
+@media (max-width: 768px) {
+  #cuerpo {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  #contenido {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+    width: 100%;
+  }
+
+  .panell-admin {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .tarjetas-admin {
+    max-height: none;
+    min-height: 280px;
+    width: 100%;
+    overflow: hidden;
+  }
+}
+
+/* RESPONSIVE PARA IPHONE Y MÓVILES PEQUEÑOS (hasta 480px) */
+@media (max-width: 480px) {
+  #cuerpo {
+    overflow: visible;
+  }
+
+  #contenido {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 8px;
+    padding-bottom: 15px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+
+  .panell-admin {
+    gap: 15px;
+    width: 100%;
+  }
+
+  .tarjetas-admin {
+    min-height: 250px;
+    border-width: 1px;
+    padding-top: 10px;
+    width: 100%;
+    overflow: hidden;
+  }
 }
 </style>

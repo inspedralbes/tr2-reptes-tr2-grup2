@@ -42,6 +42,7 @@ const initChart = (processedData) => {
       text: 'Top 3 Tallers per Any',
       subtext: 'Tallers més demandats',
       left: 'center',
+      top: '1%',
       textStyle: {
         fontSize: 16,
         fontWeight: 600,
@@ -274,5 +275,44 @@ onUnmounted(() => {
 .main-chart {
   width: 100%;
   height: 235px;
+}
+
+/* RESPONSIVE PARA TABLETS (768px - 1024px) */
+@media (max-width: 1024px) {
+  .stats-container {
+    padding: 15px;
+  }
+
+  .main-chart {
+    height: 220px;
+  }
+}
+
+/* RESPONSIVE PARA MÓVILES (hasta 768px) */
+@media (max-width: 768px) {
+  .stats-container {
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .main-chart {
+    height: 250px;
+    width: 100%;
+    overflow: hidden;
+  }
+}
+
+/* RESPONSIVE PARA IPHONE Y MÓVILES PEQUEÑOS (hasta 480px) */
+@media (max-width: 480px) {
+  .stats-container {
+    padding: 8px;
+    overflow: hidden;
+  }
+
+  .main-chart {
+    height: 280px;
+    width: 100%;
+    overflow: hidden;
+  }
 }
 </style>

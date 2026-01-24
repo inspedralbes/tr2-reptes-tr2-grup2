@@ -48,6 +48,7 @@ b {
   display: block;
   padding-top: 20px;
   padding-left: 30px;
+  font-size: 1.1rem;
 }
 
 .lista-container {
@@ -101,5 +102,121 @@ b {
   justify-content: flex-end;
   padding: 0 15px;
   border-radius: 25px;
+}
+
+/* RESPONSIVE PARA TABLETS (768px - 1024px) */
+@media (max-width: 1024px) {
+  b {
+    padding-left: 20px;
+    font-size: 1rem;
+  }
+
+  .lista-container {
+    padding: 10px 20px;
+    height: 280px;
+  }
+
+  .col-titulo {
+    font-size: 13px;
+    max-width: 130px;
+    padding-left: 20px;
+  }
+
+  .col-info {
+    max-width: 50px;
+  }
+}
+
+/* RESPONSIVE PARA MÓVILES (hasta 768px) */
+@media (max-width: 768px) {
+  b {
+    padding-left: 15px;
+    padding-top: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
+
+  .lista-container {
+    padding: 10px 15px;
+    height: auto;
+    max-height: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  .fila-recordatori {
+    height: auto;
+    margin-bottom: 0;
+    padding: 8px 0;
+    min-height: 40px;
+    justify-content: flex-start;
+    overflow: hidden;
+    max-width: 90%;
+    width: 90%;
+  }
+
+  .col-titulo {
+    font-size: 14px;
+    max-width: none;
+    padding-left: 15px;
+    padding-right: 10px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .col-info {
+    margin-left: 10px;
+    max-width: none;
+    font-size: 14px;
+  }
+}
+
+/* RESPONSIVE PARA IPHONE Y MÓVILES PEQUEÑOS (hasta 480px) */
+@media (max-width: 480px) {
+  b {
+    padding-left: 10px;
+    padding-top: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+
+  .lista-container {
+    padding: 5px 10px;
+    height: auto;
+    max-height: 300px;
+    overflow: hidden;
+  }
+
+  .fila-recordatori {
+    height: 35px;
+    margin-bottom: 5px;
+    overflow: hidden;
+    max-width: 85%;
+    width: 85%;
+  }
+
+  .col-titulo {
+    font-size: 13px;
+    max-width: 100%;
+    padding-left: 12px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .col-info {
+    margin-left: -20px;
+    max-width: 45px;
+    font-size: 13px;
+  }
+
+  .info-item {
+    font-size: 13px;
+  }
 }
 </style>
