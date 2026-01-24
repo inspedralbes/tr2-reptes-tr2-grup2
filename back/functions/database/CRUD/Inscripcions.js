@@ -40,6 +40,30 @@ export async function getInscripcionsByPeriode(periodeId) {
   }
 }
 
+export async function getInscripcionsStats(inici, fi) {
+  try {
+    let result = 0;
+    const prisma = await getPrisma();
+    const inscripcions = await prisma.assistencia.findMany({
+      where: {
+        dia: {
+          gte: new Date(inici),
+          lte: new Date(fi),
+        },
+        autoritzat: true,
+      },
+    });
+    for (inscripcio in inscripcions) {
+      result += 1;
+    }
+    return { count: result };
+  } catch (error) {
+    throw new Error(
+      `Error al obtenir estadístiques d'inscripcions: ${error.message}`,
+    );
+  }
+}
+
 // INSERT nova inscripció
 export async function createInscripcio(data) {
   try {

@@ -115,7 +115,7 @@ export async function addComentariProfe(tallerId, idInstitucio, comentari) {
     }
 
     const existingIndex = comentaris.findIndex(
-      (c) => c.id_inst === parseInt(idInstitucio)
+      (c) => c.id_inst === parseInt(idInstitucio),
     );
 
     if (existingIndex !== -1) {
@@ -159,6 +159,24 @@ export async function getInscripciosByTallerId(tallerId) {
   } catch (error) {
     throw new Error(
       `Error al obtenir inscripcions del taller: ${error.message}`,
+    );
+  }
+}
+
+export async function getTallerStatsGeneral() {
+  try {
+    const prisma = await getPrisma();
+    return await prisma.tallers.findMany({
+      select: {
+        id: true,
+        autoritzat: true,
+        admet_insc: true,
+        periode: true,
+      },
+    });
+  } catch (error) {
+    throw new Error(
+      `Error al obtenir estadístiques de tallers: ${error.message}`,
     );
   }
 }

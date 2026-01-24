@@ -403,6 +403,68 @@ export async function pointsTallers(tallerId) {
   return await response.json();
 }
 
+export async function getTallersStats() {
+  let nPeticions = 0;
+  let nTallersAssignar = 0;
+  let nTallersActius = 0;
+  let checklistPendents = 0;
+
+  const resTallers = await fetch(`${BACK_URL}/tallers/stats`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  });
+  const tallers = await resTallers.json();
+
+  const resPeriodeActual = await fetch(`${BACK_URL}/system-settings`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  });
+  const periodeActual = await resPeriodeActual.json();
+
+  Object.values(tallers).forEach((taller) => {
+    if (taller.autoritzat === false) {
+      nPeticions += 1;
+    } else {
+      if (taller.periode === periodeActual.selectedPeriodeId) {
+        nTallersAssignar += 1;
+      }
+
+      if (taller.admet_insc === true) {
+        nTallersActius += 1;
+      }
+    }
+  });
+
+  const inici = new Date(new Date().setHours(0, 0, 0, 0)).toISOString();
+  const fi = new Date(new Date().setHours(23, 59, 59, 999)).toISOString();
+
+  const resChecklistPendents = await fetch(`${BACK_URL}/inscripcions/stats`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+    body: JSON.stringify({ inici, fi }),
+  });
+
+  checklistPendents = await resChecklistPendents.json();
+
+  console.log(nTallersAssignar);
+
+  return {
+    nPeticions,
+    nTallersAssignar,
+    nTallersActius,
+    nChecklistPendents: checklistPendents.count,
+  };
+}
+
 /* ------------------------------- USUARIS ------------------------------ */
 
 export async function getAllUsuaris() {

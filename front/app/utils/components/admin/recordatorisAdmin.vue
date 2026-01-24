@@ -1,17 +1,34 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { getTallersStats } from "~/services/communicationManagerDatabase";
+
+const peticionsRebudes = ref(0);
+const tallersAssignar = ref(0);
+const tallersActius = ref(0);
+const checklistsPendents = ref(0);
+
+onMounted(async () => {
+  const { nPeticions, nTallersAssignar, nTallersActius, nChecklistPendents } =
+    await getTallersStats();
+  peticionsRebudes.value = nPeticions;
+  tallersAssignar.value = nTallersAssignar;
+  tallersActius.value = nTallersActius;
+  checklistsPendents.value = nChecklistPendents;
+});
 </script>
+
 <template>
   <b>Recordatoris</b>
   <div class="lista-container">
     <!-- FILA (barra superior) -->
     <div class="fila-recordatori">
       <div class="col-titulo">
+        <!-- Talleres no autorizados-->
         <span class="texto-titulo">Peticions rebudes</span>
       </div>
 
       <div class="col-info">
-        <span class="info-item"> X </span>
+        <span class="info-item"> {{ peticionsRebudes }} </span>
       </div>
     </div>
     <div class="fila-recordatori">
@@ -20,7 +37,8 @@ import { ref } from "vue";
       </div>
 
       <div class="col-info">
-        <span class="info-item"> 8 </span>
+        <!-- autoritzat = true y periodo = x -->
+        <span class="info-item"> {{ tallersAssignar }} </span>
       </div>
     </div>
     <div class="fila-recordatori">
@@ -29,7 +47,8 @@ import { ref } from "vue";
       </div>
 
       <div class="col-info">
-        <span class="info-item"> 8 </span>
+        <!-- admet_insc = TRUE-->
+        <span class="info-item"> {{ tallersActius }} </span>
       </div>
     </div>
     <div class="fila-recordatori">
@@ -38,7 +57,8 @@ import { ref } from "vue";
       </div>
 
       <div class="col-info">
-        <span class="info-item"> 8 </span>
+        <!-- Autoritzat assistencia dia actual  -->
+        <span class="info-item"> {{ checklistsPendents }} </span>
       </div>
     </div>
   </div>
