@@ -92,16 +92,37 @@ export async function updateEstatInscripcions(
     // Climent: Aqui tenim que filtrar amb quin periode es... pero de moment ho deixem aixi
     const todasInscripciones = await prisma.inscripcions.findMany();
 
+    // Obtenir dades actuals del taller
+    const taller = await prisma.tallers.findUnique({
+      where: { id: tallerIdNum },
+    });
+
+    if (!taller) {
+      throw new Error(`Taller ${tallerIdNum} no encontrado`);
+    }
+
+    let placesActualizadas = taller.places_disp;
+
     for (const inscripcion of todasInscripciones) {
       let alumnes = JSON.parse(inscripcion.alumnes || "[]");
       let actualizado = false;
+      let estadoAnterior = null;
 
       for (let i = 0; i < alumnes.length; i++) {
         if (alumnes[i].TALLER === tallerIdNum) {
+          estadoAnterior = alumnes[i].ESTAT;
           if (inscripcionesAprobadas.includes(inscripcion.id)) {
             alumnes[i].ESTAT = "APROBADA";
+            // Restar places solo si cambió de estado a APROBADA
+            if (estadoAnterior !== "APROBADA") {
+              placesActualizadas -= alumnes[i].QUANTITAT || 0;
+            }
           } else {
             alumnes[i].ESTAT = "DENEGADA";
+            // Sumar places si vuelve de APROBADA a DENEGADA
+            if (estadoAnterior === "APROBADA") {
+              placesActualizadas += alumnes[i].QUANTITAT || 0;
+            }
           }
           actualizado = true;
         }
@@ -114,6 +135,15 @@ export async function updateEstatInscripcions(
         });
       }
     }
+
+    // Asegurar que places_disp no sea negativo
+    placesActualizadas = Math.max(0, placesActualizadas);
+
+    // Actualizar places_disp del taller
+    await prisma.tallers.update({
+      where: { id: tallerIdNum },
+      data: { places_disp: placesActualizadas },
+    });
 
     return { success: true };
   } catch (error) {

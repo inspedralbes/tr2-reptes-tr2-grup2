@@ -10,14 +10,13 @@ import {
   getAllInstitucions,
 } from "@/services/communicationManagerDatabase";
 
-//ejemplo para ver esta pagina: http://localhost:3000/Tallerista/1/2
+//ejemplo para ver esta pagina: http://localhost:3000/centro/assistencia/1
 //teneis que tener datos que corresponden a esos ids en la base de datos
 //tanto en assistencias como en tallers etc
 const route = useRoute();
 
 // Obtener IDs de la URL
 const TALLER_ID = parseInt(route.params.tallerId) || 1;
-const INSTITUT_USUARIO = parseInt(route.params.institut) || 1;
 
 // Estats reactius
 const taller = ref(null);
@@ -72,16 +71,15 @@ const obrirModal = (assistencia) => {
 
     for (let i = 0; i < alumnesParsed.length; i++) {
       const alumne = alumnesParsed[i];
-      if (alumne.INSTITUT === INSTITUT_USUARIO) {
-        const nouAlumne = {};
-        for (const key in alumne) {
-          nouAlumne[key] = alumne[key];
-        }
-        if (instMap.value[alumne.INSTITUT]) {
-          nouAlumne.INSTITUT = instMap.value[alumne.INSTITUT];
-        }
-        alumnesFiltrats.push(nouAlumne);
+      const nouAlumne = {};
+      for (const key in alumne) {
+        nouAlumne[key] = alumne[key];
       }
+      nouAlumne.INSTITUT_ORIGINAL = alumne.INSTITUT;
+      if (instMap.value[alumne.INSTITUT]) {
+        nouAlumne.INSTITUT = instMap.value[alumne.INSTITUT];
+      }
+      alumnesFiltrats.push(nouAlumne);
     }
     alumnesDelDia.value = alumnesFiltrats;
   } catch (e) {
@@ -94,16 +92,15 @@ const obrirModal = (assistencia) => {
 
     for (let i = 0; i < profeParsed.length; i++) {
       const prof = profeParsed[i];
-      if (prof.INSTITUT === INSTITUT_USUARIO) {
-        const nouProf = {};
-        for (const key in prof) {
-          nouProf[key] = prof[key];
-        }
-        if (instMap.value[prof.INSTITUT]) {
-          nouProf.INSTITUT = instMap.value[prof.INSTITUT];
-        }
-        profesFiltrats.push(nouProf);
+      const nouProf = {};
+      for (const key in prof) {
+        nouProf[key] = prof[key];
       }
+      nouProf.INSTITUT_ORIGINAL = prof.INSTITUT;
+      if (instMap.value[prof.INSTITUT]) {
+        nouProf.INSTITUT = instMap.value[prof.INSTITUT];
+      }
+      profesFiltrats.push(nouProf);
     }
     professorsDelDia.value = profesFiltrats;
   } catch (e) {
@@ -157,17 +154,17 @@ const guardarAssistencia = async () => {
 
   guardant.value = true;
   try {
-    // Preparar arrays sense ID i convertir el nom de institució back a ID
+    // Preparar arrays de alumnos
     const alumnesParaGuardar = alumnesDelDia.value.map(a => ({
       NOM: a.NOM,
-      INSTITUT: typeof a.INSTITUT === 'string' ? INSTITUT_USUARIO : a.INSTITUT,
+      INSTITUT: a.INSTITUT_ORIGINAL || a.INSTITUT,
       ASSISTENCIA: a.ASSISTENCIA,
       JUSTIFICAT: a.JUSTIFICAT
     }));
 
     const profsParaGuardar = professorsDelDia.value.map(p => ({
       NOM: p.NOM,
-      INSTITUT: typeof p.INSTITUT === 'string' ? INSTITUT_USUARIO : p.INSTITUT,
+      INSTITUT: p.INSTITUT_ORIGINAL || p.INSTITUT,
       ASSISTENCIA: p.ASSISTENCIA,
       JUSTIFICAT: p.JUSTIFICAT
     }));
@@ -636,16 +633,53 @@ td input[type="checkbox"] {
 }
 
 .dies-container {
-  cursor: pointer;
-  border-radius: 30px;
-  border: 2px solid #a5a5a5;
-  width: 40%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  margin-top: 20px;
+  max-height: 200px;
+  overflow-y: auto;
   padding: 10px;
-  text-align: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
+  background-color: #fafafa;
 }
 
-.dies-container:hover {
-  background-color: #f5f6fa;
+.dia-item {
+  cursor: pointer;
+  border-radius: 15px;
+  border: 2px solid #7986cb;
+  background-color: #f8f9ff;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(121, 134, 203, 0.1);
+}
+
+.dia-item:hover {
+  background-color: #e8eaf6;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(121, 134, 203, 0.2);
+  border-color: #3949ab;
+}
+
+.dia-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dia-data {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #3949ab;
+  text-transform: capitalize;
+}
+
+.dia-horari {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
 }
 </style>

@@ -31,17 +31,26 @@
 
               <div v-for="weight in weights" :key="weight.id" class="table-row">
                 <div class="col-criterio">
-                  <strong>{{ getCriterioName(weight.criterio) }}</strong>
+                  <strong class="criteri-text">{{
+                    getCriterioName(weight.criteri)
+                  }}</strong>
                 </div>
                 <div class="col-desc">
-                  {{ getCriterioDesc(weight.criterio) }}
+                  <p class="criteri-text">
+                    {{ getCriterioDesc(weight.criteri) }}
+                  </p>
                 </div>
                 <div class="col-pes">
-                  <span class="pes-badge">{{ weight.peso }}</span>
+                  <span class="pes-badge">{{ weight.pes }}</span>
                 </div>
                 <div class="col-input">
-                  <input v-model.number="editedWeights[weight.id]" type="number" min="-100" max="100"
-                    class="input-pes" />
+                  <input
+                    v-model.number="editedWeights[weight.id]"
+                    type="number"
+                    min="-100"
+                    max="100"
+                    class="input-pes"
+                  />
                 </div>
               </div>
             </div>
@@ -52,8 +61,8 @@
             <h3 class="section-title">Periode Actual</h3>
             <div class="intro-text">
               <p>
-                Selecciona el periode que es mostrarà a totes les vistes. Només es
-                veuran tallers i inscripcions d'aquest periode.
+                Selecciona el periode que es mostrarà a totes les vistes. Només
+                es veuran tallers i inscripcions d'aquest periode.
               </p>
             </div>
 
@@ -64,7 +73,11 @@
                   {{ formatDate(p.dataIni) }} - {{ formatDate(p.dataFi) }}
                 </option>
               </select>
-              <button class="btn-guardar-periode" @click="guardarPeriode" :disabled="!selectedPeriodeId">
+              <button
+                class="btn-guardar-periode"
+                @click="guardarPeriode"
+                :disabled="!selectedPeriodeId"
+              >
                 Guardar
               </button>
             </div>
@@ -80,11 +93,21 @@
             <div class="create-periode">
               <div class="input-group">
                 <label for="dataIni">Data d'Inici:</label>
-                <input id="dataIni" v-model="newPeriodeDataIni" type="date" class="date-input" />
+                <input
+                  id="dataIni"
+                  v-model="newPeriodeDataIni"
+                  type="date"
+                  class="date-input"
+                />
               </div>
               <div class="input-group">
                 <label for="dataFi">Data Final:</label>
-                <input id="dataFi" v-model="newPeriodeDataFi" type="date" class="date-input" />
+                <input
+                  id="dataFi"
+                  v-model="newPeriodeDataFi"
+                  type="date"
+                  class="date-input"
+                />
               </div>
               <button class="btn-crear-periode" @click="crearPeriode">
                 Crear Periode
@@ -105,7 +128,11 @@
           <button class="btn-restablir" @click="restablirValors">
             Restablir Pesos
           </button>
-          <button class="btn-guardar" @click="guardarCambios" :disabled="loading">
+          <button
+            class="btn-guardar"
+            @click="guardarCambios"
+            :disabled="loading"
+          >
             Guardar Criteris
           </button>
         </div>
@@ -115,6 +142,7 @@
 </template>
 
 <script setup>
+//Cambiar valores de castellano a catalan segun la BBDD
 import { ref, onMounted } from "vue";
 import {
   getCriterisWeights,
@@ -171,11 +199,11 @@ const cargarWeights = async () => {
   try {
     const data = await getCriterisWeights();
     weights.value = data.filter(
-      (w) => w.criterio !== "DIVERSITY" && w.criterio !== "NE"
+      (w) => w.criteri !== "DIVERSITY" && w.criteri !== "NE",
     );
     editedWeights.value = {};
     weights.value.forEach((w) => {
-      editedWeights.value[w.id] = w.peso;
+      editedWeights.value[w.id] = w.pes;
     });
   } catch (err) {
     error.value = "Error al cargar criteris: " + err.message;
@@ -210,7 +238,7 @@ const restablirValors = () => {
   };
 
   weights.value.forEach((w) => {
-    editedWeights.value[w.id] = valorsDefault[w.criterio] || w.peso;
+    editedWeights.value[w.id] = valorsDefault[w.criterio] || w.pes;
   });
 };
 
@@ -221,7 +249,7 @@ const guardarCambios = async () => {
 
   try {
     const updates = weights.value
-      .filter((w) => editedWeights.value[w.id] !== w.peso)
+      .filter((w) => editedWeights.value[w.id] !== w.pes)
       .map((w) => updateCriterisWeight(w.id, editedWeights.value[w.id]));
 
     await Promise.all(updates);
@@ -277,7 +305,7 @@ const crearPeriode = async () => {
   try {
     const newPeriode = await createPeriode(
       newPeriodeDataIni.value,
-      newPeriodeDataFi.value
+      newPeriodeDataFi.value,
     );
     successMessage.value = "✓ Periode creat correctament";
     newPeriodeDataIni.value = "";
@@ -377,7 +405,7 @@ onMounted(async () => {
   flex: 1;
   padding: 30px;
   overflow-y: auto;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 
 .modal-body::-webkit-scrollbar {
@@ -431,14 +459,13 @@ onMounted(async () => {
   background-color: white;
   border-radius: 15px;
   overflow: hidden;
-
 }
 
 .table-header {
   display: grid;
   grid-template-columns: 1fr 2fr 0.8fr 0.9fr;
   border-radius: 50px;
-  background: #7986CB;
+  background: #7986cb;
   color: white;
   padding: 18px 20px;
   font-weight: 600;
@@ -599,7 +626,6 @@ onMounted(async () => {
 
   padding: 18px;
   border-radius: 12px;
-
 }
 
 .periode-dropdown {
@@ -634,8 +660,10 @@ onMounted(async () => {
   transition:
     background-color 0.2s ease,
     transform 0.2s ease;
+}
 
-
+.criteri-text {
+  color: #1d1d1d;
 }
 
 .btn-guardar-periode:hover:not(:disabled) {

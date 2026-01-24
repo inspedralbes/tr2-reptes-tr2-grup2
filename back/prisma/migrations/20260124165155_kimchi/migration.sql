@@ -12,6 +12,10 @@ CREATE TABLE `Tallers` (
     `horari` TEXT NOT NULL,
     `periode` INTEGER NOT NULL,
     `autoritzat` BOOLEAN NOT NULL DEFAULT false,
+    `comentari_profe` TEXT NULL,
+    `comentari_tallerista` VARCHAR(191) NULL,
+    `mailTallerista` VARCHAR(191) NULL,
+    `imatge` VARCHAR(191) NULL,
     `admin` INTEGER NOT NULL,
     `admet_insc` BOOLEAN NULL,
 
@@ -26,6 +30,7 @@ CREATE TABLE `Institucions` (
     `direccio` VARCHAR(191) NOT NULL,
     `codi_postal` VARCHAR(191) NOT NULL,
 
+    UNIQUE INDEX `Institucions_codi_centre_key`(`codi_centre`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -56,7 +61,7 @@ CREATE TABLE `Usuaris` (
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `telefon` INTEGER NOT NULL,
-    `token` VARCHAR(191) NULL,
+    `token` TEXT NULL,
     `rol` ENUM('Admin', 'Professorat') NOT NULL,
     `institucio` INTEGER NULL,
     `autoritzat` BOOLEAN NOT NULL,
@@ -75,7 +80,6 @@ CREATE TABLE `Assistencia` (
     `llista_professors` TEXT NOT NULL,
     `autoritzat` BOOLEAN NOT NULL,
 
-    UNIQUE INDEX `Assistencia_id_taller_key`(`id_taller`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -94,6 +98,26 @@ CREATE TABLE `Historic` (
     `id_institucio` INTEGER NOT NULL,
     `periode` INTEGER NOT NULL,
     `assistencia` DOUBLE NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `CriterisWeights` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `criteri` VARCHAR(191) NOT NULL,
+    `pes` INTEGER NOT NULL DEFAULT 20,
+    `periode` INTEGER NULL,
+    `dataActualitzacio` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `CriterisWeights_criteri_key`(`criteri`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `SystemSettings` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `selectedPeriodeId` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -127,3 +151,9 @@ ALTER TABLE `Historic` ADD CONSTRAINT `Historic_id_institucio_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `Historic` ADD CONSTRAINT `Historic_periode_fkey` FOREIGN KEY (`periode`) REFERENCES `Periodes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `CriterisWeights` ADD CONSTRAINT `CriterisWeights_periode_fkey` FOREIGN KEY (`periode`) REFERENCES `Periodes`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `SystemSettings` ADD CONSTRAINT `SystemSettings_selectedPeriodeId_fkey` FOREIGN KEY (`selectedPeriodeId`) REFERENCES `Periodes`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
