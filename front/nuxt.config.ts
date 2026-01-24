@@ -1,15 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
   app: {
     head: {
       meta: [
-        { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: 'Tu descripción aquí' }
-      ]
+        { charset: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "description", content: "Tu descripción aquí" },
+      ],
     },
-    pageTransition: { name: 'page', mode: 'out-in' }
-  }
-})
+  },
+  routeRules: {
+    "/admin/**": { appMiddleware: "auth" },
+    "/centro/**": { appMiddleware: "auth" },
+  },
+});
