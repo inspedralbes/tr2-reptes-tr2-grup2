@@ -73,13 +73,6 @@
                   {{ formatDate(p.dataIni) }} - {{ formatDate(p.dataFi) }}
                 </option>
               </select>
-              <button
-                class="btn-guardar-periode"
-                @click="guardarPeriode"
-                :disabled="!selectedPeriodeId"
-              >
-                Guardar
-              </button>
             </div>
           </div>
 
@@ -144,6 +137,7 @@
 <script setup>
 //Cambiar valores de castellano a catalan segun la BBDD
 import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
 import {
   getCriterisWeights,
   updateCriterisWeight,
@@ -248,19 +242,38 @@ const guardarCambios = async () => {
   successMessage.value = "";
 
   try {
+    // Guardar criterios
     const updates = weights.value
       .filter((w) => editedWeights.value[w.id] !== w.pes)
       .map((w) => updateCriterisWeight(w.id, editedWeights.value[w.id]));
 
     await Promise.all(updates);
 
-    successMessage.value = "✓ Criteris actualitzats correctament";
-    await cargarWeights();
-    setTimeout(() => {
-      successMessage.value = "";
-    }, 3000);
+    // Guardar período si está seleccionado
+    if (selectedPeriodeId.value) {
+      await updateSystemSettings(systemSettingsId.value, selectedPeriodeId.value);
+    }
+
+    // Mostrar alerta de éxito con SweetAlert
+    await Swal.fire({
+      icon: "success",
+      title: "Configuració actualitzada",
+      text: "Els criteris i periode han estat guardats correctament",
+      confirmButtonText: "D'acord",
+      confirmButtonColor: "#5c6bc0",
+    });
+
+    // Recargar la página
+    location.reload();
   } catch (err) {
     error.value = "Error al guardar: " + err.message;
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: err.message,
+      confirmButtonText: "D'acord",
+      confirmButtonColor: "#c62828",
+    });
   } finally {
     loading.value = false;
   }
