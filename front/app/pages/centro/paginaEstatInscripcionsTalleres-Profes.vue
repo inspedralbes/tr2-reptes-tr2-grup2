@@ -5,7 +5,7 @@ import llistaEstados from "@/utils/components/centro/listaEstadoInscripciones.vu
   <div>
     <div id="cuerpo">
       <div id="contenido">
-        <h2>Tallers disponibles:</h2>
+        <h2>Estat inscripcions:</h2>
         <br />
         <llistaEstados />
       </div>
