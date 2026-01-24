@@ -546,7 +546,10 @@ export async function saveInscripcions(selecciones, docentRef, comentari) {
 
   const response = await fetch(`${BACK_URL}/inscripcions/dadesinsc`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
     body: JSON.stringify(payload),
   });
   if (!response.ok) {
