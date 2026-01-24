@@ -137,12 +137,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="page-container">
     <div id="cuerpo">
+      <h2>
+        Bon dia, <span id="user">{{ userName }}</span>:
+      </h2>
       <div id="contenido">
-        <h2>
-          Bon dia, <span id="user">{{ userName }}</span>:
-        </h2>
         <br />
         <h3>Tallers actius:</h3>
         <div id="slider">
@@ -151,7 +151,6 @@ onMounted(() => {
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
@@ -160,15 +159,32 @@ onMounted(() => {
   src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
 }
 
+.page-container {
+  width: 100%;
+  flex: 1;
+}
+
 #cuerpo {
   display: flex;
-  height: calc(100vh - 85px);
-  overflow: hidden;
+  flex-direction: column;
+  min-height: calc(100vh - 200px);
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  font-family: "Coolvetica";
+}
+
+#cuerpo h2 {
+  margin-top: 4%;
+  margin-left: 4%;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
 }
 
 #contenido {
-  margin-top: 30px;
-  margin-left: 50px;
+  margin-top: 3%;
+  margin-left: 4%;
+  margin-right: auto;
   font-family: "Coolvetica";
   background-color: #FFFFFF;
   border-radius: 20px;
@@ -176,9 +192,10 @@ onMounted(() => {
   border-color: #87878748;
   border-width: 2px;
   padding: 30px;
-  width: 1000px;
+  width: 95%;
+  max-width: 1400px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  height: 410px;
+  min-height: 200px;
   display: flex;
   flex-direction: column;
 }
@@ -191,5 +208,31 @@ onMounted(() => {
 #user {
   color: #5c6bc0;
   font-weight: bold;
+}
+
+
+/* Media Query para móviles */
+@media (max-width: 768px) {
+  #cuerpo {
+    min-height: calc(100vh - 60px);
+    align-items: center;
+  }
+
+  .welcome-header {
+    width: 95%;
+    margin-left: 0;
+    margin-top: 20px;
+    text-align: left;
+  }
+
+  /* ... rest of media query ... */
+
+  #contenido {
+    width: 95%;
+    /* Mantenemos margen pequeño en móvil */
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
 }
 </style>

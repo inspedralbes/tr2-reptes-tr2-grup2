@@ -19,26 +19,13 @@ const closeMenu = () => {
 </script>
 <template>
   <div id="navBar" :class="{ 'menu-open': menuOpen }">
-    <!-- Hamburger button (solo visible en móvil/tablet) -->
-    <button class="hamburger-btn" @click="toggleMenu" aria-label="Toggle menu">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <!-- Overlay para cerrar menú en móvil -->
-    <div v-if="menuOpen" class="menu-overlay" @click="closeMenu"></div>
 
     <div id="btns" :class="{ active: menuOpen }">
       <NuxtLink to="/centro" custom v-slot="{ navigate }">
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Pàgina Principal"
-          :class="{ 'btn-activo': isActive('/centro') }"
-        >
+        <button @click="
+          navigate();
+        closeMenu();
+        " data-tooltip="Pàgina Principal" :class="{ 'btn-activo': isActive('/centro') }">
           <img src="/img/navBarProfes/home.png" alt="" />
         </button>
       </NuxtLink>
@@ -46,50 +33,34 @@ const closeMenu = () => {
       <br />
 
       <NuxtLink to="/centro/inscripcionsTallers" custom v-slot="{ navigate }">
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Inscripcions Tallers"
-          :class="{
-            'btn-activo': isActive('/centro/inscripcionsTalleres'),
-          }"
-        >
+        <button @click="
+          navigate();
+        closeMenu();
+        " data-tooltip="Inscripcions Tallers" :class="{
+          'btn-activo': isActive('/centro/inscripcionsTalleres'),
+        }">
           <img src="/img/navBarProfes/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/centro/estatInscripcionsTallers"
-        custom
-        v-slot="{ navigate }"
-      >
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Estat Inscripcions"
-          :class="{
-            'btn-activo': isActive('/centro/estatInscripcionsTalleres'),
-          }"
-        >
+      <NuxtLink to="/centro/estatInscripcionsTallers" custom v-slot="{ navigate }">
+        <button @click="
+          navigate();
+        closeMenu();
+        " data-tooltip="Estat Inscripcions" :class="{
+          'btn-activo': isActive('/centro/estatInscripcionsTalleres'),
+        }">
           <img src="/img/navBarProfes/checkbox.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/centro/tallersFinalitzats" custom v-slot="{ navigate }">
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Tallers Finalitzats"
-          :class="{
-            'btn-activo': isActive('/centro/tallersFinalitzats'),
-          }"
-        >
+        <button @click="
+          navigate();
+        closeMenu();
+        " data-tooltip="Tallers Finalitzats" :class="{
+          'btn-activo': isActive('/centro/tallersFinalitzats'),
+        }">
           <img src="/img/navBarProfes/document-alt.png" alt="" />
         </button>
       </NuxtLink>
@@ -98,13 +69,13 @@ const closeMenu = () => {
 </template>
 <style>
 /* Desktop: Vertical sidebar (default) */
+/* Desktop: Vertical sidebar (default) */
 #navBar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 70px;
+  width: 80px;
   height: auto;
-  max-height: calc(100vh - 60px);
   background-color: #3949ab;
   padding: 10px;
   border-radius: 20px;
@@ -112,7 +83,6 @@ const closeMenu = () => {
   margin-bottom: 30px;
   margin-left: 30px;
   position: relative;
-  overflow-y: auto;
 }
 
 /* Hamburger button (oculto en desktop) */
@@ -143,13 +113,14 @@ const closeMenu = () => {
 }
 
 #btns {
-  margin-top: 10px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 #btns button {
+  
   width: 50px;
   height: 50px;
   background-color: transparent;
@@ -196,41 +167,6 @@ const closeMenu = () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* RESPONSIVE: Tablet y móvil */
-@media (max-width: 1024px) {
-  #navBar {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    height: 60px !important;
-    max-height: 60px !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    padding: 10px 20px !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    z-index: 1000;
-  }
-
-  /* Mostrar hamburger button */
-  .hamburger-btn {
-    display: flex;
-  }
-
-  /* Animación hamburger cuando está abierto */
-  #navBar.menu-open .hamburger-btn span:nth-child(1) {
-    transform: rotate(45deg) translate(8px, 8px);
-  }
-
-  #navBar.menu-open .hamburger-btn span:nth-child(2) {
-    opacity: 0;
-  }
-
-  #navBar.menu-open .hamburger-btn span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -7px);
-  }
 
   /* Overlay oscuro */
   .menu-overlay {
@@ -244,95 +180,14 @@ const closeMenu = () => {
     z-index: 999;
   }
 
-  /* Menú lateral deslizante */
-  #btns {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 75%;
-    max-width: 320px;
-    height: 100vh;
-    background-color: #3949ab;
-    margin: 0;
-    padding: 70px 15px 20px;
-    transition: right 0.3s ease;
-    z-index: 1000;
-    overflow-y: auto;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
 
-  #btns.active {
-    right: 0;
-  }
-
-  #btns br {
-    display: none;
-  }
-
-  #btns button {
-    width: 100%;
-    height: 48px;
-    justify-content: flex-start;
-    padding-left: 15px;
-    margin-bottom: 0;
-    border-radius: 8px;
-  }
-
-  #btns button img {
-    margin-right: 12px;
-    width: 28px;
-    height: 28px;
-  }
-
-  /* Tooltip en móvil: mostrar como texto */
-  #btns button::after {
-    content: attr(data-tooltip);
-    position: static;
-    transform: none;
-    background: none;
-    color: white;
-    padding: 0;
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: none;
-    white-space: normal;
-  }
-
-  #btns button:hover::after {
-    background: none;
-  }
-}
-
-/* RESPONSIVE: Móvil pequeño */
-@media (max-width: 640px) {
-  #navBar {
-    padding: 10px 15px;
-  }
-
-  #btns {
-    width: 260px;
-    padding: 70px 15px 15px;
-  }
-
-  #btns button {
-    height: 45px;
-    font-size: 14px;
-  }
-
-  #btns button img {
-    width: 32px;
-    height: 32px;
-  }
-}
 
 /* RESPONSIVE: Pantallas grandes */
 @media (min-width: 1280px) and (max-width: 1919px) {
   #navBar {
     width: 80px;
-    max-height: calc(100vh - 80px);
+    height: auto;
+    min-height: 100%;
     margin-top: 40px;
     margin-bottom: 40px;
     margin-left: 40px;
@@ -357,7 +212,8 @@ const closeMenu = () => {
 @media (min-width: 1920px) {
   #navBar {
     width: 90px;
-    max-height: calc(100vh - 100px);
+    height: auto;
+    min-height: 100%;
     margin-top: 50px;
     margin-bottom: 50px;
     margin-left: 50px;

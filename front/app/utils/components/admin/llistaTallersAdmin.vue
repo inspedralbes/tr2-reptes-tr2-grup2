@@ -972,6 +972,12 @@ async function confirmarEliminar(id) {
   width: 100%;
   display: flex;
   flex-direction: column;
+  border-radius: 20px;
+  border: 2px solid #87878748;
+  height: calc(100vh - 250px);
+  /* Altura ajustada para scroll interno */
+  min-height: 400px;
+  background-color: #FFFFFF;
 }
 
 .header-lista {
@@ -980,7 +986,9 @@ async function confirmarEliminar(id) {
   align-items: center;
   gap: 140px;
   margin-bottom: 15px;
+  margin-top: 40px;
   padding-right: 0;
+  margin-right: 40px;
 }
 
 #btn-filtres {
@@ -1097,7 +1105,7 @@ async function confirmarEliminar(id) {
   background-color: #9fa8da;
   margin-left: -110px;
   z-index: 2;
-  width: 350px;
+  width: clamp(350px, 35vw, 650px);
   height: 110px;
   display: flex;
   flex-direction: column;
@@ -1108,9 +1116,9 @@ async function confirmarEliminar(id) {
 
 .text-info {
   font-weight: bold;
-  margin-left: 30%;
-  margin-top: 40px;
-  font-size: 0.85rem;
+  margin-left: 20%;
+  margin-top: 30px;
+  font-size: clamp(1rem, 1.5vw, 1.5rem);
 }
 
 .btn-detalls {
@@ -1143,7 +1151,7 @@ async function confirmarEliminar(id) {
   border-color: #717ED3;
   border-radius: 30px;
   cursor: pointer;
-  margin-left: 40px;
+  margin-left: 90px;
   transition:
     background-color 0.2s ease,
     transform 0.2s ease;
@@ -1194,7 +1202,7 @@ async function confirmarEliminar(id) {
 .info-desplegable {
   margin-left: 153px;
   background-color: #D5DAFB;
-  width: 35.5%;
+  width: clamp(350px, 35vw, 650px);
   margin-top: -60px;
   padding: 70px 20px 15px 40px;
   border-radius: 0 0 30px 30px;

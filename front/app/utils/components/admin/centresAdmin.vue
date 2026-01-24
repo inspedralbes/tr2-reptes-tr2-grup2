@@ -164,8 +164,14 @@ const toggleDetalls = (id) => {
 <style scoped>
 #container {
   font-family: Arial, Helvetica, sans-serif;
-  width: 100%;
-  max-height: 550px;
+  width: 95%;
+  height: calc(100vh - 350px);
+  min-height: 400px;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  border: 1px solid #87878779;
+  padding: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
   display: flex;
   flex-direction: column;
 }
@@ -203,8 +209,9 @@ const toggleDetalls = (id) => {
 
 .lista-container {
   max-width: 100%;
-  width: 1000px;
-  height: 300px;
+  margin-left: 7%;
+  width: 100%;
+  flex: 1;
   overflow-y: auto;
   overflow-x: visible;
   padding: 10px 20px;
@@ -232,36 +239,40 @@ p {
 .fila-curso {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   margin-bottom: 0px;
   height: 45px;
   position: relative;
+  width: 100%;
 }
 
 .col-titulo {
   background-color: #7986cb;
   color: #1a1a1a;
   z-index: 3;
-  width: 350px;
+  width: clamp(250px, 40%, 400px);
   min-height: 35px;
   display: flex;
   align-items: center;
   padding-left: 25px;
   border-radius: 25px;
   font-weight: bold;
-  margin-left: 8%;
+  margin-left: 0;
+  flex-shrink: 0;
 }
 
 .col-info {
   background-color: #9fa8da;
   margin-left: -50px;
   z-index: 2;
-  width: 320px;
+  width: clamp(280px, 35%, 450px);
   min-height: 35px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   padding: 0 15px;
   border-radius: 25px;
+  flex-shrink: 0;
 }
 
 .icon {
@@ -289,10 +300,12 @@ p {
 /* Desplegable */
 .desplegable {
   background-color: #d5dafb;
-  margin-left: 8%;
   margin-top: -20px;
   position: relative;
-  width: 815px;
+  width: calc(100% - 40px);
+  max-width: 990px;
+  min-width: 600px;
+  margin-left: 0;
   padding-top: 15px;
   border-radius: 0 0 25px 25px;
   box-sizing: border-box;

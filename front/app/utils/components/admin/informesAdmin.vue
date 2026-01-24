@@ -197,22 +197,24 @@ function exportCSV() {
 }
 
 #container {
-  background-color: #ffffff;
-  /* border-radius: 20px; */
-  padding: 24px;
-  width: 1050px;
-  max-width: 1050px;
-  margin: 0 auto;
-  /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); */
+  background-color: transparent;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .header-Centres {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 1050px;
-  max-width: 1050px;
-  /* margin: 20px auto 12px auto; */
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.header-Centres h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
 }
 
 /* .container-informs {

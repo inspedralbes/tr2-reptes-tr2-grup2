@@ -1,24 +1,24 @@
 <template>
-
-  <div id="cuerpo">
-
-    <div id="contenido">
-      <div v-if="tallerNom" class="content-wrapper">
-        <h2>{{ tallerNom }}</h2>
-        <div class="comentari-section">
-          <label for="comentari-textarea">Deixa aquí el teu comentari sobre el taller:</label>
-          <textarea id="comentari-textarea" v-model="comentari" maxlength="300" placeholder="Escriu el teu comentari..."
-            rows="6" class="textarea-style"></textarea>
-          <div class="char-counter">{{ comentari.length }} / 300</div>
-          <button @click="guardarComentari" class="btn-guardar">
-            Enviar comentari
-          </button>
-          <div v-if="mensaje" :class="['mensaje', mensajeTipo]">
-            {{ mensaje }}
+  <div class="page-container">
+    <div id="cuerpo">
+      <div id="contenido">
+        <div v-if="tallerNom" class="content-wrapper">
+          <h2>{{ tallerNom }}</h2>
+          <div class="comentari-section">
+            <label for="comentari-textarea">Deixa aquí el teu comentari sobre el taller:</label>
+            <textarea id="comentari-textarea" v-model="comentari" maxlength="300"
+              placeholder="Escriu el teu comentari..." rows="6" class="textarea-style"></textarea>
+            <div class="char-counter">{{ comentari.length }} / 300</div>
+            <button @click="guardarComentari" class="btn-guardar">
+              Enviar comentari
+            </button>
+            <div v-if="mensaje" :class="['mensaje', mensajeTipo]">
+              {{ mensaje }}
+            </div>
           </div>
         </div>
+        <div v-else class="loading">Carregant...</div>
       </div>
-      <div v-else class="loading">Carregant...</div>
     </div>
   </div>
 </template>
@@ -77,31 +77,68 @@ onMounted(loadTaller);
 </script>
 
 <style scoped>
+@font-face {
+  font-family: "Coolvetica";
+  src: url(/assets/fuentes/coolvetica/Coolvetica\ Rg.otf);
+}
+
+.page-container {
+  width: 100%;
+  flex: 1;
+}
+
 #cuerpo {
   display: flex;
-  height: calc(100vh - 85px);
-  overflow: hidden;
+  min-height: calc(100vh - 200px);
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  justify-content: center;
+  width: 100%;
 }
 
 #contenido {
-  margin-top: 40px;
-  margin-left: 50px;
+  margin-top: 3%;
+  margin-left: 4%;
+  margin-right: auto;
   font-family: "Coolvetica";
   background-color: #ffffff;
   border-radius: 20px;
   border: 1px solid #87878779;
   padding: 30px;
-  width: 950px;
+  width: 95%;
+  max-width: 1400px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  height: 410px;
+  height: auto;
+  min-height: 410px;
+}
+
+@media (max-width: 768px) {
+  #cuerpo {
+    min-height: calc(100vh - 60px);
+    align-items: flex-start;
+  }
+
+  #contenido {
+    width: 95%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: auto;
+  }
+}
+
+.content-wrapper {
+  margin-left: 2%;
+  margin-right: 2%;
 }
 
 .content-wrapper h2 {
   margin: 0 0 20px 0;
   color: #283593;
-  font-size: 1.8rem;
+  font-size: clamp(1.5rem, 2.5vw, 1.8rem);
+
 }
 
 .comentari-section {
@@ -122,8 +159,9 @@ label {
   border-radius: 6px;
   font-family: inherit;
   font-size: 0.9rem;
-  height: 200px;
+  height: 300px;
   resize: vertical;
+  margin-bottom: 5%;
 }
 
 .char-counter {

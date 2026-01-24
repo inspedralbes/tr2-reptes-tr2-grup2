@@ -42,6 +42,7 @@ const initChart = (processedData) => {
       text: 'Top 3 Tallers per Any',
       subtext: 'Tallers més demandats',
       left: 'center',
+      padding: [5, 0, 10, 0], // Reducido el padding para controlar mejor con grid.top
       textStyle: {
         fontSize: 16,
         fontWeight: 600,
@@ -49,12 +50,12 @@ const initChart = (processedData) => {
       },
       subtextStyle: {
         fontSize: 12,
-        color: '#666'
+        color: '#666',
       }
     },
     legend: {
       data: years,
-      bottom: 10,
+      bottom: 0, // Pegado abajo
     },
     tooltip: {
       trigger: 'axis',
@@ -74,8 +75,8 @@ const initChart = (processedData) => {
     grid: {
       left: '3%',
       right: '4%',
-      bottom: '15%',
-      top: '20%',
+      bottom: '15%', // Espacio suficiente para etiquetas X y Leyenda
+      top: '80px', // Espacio fijo arriba para el título
       containLabel: true
     },
     xAxis: {
@@ -148,7 +149,8 @@ const initChart = (processedData) => {
         seriesArray.push({
           name: year,
           type: 'bar',
-          barGap: '10%',
+          barGap: '20%',
+          barMaxWidth: 100, // Aumentado para reducir espacio vacío entre barras
           label: {
             show: true,
             position: 'top',

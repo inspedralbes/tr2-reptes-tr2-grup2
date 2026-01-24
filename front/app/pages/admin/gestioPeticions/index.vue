@@ -2,43 +2,57 @@
 import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
 </script>
 <template>
-  <div>
-    <div id="body">
-      <div id="content">
+  <div class="page-container">
+    <div id="cuerpo">
+      <div id="contenido">
         <div class="header-Peticions">
           <h2>Gestió peticions</h2>
         </div>
-        <div class="container-courses">
-          <br />
-          <listaPeticions></listaPeticions>
-        </div>
+        <br />
+        <listaPeticions></listaPeticions>
       </div>
     </div>
   </div>
 </template>
 <style scoped>
-#body {
-  display: flex;
+.page-container {
+  width: 100%;
+  flex: 1;
 }
 
-#content {
-  margin-left: 50px;
+#cuerpo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 100px);
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+#contenido {
+  margin-left: 4%;
+  margin-right: auto;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
+  width: 95%;
+  max-width: 1400px;
+  padding-right: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
 }
 
-.container-courses {
-  background-color: #FFFFFF;
-  border-radius: 20px;
-  border-style: solid;
-  border-color: #87878748;
-  border-width: 2px;
-  padding: 24px;
-  width: 1000px;
-  max-width: 1050px;
-  margin: 0 auto;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  overflow-y: auto;
-  min-height: 370px;
+.header-Peticions {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.header-Peticions h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
 }
 </style>

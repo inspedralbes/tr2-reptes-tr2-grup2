@@ -3,9 +3,9 @@ import informes from "@/utils/components/admin/informesAdmin.vue";
 </script>
 
 <template>
-  <div>
-    <div id="body">
-      <div id="content">
+  <div class="page-container">
+    <div id="cuerpo">
+      <div id="contenido">
         <informes></informes>
       </div>
     </div>
@@ -13,31 +13,33 @@ import informes from "@/utils/components/admin/informesAdmin.vue";
 </template>
 
 <style scoped>
-#body {
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
+.page-container {
+  width: 100%;
+  flex: 1;
 }
 
-#content {
-  margin-left: 50px;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: lighter;
-  flex: 1;
+#cuerpo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 100px);
+  height: auto;
   overflow-y: auto;
   overflow-x: hidden;
+  width: 100%;
 }
 
-#content::-webkit-scrollbar {
-  width: 6px;
-}
-
-#content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#content::-webkit-scrollbar-thumb {
-  background: #878787;
-  border-radius: 10px;
+#contenido {
+  margin-top: 3%;
+  margin-left: 4%;
+  margin-right: auto;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: lighter;
+  width: 95%;
+  max-width: 1400px;
+  padding-right: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
 }
 </style>

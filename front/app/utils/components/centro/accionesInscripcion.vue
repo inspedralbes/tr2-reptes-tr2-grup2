@@ -219,8 +219,9 @@ const handleDelete = async () => {
 .acciones-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
+  margin-left: 20%;
 }
 
 #btn-update,
@@ -296,20 +297,32 @@ const handleDelete = async () => {
 }
 
 .btn-cancel {
-  background: #e0e0e0;
+  background: #959dd1;
+  border-color: #717ed3;
   padding: 10px 20px;
-  border-radius: 20px;
-  border: none;
+  border-style: solid;
+  border-width: 4px;
+  border-radius: 30px;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 .btn-save {
   background: #3949ab;
+  border-color: #323c7c;
   color: white;
   padding: 10px 20px;
-  border-radius: 20px;
-  border: none;
+  border-style: solid;
+  border-width: 4px;
+  border-radius: 30px;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-cancel:hover,
+.btn-save:hover {
+  background-color: #687dff;
+  border-color: #4956aa;
 }
 
 .input-dynamic {
@@ -317,14 +330,17 @@ const handleDelete = async () => {
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
+
 }
 
 .input-dynamic input {
   flex: 1;
+  border-radius: 30px;
+  padding: 10px;
 }
 
 .btn-remove {
-  background: #ff5252;
+  background: #5762aa;
   color: white;
   border: none;
   width: 25px;
@@ -334,12 +350,19 @@ const handleDelete = async () => {
 }
 
 .btn-add {
-  background: #4caf50;
+  background: #5762aa;
+  border-color: #3949ab;
   color: white;
-  border: none;
   padding: 8px 15px;
-  border-radius: 20px;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 30px;
   cursor: pointer;
   margin-top: 5px;
+  transition: 0.3s;
+}
+
+.btn-add:hover {
+  background-color: #3949ab;
 }
 </style>
