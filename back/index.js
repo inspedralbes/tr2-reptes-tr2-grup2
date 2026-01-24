@@ -20,7 +20,10 @@ import {
   updateUsuariToken,
   getUserId,
 } from "./functions/database/CRUD/Usuaris.js";
-import { getInscripciosByTallerId } from "./functions/database/CRUD/Inscripcions.js";
+import {
+  getInscripciosByTallerId,
+  getInscripcionsStats,
+} from "./functions/database/CRUD/Inscripcions.js";
 import { calcularPuntuacionesDelTaller } from "./functions/database/Criteris.js";
 import {
   getAllCriterisWeights,
@@ -536,6 +539,18 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
   }
 });
 
+app.post("/inscripcions/stats", async (req, res) => {
+  const { inici, fi } = req.body;
+
+  try {
+    const stats = await getInscripcionsStats(inici, fi);
+    res.json(stats);
+  } catch (error) {
+    console.error("Error al obtener estadísticas de inscripcions:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Procesar inscripcions i crear assistències
 // {
 //   "periode": 3
@@ -775,6 +790,7 @@ import {
   deleteTaller,
   getTallersByPeriode,
   addComentariProfe,
+  getTallerStatsGeneral,
 } from "./functions/database/CRUD/Tallers.js";
 
 app.get("/tallers", async (req, res) => {
@@ -792,6 +808,16 @@ app.get("/tallers", async (req, res) => {
   }
 
   res.json(tallers);
+});
+
+app.get("/tallers/stats", async (req, res) => {
+  try {
+    const stats = await getTallerStatsGeneral();
+    res.json(stats);
+  } catch (error) {
+    console.error("Error al obtener estadísticas de tallers:", error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.get("/tallers/:id", async (req, res) => {
