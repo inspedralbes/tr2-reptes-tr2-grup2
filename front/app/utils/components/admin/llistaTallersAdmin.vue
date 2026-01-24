@@ -1,6 +1,7 @@
 <script setup>
 import Swal from "sweetalert2";
 import { ref, onMounted, computed } from "vue";
+import { getImageUrl } from "@/utils/imageUtils";
 import {
   getAllTallers,
   createTaller,
@@ -8,8 +9,6 @@ import {
   getSystemSettings
   , updateTaller, deleteTaller,
 } from "~/services/communicationManagerDatabase";
-
-const BACK_URL = import.meta.env.VITE_URL_BACK;
 
 const tallers = ref([]);
 const mostrarModal = ref(false);
@@ -534,34 +533,8 @@ const actualizarTaller = async () => {
   }
 };
 
-const getImageUrl = (source) => {
-  const DEFAULT_IMG = "/img/centro/image.png";
-
-  if (!source) return DEFAULT_IMG;
-
-  let path = null;
-  if (typeof source === "string") {
-    path = source;
-  } else if (typeof source === "object") {
-    path =
-      source.imatge ||
-      source.image ||
-      source.foto ||
-      source.url ||
-      source.path ||
-      null;
-  }
-
-  if (!path) return DEFAULT_IMG;
-
-  if (path.startsWith("/")) return `${BACK_URL}${path}`;
-
-  // path no empieza por slash -> normalizar
-  return `${BACK_URL}/${path}`;
-};
-
 const onImgError = (e) => {
-  e.target.src = "/img/centro/image.png";
+  e.target.src = getImageUrl(null);
 };
 
 async function confirmarEliminar(id) {

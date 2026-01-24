@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import SelectorAlumnos from "@/utils/components/centro/desplegableAlumnos.vue";
+import { getImageUrl } from "@/utils/imageUtils";
 import {
   getAllTallers,
   getAllInscripcions,
@@ -245,7 +246,7 @@ const processTallers = (data) => {
       id: t.id,
       titulo: t.nom,
       hora: horari.TORNS?.[0]?.HORAINICI || "00:00",
-      imagen: "/img/centro/image.png",
+      imagen: getImageUrl(t),
       descripcio: t.descripcio,
       direccio: t.direccio,
       mesNum: mesNum,
@@ -712,8 +713,8 @@ h3 {
 }
 
 .col-titulo img.img-curso {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 

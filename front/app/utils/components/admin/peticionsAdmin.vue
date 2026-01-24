@@ -54,6 +54,7 @@
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
 // SelectorAlumnos removed from this component to hide numeric dropdown
+import { getImageUrl } from "@/utils/imageUtils";
 import {
   getAllTallers,
   getTallersByPeriode,
@@ -221,7 +222,7 @@ const processTallers = (data) => {
       id: t.id,
       titulo: t.nom,
       hora: horari.TORNS?.[0]?.HORAINICI || "00:00",
-      imagen: "/img/centro/image.png",
+      imagen: getImageUrl(t),
       descripcio: t.descripcio,
       direccio: t.direccio,
       mesNum: parts[1] || null,
