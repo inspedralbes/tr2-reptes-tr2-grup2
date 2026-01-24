@@ -328,6 +328,9 @@ export async function getTallersByPeriode(periodeId) {
 export async function createTaller(formData) {
   const response = await fetch(`${BACK_URL}/tallers`, {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
     body: formData,
   });
 
@@ -348,7 +351,6 @@ export async function updateTaller(formData) {
   const response = await fetch(`${BACK_URL}/tallers`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: formData,
@@ -594,6 +596,7 @@ export async function createHistoric(idInstitucion, periode, assistencia) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
     },
     body: JSON.stringify({
       idInstitucion: parseInt(idInstitucion),

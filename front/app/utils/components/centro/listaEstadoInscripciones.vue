@@ -204,14 +204,38 @@ const processTallers = (data, inscritos) => {
     // Determinar estado de la inscripción
     let estado = "No sol·licitat";
     if (inscripcion) {
-      if (!t.autoritzat) {
-        estado = "Pendent"; // El taller en sí no está autorizado
-      } else if (inscripcion.estat === true) {
-        estado = "Aprovada";
-      } else if (inscripcion.estat === false) {
-        estado = "Denegada";
-      } else {
+      // Primero verificar si la inscripción está autorizada
+      if (!inscripcion.autoritzat) {
         estado = "Pendent";
+      } else {
+        // Buscar el alumno específico para este taller
+        let alumnesArray = [];
+        try {
+          alumnesArray =
+            typeof inscripcion.alumnes === "string"
+              ? JSON.parse(inscripcion.alumnes)
+              : inscripcion.alumnes || [];
+        } catch (e) {
+          alumnesArray = [];
+        }
+
+        const alumneDelTaller = Array.isArray(alumnesArray)
+          ? alumnesArray.find((a) => a.TALLER === t.id)
+          : null;
+
+        if (alumneDelTaller && alumneDelTaller.ESTAT) {
+          // Usar el ESTAT del alumno en el array
+          const estatAlumne = alumneDelTaller.ESTAT.toUpperCase();
+          if (estatAlumne === "APROBADA") {
+            estado = "Aprovada";
+          } else if (estatAlumne === "RECHAZADA" || estatAlumne === "DENEGADA") {
+            estado = "Denegada";
+          } else if (estatAlumne === "PENDIENTE" || estatAlumne === "PENDENT") {
+            estado = "Pendent";
+          } else {
+            estado = "Pendent";
+          }
+        }
       }
     } else {
       // Si no hay inscripción
@@ -252,28 +276,51 @@ const loadData = async () => {
     console.log("DEBUG: Total inscripciones cargadas:", inscripciones.length);
     console.log("DEBUG: Periodo seleccionado:", settings.selectedPeriodeId);
 
-    // Filtrar talleres por período seleccionado
-    const filteredData = rawData.filter(
-      (t) => t.periode === settings.selectedPeriodeId
-    );
-    console.log("DEBUG: Talleres tras filtro periodo:", filteredData.length);
-
-    horaris.value = extractHoraris(filteredData);
-
     const usuarioInstitucionId = localStorage.getItem("user_institution_id");
     console.log("DEBUG: ID institución usuario:", usuarioInstitucionId);
 
+    // Filtrar inscripciones por institución y período
     const inscripcionesFiltridas = [];
+    const tallersInscritos = new Set(); // Set de IDs de talleres inscritos por esta institución
+
     for (const i of inscripciones) {
-      if (usuarioInstitucionId) {
-        if (i.institucio === parseInt(usuarioInstitucionId)) {
-          inscripcionesFiltridas.push(i);
-        }
-      } else {
+      // Filtrar por institución
+      const institucionCoincide = !usuarioInstitucionId || i.institucio === parseInt(usuarioInstitucionId);
+
+      // Filtrar por período seleccionado
+      const periodoCoincide = i.periode === settings.selectedPeriodeId;
+
+      if (institucionCoincide && periodoCoincide) {
         inscripcionesFiltridas.push(i);
+
+        // Extraer IDs de talleres inscritos
+        let alumnesArray = [];
+        try {
+          alumnesArray =
+            typeof i.alumnes === "string" ? JSON.parse(i.alumnes) : i.alumnes;
+        } catch (e) {
+          alumnesArray = [];
+        }
+
+        if (Array.isArray(alumnesArray)) {
+          alumnesArray.forEach((alumne) => {
+            if (alumne.TALLER) {
+              tallersInscritos.add(alumne.TALLER);
+            }
+          });
+        }
       }
     }
-    console.log("DEBUG: Inscripciones filtradas por institución:", inscripcionesFiltridas.length);
+    console.log("DEBUG: Inscripciones filtradas por institución y período:", inscripcionesFiltridas.length);
+    console.log("DEBUG: Talleres inscritos por institución:", tallersInscritos.size);
+
+    // Filtrar talleres por período Y por los que hay inscripción en esta institución
+    const filteredData = rawData.filter(
+      (t) => t.periode === settings.selectedPeriodeId && tallersInscritos.has(t.id)
+    );
+    console.log("DEBUG: Talleres tras filtro periodo e institución:", filteredData.length);
+
+    horaris.value = extractHoraris(filteredData);
 
     inscripcionsMap.value = {};
     for (const i of inscripcionesFiltridas) {
