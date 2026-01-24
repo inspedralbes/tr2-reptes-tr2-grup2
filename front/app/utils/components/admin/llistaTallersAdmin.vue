@@ -116,6 +116,13 @@ const formatHorari = (horariJSON) => {
   }
 };
 
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+  return date.toLocaleDateString('ca-ES', options);
+};
+
 const cargarPeriodes = async () => {
   try {
     periodes.value = await getPeriodes();
@@ -267,8 +274,17 @@ const tallersFiltrados = computed(() => {
   return filtered;
 });
 
+const periodeActiuInfo = computed(() => {
+  const periode = periodes.value.find(p => p.id === selectedPeriodeId.value);
+  if (periode) {
+    return `${formatDate(periode.dataIni)} - ${formatDate(periode.dataFi)}`;
+  }
+  return "";
+});
+
 const abrirModal = () => {
   mostrarModal.value = true;
+  periodeSeleccionado.value = String(selectedPeriodeId.value || "");
 };
 
 const abrirModalEditar = (taller) => {
@@ -801,10 +817,8 @@ async function confirmarEliminar(id) {
           <!-- Periode -->
           <div class="form-group">
             <label for="periode">Periode *</label>
-            <select id="periode" v-model="periodeSeleccionado" required>
-              <option value="">Selecciona un periode</option>
-              <option v-for="n in 6" :key="n" :value="n">{{ n }}</option>
-            </select>
+            <input id="periode" :value="periodeActiuInfo" type="text" disabled />
+            <small style="color: #666; margin-top: 5px">Periode actual</small>
           </div>
 
           <!-- Imatge -->
@@ -926,7 +940,9 @@ async function confirmarEliminar(id) {
             <label for="periode-edit">Periode *</label>
             <select id="periode-edit" v-model="periodeSeleccionado" required>
               <option value="">Selecciona un periode</option>
-              <option v-for="n in 6" :key="n" :value="n">{{ n }}</option>
+              <option v-for="periode in periodes" :key="periode.id" :value="periode.id">
+                {{ formatDate(periode.dataIni) }} - {{ formatDate(periode.dataFi) }}
+              </option>
             </select>
           </div>
 
