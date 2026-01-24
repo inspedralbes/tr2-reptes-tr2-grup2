@@ -29,38 +29,67 @@ const closeMenu = () => {
     <!-- Overlay para cerrar menú en móvil -->
     <div v-if="menuOpen" class="menu-overlay" @click="closeMenu"></div>
 
-    <div id="btns" :class="{ 'active': menuOpen }">
-      <NuxtLink to="/centro/paginaPrincipal-Profes" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Pàgina Principal"
-          :class="{ 'btn-activo': isActive('/centro/paginaPrincipal-Profes') }">
+    <div id="btns" :class="{ active: menuOpen }">
+      <NuxtLink to="/centro" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Pàgina Principal"
+          :class="{ 'btn-activo': isActive('/centro') }"
+        >
           <img src="/img/navBarProfes/home.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
 
-      <NuxtLink to="/centro/paginaInscripcionsTalleres-Profes" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Inscripcions Tallers" :class="{
-          'btn-activo': isActive('/centro/paginaInscripcionsTalleres-Profes'),
-        }">
+      <NuxtLink to="/centro/inscripcionsTallers" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Inscripcions Tallers"
+          :class="{
+            'btn-activo': isActive('/centro/inscripcionsTalleres'),
+          }"
+        >
           <img src="/img/navBarProfes/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/centro/paginaEstatInscripcionsTalleres-Profes" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Estat Inscripcions" :class="{
-          'btn-activo': isActive(
-            '/centro/paginaEstatInscripcionsTalleres-Profes',
-          ),
-        }">
+      <NuxtLink
+        to="/centro/estatInscripcionsTallers"
+        custom
+        v-slot="{ navigate }"
+      >
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Estat Inscripcions"
+          :class="{
+            'btn-activo': isActive('/centro/estatInscripcionsTalleres'),
+          }"
+        >
           <img src="/img/navBarProfes/checkbox.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/centro/paginaTallersFinalitzats-Profes" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Tallers Finalitzats" :class="{
-          'btn-activo': isActive('/centro/paginaTallersFinalitzats-Profes'),
-        }">
+      <NuxtLink to="/centro/tallersFinalitzats" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Tallers Finalitzats"
+          :class="{
+            'btn-activo': isActive('/centro/tallersFinalitzats'),
+          }"
+        >
           <img src="/img/navBarProfes/document-alt.png" alt="" />
         </button>
       </NuxtLink>

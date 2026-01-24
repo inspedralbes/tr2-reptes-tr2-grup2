@@ -31,51 +31,90 @@ const closeMenu = () => {
     <!-- Overlay para cerrar menú en móvil -->
     <div v-if="menuOpen" class="menu-overlay" @click="closeMenu"></div>
 
-    <div id="btns" :class="{ 'active': menuOpen }">
-      <NuxtLink to="/admin/paginaPrincipal-Admin" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Pàgina Principal"
-          :class="{ 'btn-activo': isActive('/admin/paginaPrincipal-Admin') }">
+    <div id="btns" :class="{ active: menuOpen }">
+      <NuxtLink to="/admin" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Pàgina Principal"
+          :class="{ 'btn-activo': isActive('/admin') }"
+        >
           <img src="/img/navBarAdmin/home.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
 
-      <NuxtLink to="/admin/gestioTallers-Admin" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Gestió Tallers"
-          :class="{ 'btn-activo': isActive('/admin/gestioTallers-Admin') }">
+      <NuxtLink to="/admin/gestioTallers" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Gestió Tallers"
+          :class="{ 'btn-activo': isActive('/admin/gestioTallers') }"
+        >
           <img src="/img/navBarAdmin/backpack.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/admin/gestioPeticions-Admin" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Gestió Peticions"
-          :class="{ 'btn-activo': isActive('/admin/gestioPeticions-Admin') }">
+      <NuxtLink to="/admin/gestioPeticions" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Gestió Peticions"
+          :class="{ 'btn-activo': isActive('/admin/gestioPeticions') }"
+        >
           <img src="/img/navBarAdmin/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/admin/gestioCentres-Admin" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Informació Centres"
-          :class="{ 'btn-activo': isActive('/admin/gestioCentres-Admin') }">
+      <NuxtLink to="/admin/gestioCentres" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Informació Centres"
+          :class="{ 'btn-activo': isActive('/admin/gestioCentres') }"
+        >
           <img src="/img/navBarAdmin/academic-cap.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/admin/gestioInformes-Admin" custom v-slot="{ navigate }">
-        <button @click="navigate(); closeMenu()" data-tooltip="Gestió Informes"
-          :class="{ 'btn-activo': isActive('/admin/gestioInformes-Admin') }">
+      <NuxtLink to="/admin/gestioInformes" custom v-slot="{ navigate }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Gestió Informes"
+          :class="{ 'btn-activo': isActive('/admin/gestioInformes') }"
+        >
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
-      <button @click="mostrarModalWeights = true; closeMenu()" title="Configurar criteris">
+      <button
+        @click="
+          mostrarModalWeights = true;
+          closeMenu();
+        "
+        title="Configurar criteris"
+      >
         <i class="fas fa-cog"></i>
       </button>
     </div>
 
-    <GestioWeights v-if="mostrarModalWeights" @close="mostrarModalWeights = false" />
+    <GestioWeights
+      v-if="mostrarModalWeights"
+      @close="mostrarModalWeights = false"
+    />
   </div>
 </template>
 <style>
