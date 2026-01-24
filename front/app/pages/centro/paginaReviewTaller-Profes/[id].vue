@@ -1,22 +1,14 @@
 <template>
-  <Encabezado />
+
   <div id="cuerpo">
-    <navProfes />
+
     <div id="contenido">
       <div v-if="tallerNom" class="content-wrapper">
         <h2>{{ tallerNom }}</h2>
         <div class="comentari-section">
-          <label for="comentari-textarea"
-            >Deixa aquí el teu comentari sobre el taller:</label
-          >
-          <textarea
-            id="comentari-textarea"
-            v-model="comentari"
-            maxlength="300"
-            placeholder="Escriu el teu comentari..."
-            rows="6"
-            class="textarea-style"
-          ></textarea>
+          <label for="comentari-textarea">Deixa aquí el teu comentari sobre el taller:</label>
+          <textarea id="comentari-textarea" v-model="comentari" maxlength="300" placeholder="Escriu el teu comentari..."
+            rows="6" class="textarea-style"></textarea>
           <div class="char-counter">{{ comentari.length }} / 300</div>
           <button @click="guardarComentari" class="btn-guardar">
             Enviar comentari
@@ -87,23 +79,23 @@ onMounted(loadTaller);
 <style scoped>
 #cuerpo {
   display: flex;
-  background-color: #f5f5f5;
   height: calc(100vh - 85px);
   overflow: hidden;
 }
 
 #contenido {
-  margin-top: 30px;
+  margin-top: 40px;
   margin-left: 50px;
   font-family: "Coolvetica";
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   border-radius: 20px;
+  border: 1px solid #87878779;
   padding: 30px;
-  width: 1050px;
+  width: 950px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  height: fit-content;
+  height: 410px;
 }
 
 .content-wrapper h2 {
@@ -125,11 +117,12 @@ label {
 }
 
 .textarea-style {
-  padding: 10px;
+  padding: 20px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-family: inherit;
   font-size: 0.9rem;
+  height: 200px;
   resize: vertical;
 }
 
@@ -140,19 +133,23 @@ label {
 }
 
 .btn-guardar {
-  background-color: #5064cd;
+  background-color: #808bd1;
+  border-color: #5762aa;
   color: white;
   font-weight: 600;
   padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
+  border-style: solid;
+  border-width: 4px;
+  border-radius: 30px;
   cursor: pointer;
   font-size: 0.9rem;
   align-self: flex-start;
 }
 
 .btn-guardar:hover {
-  background-color: #3949ab;
+  transform: translateY(-2px);
+  background-color: #97a0dd;
+  border-color: #6a74b9
 }
 
 .mensaje {

@@ -13,6 +13,7 @@ services:
     command: sh -c "cp .env.DEV .env && npm install && npm run dev"
     volumes:
       - ./front:/usr/src/app
+      - /usr/src/app/node_modules # Evita conflictos de permisos en Windows
     working_dir: /usr/src/app
     ports:
       - 3000:3000
@@ -21,7 +22,6 @@ services:
     environment:
       HOST: 0.0.0.0
       CHOKIDAR_USEPOLLING: "true"
-
   tr2g2-back:
     build:
       dockerfile: ./back/dev.Dockerfile

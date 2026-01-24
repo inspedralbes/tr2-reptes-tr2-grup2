@@ -159,8 +159,7 @@ const guardarSeleccion = () => {
   };
   console.log("Inscripciones aprobadas:", resultado);
   alert(
-    `Guardado: ${
-      idsSeleccionados.length
+    `Guardado: ${idsSeleccionados.length
     } inscripciones con ${alumnosSeleccionados()} alumnos`
   );
 };
@@ -292,10 +291,6 @@ function enviarsInscripciones() {
 
 <template>
   <div id="container">
-    <div v-if="!viendoInscripciones" class="header-lista">
-      <button class="btn-filter-style">Tallers</button>
-      <button class="btn-filter-style">Centres</button>
-    </div>
 
     <div v-if="viendoInscripciones" class="header-inscripciones">
       <button class="btn-volver" @click="volverALista">
@@ -314,10 +309,7 @@ function enviarsInscripciones() {
           <strong>{{ alumnosSeleccionados() }} / {{ placesMax }}</strong>
         </p>
         <div class="progress-bar">
-          <div
-            class="progress-fill"
-            :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"
-          ></div>
+          <div class="progress-fill" :style="{ width: (alumnosSeleccionados() / placesMax) * 100 + '%' }"></div>
         </div>
       </div>
 
@@ -333,33 +325,23 @@ function enviarsInscripciones() {
         </thead>
         <tbody>
           <template v-for="insc in inscripciones" :key="insc.id">
-            <tr
-              :class="{
-                'disabled-row':
-                  !puedeSeleccionar(insc.alumnos) &&
-                  !inscripcionesSeleccionadas[insc.id],
-              }"
-            >
+            <tr :class="{
+              'disabled-row':
+                !puedeSeleccionar(insc.alumnos) &&
+                !inscripcionesSeleccionadas[insc.id],
+            }">
               <td>
-                <input
-                  type="checkbox"
-                  :checked="!!inscripcionesSeleccionadas[insc.id]"
-                  @change="selectInscripcion(insc.id, insc.alumnos)"
-                  :disabled="
-                    !puedeSeleccionar(insc.alumnos) &&
+                <input type="checkbox" :checked="!!inscripcionesSeleccionadas[insc.id]"
+                  @change="selectInscripcion(insc.id, insc.alumnos)" :disabled="!puedeSeleccionar(insc.alumnos) &&
                     !inscripcionesSeleccionadas[insc.id]
-                  "
-                />
+                    " />
               </td>
               <td>{{ insc.institucion }}</td>
               <td>{{ insc.alumnos }}</td>
               <td>
                 <div class="puntuacion-cell">
                   <span class="score">{{ insc.puntuacion }}</span>
-                  <button
-                    class="btn-expandir"
-                    @click="toggleInscripcionExpandida(insc.id)"
-                  >
+                  <button class="btn-expandir" @click="toggleInscripcionExpandida(insc.id)">
                     +
                   </button>
                 </div>
@@ -370,22 +352,16 @@ function enviarsInscripciones() {
             <tr v-if="inscripcionesExpandidas[insc.id]" class="fila-desglose">
               <td colspan="5">
                 <div class="desglose">
-                  <div
-                    class="desglose-item"
-                    v-for="item in insc.aceptadas"
-                    :key="item.criterio"
-                  >
+                  <div class="desglose-item" v-for="item in insc.aceptadas" :key="item.criterio">
                     <span class="criterio">{{ item.criterio }}</span>
-                    <span
-                      :class="[
-                        'puntos',
-                        {
-                          positivo: item.puntos > 0,
-                          negativo: item.puntos < 0,
-                          'no-aplicat': !item.aplicat,
-                        },
-                      ]"
-                    >
+                    <span :class="[
+                      'puntos',
+                      {
+                        positivo: item.puntos > 0,
+                        negativo: item.puntos < 0,
+                        'no-aplicat': !item.aplicat,
+                      },
+                    ]">
                       {{
                         item.aplicat
                           ? (item.puntos > 0 ? "+" : "") + item.puntos
@@ -412,30 +388,18 @@ function enviarsInscripciones() {
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
 
-      <div
-        v-for="seccion in tallersGrouped"
-        :key="seccion.mes"
-        class="seccion-mes"
-      >
+      <div v-for="seccion in tallersGrouped" :key="seccion.mes" class="seccion-mes">
         <h2 class="mes-titulo">{{ seccion.mes }}</h2>
 
-        <div
-          v-for="curso in seccion.cursos"
-          :key="curso.id"
-          class="bloque-curso"
-        >
-          <div
-            class="fila-curso"
-            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
-          >
+        <div v-for="curso in seccion.cursos" :key="curso.id" class="bloque-curso">
+          <div class="fila-curso" :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }">
             <div class="col-titulo">
               <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
             </div>
 
             <div class="col-info">
               <div class="text-info">
-                <span class="texto-titulo">{{ curso.titulo }}</span
-                ><br />
+                <span class="texto-titulo">{{ curso.titulo }}</span><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" alt="icon" />
                   {{ seccion.diaNum }}/{{ getMesNum(seccion.mes) }}
@@ -446,17 +410,10 @@ function enviarsInscripciones() {
             </div>
 
             <button class="btn-detalls" @click="toggleDetalles(curso.id)">
-              <span
-                class="btn-detalls-text"
-                :class="{ rotar: cursoExpandido === curso.id }"
-                >+</span
-              >
+              <span class="btn-detalls-text" :class="{ rotar: cursoExpandido === curso.id }">+</span>
             </button>
 
-            <button
-              class="btn-veure-inscripcions"
-              @click="vereuInscripcions(curso.id, curso.titulo)"
-            >
+            <button class="btn-veure-inscripcions" @click="vereuInscripcions(curso.id, curso.titulo)">
               Veure inscripcions
             </button>
 
@@ -474,7 +431,7 @@ function enviarsInscripciones() {
         </div>
       </div>
     </div>
-    <button class="btn-veure-inscripcions" @click="enviarsInscripciones">
+    <button class="btn-veure-inscripcions enviarsInscripcions" @click="enviarsInscripciones">
       <p>Enviar Les Inscripcions</p>
     </button>
   </div>
@@ -621,10 +578,10 @@ function enviarsInscripciones() {
 }
 
 .btn-detalls {
-  background-color: #c5cae9;
+  background-color: #C5CAE9;
   margin-left: -100px;
   z-index: 1;
-  width: 140px;
+  width: 150px;
   height: 110px;
   border: none;
   border-radius: 200px;
@@ -636,25 +593,49 @@ function enviarsInscripciones() {
 
 .btn-detalls:hover {
   background-color: #d2d7f7;
-  width: 150px;
+  width: 160px;
 }
 
 .btn-veure-inscripcions {
-  background-color: #5064cd;
-  color: white;
+  background-color: #808bd1;
+  color: 1D1D1D;
   font-weight: 600;
   font-size: 14px;
   padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #5762aa;
+  border-radius: 60px;
   cursor: pointer;
   margin-left: 40px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-veure-inscripcions:hover {
-  background-color: #3949ab;
+  background-color: #959fdd;
+  border-color: #959fdd;
   transform: translateY(-2px);
+}
+
+
+.btn-veure-inscripcions.enviarsInscripcions {
+  margin-top: 5%;
+  background-color: #808bd1;
+  color: 1D1D1D;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #5762aa;
+  border-radius: 60px;
+  cursor: pointer;
+  margin-left: 40px;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn-detalls-text {
@@ -677,53 +658,51 @@ function enviarsInscripciones() {
 }
 
 .titulo-inscripciones {
-  color: #283593;
-  font-size: 2rem;
+  color: #2c2c2c;
+  font-size: 1.8rem;
   font-weight: 900;
-  margin-bottom: 30px;
-  padding-left: 70px;
+  margin-bottom: 20px;
+  padding-left: 10px;
 }
 
 .header-inscripciones {
   display: flex;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 30px;
+  padding: 5px 20px;
+  border-radius: 20px;
 }
 
 .btn-volver {
-  background-color: #7986cb;
+  background-color: #9fa8da00;
+  border-color: transparent;
   color: #1f1f1f;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 18px;
-  width: 45px;
-  height: 45px;
-  padding: 0;
-  border: 2px solid #3949ab70;
-  border-radius: 50%;
+  width: 50px;
+  height: 50px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .btn-volver:hover {
-  background-color: #aab4e9;
-  transform: translateY(-1px);
+  background-color: transparent;
+  border-color: transparent;
+  transform: translateY(-2px);
 }
 
 /* --- DESPLEGABLE DE INFORMACIÓN --- */
 .info-desplegable {
   margin-left: 153px;
-  background-color: #f5f6ff;
-  width: 34%;
+  background-color: #D5DAFB;
+  width: 35.5%;
   margin-top: -60px;
-  padding: 50px 20px 15px 40px;
+  padding: 70px 20px 15px 40px;
   border-radius: 0 0 30px 30px;
-  border: 1px solid #c5cae9;
   z-index: 0;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
@@ -769,62 +748,64 @@ function enviarsInscripciones() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px 0;
 }
 
 .info-plazas {
-  margin-bottom: 20px;
-  padding: 0 20px;
+  padding: 20px 25px;
+  border-bottom: 2px solid #3948ab2c;
 }
 
 .info-plazas p {
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  color: #3949ab;
-  font-weight: 600;
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #2c2c2c;
+  font-weight: 700;
 }
 
 .progress-bar {
   width: 100%;
-  height: 8px;
-  background-color: #e0e0e0;
-  border-radius: 4px;
+  height: 12px;
+  background-color: #e8ebf9;
+  border-radius: 20px;
   overflow: hidden;
+  border: 2px solid #b0b7e3;
 }
 
 .progress-fill {
   height: 100%;
-  background-color: #5064cd;
+  background: linear-gradient(90deg, #5064cd 0%, #7986cb 100%);
   transition: width 0.3s ease;
+  border-radius: 20px;
 }
 
 /* --- TABLA DE INSCRIPCIONES --- */
 .tabla-inscripciones {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0 8px;
   margin-bottom: 20px;
   font-size: 0.9rem;
 }
 
 .tabla-inscripciones thead {
-  background-color: #f5f6ff;
-  border-bottom: 2px solid #7986cb;
+  background-color: transparent;
 }
 
 .tabla-inscripciones th {
   padding: 12px 15px;
+  gap: 30px;
   text-align: left;
   font-weight: 600;
   color: #3949ab;
+  background-color: transparent;
 }
 
 .tabla-inscripciones tbody tr {
-  border-bottom: 1px solid #e0e0e0;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
-.tabla-inscripciones tbody tr:hover {
-  background-color: #f9f9ff;
+.tabla-inscripciones tbody tr:hover td {
+  background-color: #e8ebf9;
 }
 
 .tabla-inscripciones tbody tr.disabled-row {
@@ -833,13 +814,23 @@ function enviarsInscripciones() {
 }
 
 .tabla-inscripciones td {
-  padding: 12px 15px;
+  padding: 15px 18px;
+  background-color: #D5DAFB;
+  border: none;
+}
+
+.tabla-inscripciones td:first-child {
+  border-radius: 30px 0 0 30px;
+}
+
+.tabla-inscripciones td:last-child {
+  border-radius: 0 30px 30px 0;
 }
 
 .tabla-inscripciones input[type="checkbox"] {
   cursor: pointer;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   accent-color: #5064cd;
 }
 
@@ -847,72 +838,80 @@ function enviarsInscripciones() {
 .puntuacion-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .score {
-  font-weight: 600;
-  color: #3949ab;
-  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  font-size: 1rem;
 }
 
 .btn-expandir {
-  background: none;
-  border: none;
-  color: #7986cb;
-  font-size: 16px;
+  background-color: #9fa8da;
+  border: 3px solid #717ed3;
+  color: #1f1f1f;
+  font-size: 18px;
+  font-weight: bold;
   cursor: pointer;
   padding: 0;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .btn-expandir:hover {
-  background-color: #e8eaf6;
+  background-color: #7986cb;
+  border-color: #5064cd;
   transform: scale(1.1);
 }
 
 /* --- DESGLOSE DE CRITERIOS --- */
 .fila-desglose {
-  background-color: #f5f6ff;
+  background-color: transparent;
 }
 
 .fila-desglose td {
-  padding: 15px !important;
+  padding: 0 18px 15px 18px !important;
+  background-color: #c5cae9 !important;
+  border-radius: 0 0 30px 30px !important;
 }
 
 .desglose {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
+  padding: 15px;
+  background-color: #D5DAFB;
+  border-radius: 20px;
 }
 
 .desglose-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
+  padding: 10px 15px;
   background-color: white;
-  border-radius: 4px;
-  border-left: 3px solid #7986cb;
+  border-radius: 15px;
+  border-left: 4px solid #7986cb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .criterio {
   font-size: 0.85rem;
-  color: #3949ab;
-  font-weight: 500;
+  color: #2c2c2c;
+  font-weight: 600;
 }
 
 .puntos {
   font-size: 0.85rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 3px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
 }
 
 .puntos.positivo {
@@ -936,24 +935,28 @@ function enviarsInscripciones() {
   justify-content: center;
   gap: 15px;
   padding: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 2px solid #3948ab2c;
+  margin-top: 10px;
 }
 
 .btn-guardar {
-  background-color: #5064cd;
+  background-color: #4654af;
   color: white;
   font-weight: 600;
-  font-size: 14px;
-  padding: 10px 30px;
-  border: none;
-  border-radius: 8px;
+  font-size: 16px;
+  padding: 12px 40px;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #303869;
+  border-radius: 40px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-guardar:hover {
-  background-color: #3949ab;
+  background-color: #5064cd;
+  border-color: #424d91;
   transform: translateY(-2px);
 }
 </style>
