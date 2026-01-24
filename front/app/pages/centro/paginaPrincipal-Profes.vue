@@ -170,10 +170,13 @@ onMounted(() => {
   margin-top: 30px;
   margin-left: 50px;
   font-family: "Coolvetica";
-  background-color: #e0e0e0;
+  background-color: #FFFFFF;
   border-radius: 20px;
+  border-style: solid;
+  border-color: #87878748;
+  border-width: 2px;
   padding: 30px;
-  width: 1050px;
+  width: 1000px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   height: 410px;
   display: flex;

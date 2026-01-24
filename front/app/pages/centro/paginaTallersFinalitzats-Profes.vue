@@ -34,14 +34,15 @@ import listaFinalizados from "@/utils/components/centro/listaFinalizados.vue";
 
 #contenido {
   margin-top: 30px;
-  margin-left: 40px;
+
   font-family: "Coolvetica";
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   border-radius: 20px;
+  border: 1px solid #87878779;
   padding: 30px;
   width: 950px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  height: 330px;
+  height: 325px;
   display: flex;
   flex-direction: column;
 }

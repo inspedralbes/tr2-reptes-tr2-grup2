@@ -22,6 +22,7 @@ import llistaTallers from "@/utils/components/centro/listaInscripciones.vue";
   display: flex;
   height: calc(100vh - 85px);
   overflow: hidden;
+  font-size: 20px;
 }
 
 #contenido {

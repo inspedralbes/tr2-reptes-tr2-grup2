@@ -123,31 +123,16 @@ const handleDelete = async () => {
     <button @click="handleDelete" id="btn-delete">Eliminar</button>
 
     <!-- Modal Editar -->
-    <div
-      v-if="showEditModal"
-      class="modal-overlay"
-      @click.self="showEditModal = false"
-    >
+    <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
       <div class="modal-content">
         <h2>Actualitzar inscripció</h2>
         <form @submit.prevent="handleUpdate">
           <div class="form-section">
             <h3>Alumnes</h3>
-            <div
-              v-for="(n, i) in formIscripcio.alumnesAfegir"
-              :key="i"
-              class="input-dynamic"
-            >
-              <input
-                v-model="formIscripcio.alumnesAfegir[i]"
-                placeholder="Nom alumne"
-              />
-              <button
-                type="button"
-                @click="removeAlumneUpdate(i)"
-                v-if="formIscripcio.alumnesAfegir.length > 1"
-                class="btn-remove"
-              >
+            <div v-for="(n, i) in formIscripcio.alumnesAfegir" :key="i" class="input-dynamic">
+              <input v-model="formIscripcio.alumnesAfegir[i]" placeholder="Nom alumne" />
+              <button type="button" @click="removeAlumneUpdate(i)" v-if="formIscripcio.alumnesAfegir.length > 1"
+                class="btn-remove">
                 ×
               </button>
             </div>
@@ -158,21 +143,10 @@ const handleDelete = async () => {
           <hr />
           <div class="form-section">
             <h3>Professors</h3>
-            <div
-              v-for="(n, i) in formIscripcio.profesAfegir"
-              :key="i"
-              class="input-dynamic"
-            >
-              <input
-                v-model="formIscripcio.profesAfegir[i]"
-                placeholder="Nom profe"
-              />
-              <button
-                type="button"
-                @click="removeProfeUpdate(i)"
-                v-if="formIscripcio.profesAfegir.length > 1"
-                class="btn-remove"
-              >
+            <div v-for="(n, i) in formIscripcio.profesAfegir" :key="i" class="input-dynamic">
+              <input v-model="formIscripcio.profesAfegir[i]" placeholder="Nom profe" />
+              <button type="button" @click="removeProfeUpdate(i)" v-if="formIscripcio.profesAfegir.length > 1"
+                class="btn-remove">
                 ×
               </button>
             </div>
@@ -181,11 +155,7 @@ const handleDelete = async () => {
             </button>
           </div>
           <div class="modal-buttons">
-            <button
-              type="button"
-              @click="showEditModal = false"
-              class="btn-cancel"
-            >
+            <button type="button" @click="showEditModal = false" class="btn-cancel">
               Cancel·lar
             </button>
             <button type="submit" class="btn-save">Guardar</button>
@@ -195,31 +165,16 @@ const handleDelete = async () => {
     </div>
 
     <!-- Modal Crear -->
-    <div
-      v-if="showInscripcioModal"
-      class="modal-overlay"
-      @click.self="showInscripcioModal = false"
-    >
+    <div v-if="showInscripcioModal" class="modal-overlay" @click.self="showInscripcioModal = false">
       <div class="modal-content modal-large">
         <h2>Nova Inscripció</h2>
         <form @submit.prevent="handleCreateInscripcio">
           <div class="form-section">
             <h3>Alumnes</h3>
-            <div
-              v-for="(n, i) in formCrear.alumnesAfegir"
-              :key="i"
-              class="input-dynamic"
-            >
-              <input
-                v-model="formCrear.alumnesAfegir[i]"
-                placeholder="Nom alumne"
-              />
-              <button
-                type="button"
-                @click="removeAlumne(i)"
-                v-if="formCrear.alumnesAfegir.length > 1"
-                class="btn-remove"
-              >
+            <div v-for="(n, i) in formCrear.alumnesAfegir" :key="i" class="input-dynamic">
+              <input v-model="formCrear.alumnesAfegir[i]" placeholder="Nom alumne" />
+              <button type="button" @click="removeAlumne(i)" v-if="formCrear.alumnesAfegir.length > 1"
+                class="btn-remove">
                 ×
               </button>
             </div>
@@ -230,21 +185,9 @@ const handleDelete = async () => {
           <hr />
           <div class="form-section">
             <h3>Professors</h3>
-            <div
-              v-for="(n, i) in formCrear.profesAfegir"
-              :key="i"
-              class="input-dynamic"
-            >
-              <input
-                v-model="formCrear.profesAfegir[i]"
-                placeholder="Nom profe"
-              />
-              <button
-                type="button"
-                @click="removeProfe(i)"
-                v-if="formCrear.profesAfegir.length > 1"
-                class="btn-remove"
-              >
+            <div v-for="(n, i) in formCrear.profesAfegir" :key="i" class="input-dynamic">
+              <input v-model="formCrear.profesAfegir[i]" placeholder="Nom profe" />
+              <button type="button" @click="removeProfe(i)" v-if="formCrear.profesAfegir.length > 1" class="btn-remove">
                 ×
               </button>
             </div>
@@ -253,11 +196,7 @@ const handleDelete = async () => {
             </button>
           </div>
           <div class="modal-buttons">
-            <button
-              type="button"
-              @click="showInscripcioModal = false"
-              class="btn-cancel"
-            >
+            <button type="button" @click="showInscripcioModal = false" class="btn-cancel">
               Cancel·lar
             </button>
             <button type="submit" class="btn-save">Inscriure</button>
@@ -271,7 +210,9 @@ const handleDelete = async () => {
 <style scoped>
 .acciones-wrapper {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
 }
 
 #btn-inscripcion,
@@ -281,10 +222,12 @@ const handleDelete = async () => {
   color: #141414;
   border: 4px solid #717ed3;
   border-radius: 20px;
-  padding: 5px 15px;
+  padding: 5px 10px;
   cursor: pointer;
   font-family: "Coolvetica";
   transition: 0.3s;
+  width: 140px;
+  text-align: center;
 }
 
 #btn-inscripcion:hover,

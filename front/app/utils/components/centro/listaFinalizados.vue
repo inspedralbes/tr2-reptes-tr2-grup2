@@ -12,8 +12,10 @@ function processTallers(allTallers, allInscripcions) {
   // 1. Obtener ID de institución
   const rawId = localStorage.getItem("user_institution_id");
   const myInstId = parseInt(rawId);
+  console.log("DEBUG Finalizados: ID Institución:", myInstId);
 
   if (!myInstId) {
+    console.log("DEBUG Finalizados: No hay ID de institución, retornando vacío.");
     return [];
   }
 
@@ -25,10 +27,12 @@ function processTallers(allTallers, allInscripcions) {
       misTalleresIds.push(inscripcion.tallerId);
     }
   }
+  console.log("DEBUG Finalizados: IDs de talleres inscritos:", misTalleresIds);
 
   // 3. Filtrar talleres: Que sean míos Y que ya hayan pasado
   const resultado = [];
   const hoy = new Date();
+  console.log("DEBUG Finalizados: Fecha hoy:", hoy);
 
   for (let j = 0; j < allTallers.length; j++) {
     const taller = allTallers[j];
@@ -44,6 +48,7 @@ function processTallers(allTallers, allInscripcions) {
 
     // Si no es mío, pasamos al siguiente taller inmediatamente
     if (!esMio) {
+      // console.log(`DEBUG Finalizados: Taller ${taller.id} no es mío.`);
       continue;
     }
 
@@ -76,14 +81,22 @@ function processTallers(allTallers, allInscripcions) {
         fechaTaller = new Date(year, month, day);
       }
     } catch (e) {
+      console.warn("DEBUG Finalizados: Error parsing dates for taller", taller.id);
       continue;
     }
 
+    /* console.log(
+      `DEBUG Finalizados: Taller ${taller.id} (${taller.nom}) Fecha: ${fechaTaller}`
+    ); */
+
     if (fechaTaller && fechaTaller < hoy) {
       resultado.push(taller);
+    } else {
+      // console.log(`DEBUG Finalizados: Taller ${taller.id} es futuro o hoy.`);
     }
   }
 
+  console.log("DEBUG Finalizados: Resultado final:", resultado.length);
   return resultado;
 }
 
@@ -117,11 +130,7 @@ onMounted(async () => {
     </div>
 
     <div v-else class="grid-tallers">
-      <div
-        v-for="taller in tallersFinalitzats"
-        :key="taller.id"
-        class="card-taller"
-      >
+      <div v-for="taller in tallersFinalitzats" :key="taller.id" class="card-taller">
         <div class="card-header">
           <h4>{{ taller.nom }}</h4>
         </div>
@@ -147,6 +156,7 @@ onMounted(async () => {
 .lista-container::-webkit-scrollbar {
   width: 6px;
 }
+
 .lista-container::-webkit-scrollbar-thumb {
   background: #878787;
   border-radius: 10px;
@@ -162,15 +172,12 @@ onMounted(async () => {
 .card-taller {
   background: white;
   border-radius: 15px;
+  border: 1px solid #87878779;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.2s;
   display: flex;
   flex-direction: column;
-}
-
-.card-taller:hover {
-  transform: translateY(-5px);
 }
 
 .card-header {
@@ -201,7 +208,7 @@ onMounted(async () => {
 .ubicacion {
   font-size: 0.85rem;
   color: #888;
-  margin: 0;
+  margin-bottom: 5px;
 }
 
 .loading,
@@ -211,12 +218,22 @@ onMounted(async () => {
   font-size: 1.2rem;
   color: #666;
 }
+
 button {
-  background-color: #5c6bc0;
-  color: white;
-  border: none;
+  background-color: #9FACFE;
+  border-color: #717ed39c;
+  color: #1d1d1d;
+  font-weight: 600;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-style: solid;
+  border-width: 4px;
+  border-radius: 30px;
   cursor: pointer;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  background-color: #7f8bdd;
+  border-color: #5d69bd;
 }
 </style>

@@ -28,14 +28,17 @@ import listaPeticions from "@/utils/components/admin/peticionsAdmin.vue";
 }
 
 .container-courses {
-  background-color: #f5f5f5;
+  background-color: #FFFFFF;
   border-radius: 20px;
+  border-style: solid;
+  border-color: #87878748;
+  border-width: 2px;
   padding: 24px;
-  width: 1050px;
+  width: 1000px;
   max-width: 1050px;
   margin: 0 auto;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
-  max-height: 550px;
+  min-height: 370px;
 }
 </style>
