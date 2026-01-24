@@ -14,9 +14,23 @@ const handleLogout = () => {
 </script>
 <template>
   <header>
-    <img src="/assets/img/encabezado/consorci-logo.png" alt="Logo Consorci" id="logo-img" />
-    <img src="/assets/img/encabezado/consorci-nombre.png" alt="Nombre Consorci" id="nombre-img" />
-    <img v-if="!isHome" src="/img/log_out.png" alt="Log Out" id="logout-img" @click="handleLogout" />
+    <img
+      src="/assets/img/encabezado/consorci-logo.png"
+      alt="Logo Consorci"
+      id="logo-img"
+    />
+    <img
+      src="/assets/img/encabezado/consorci-nombre.png"
+      alt="Nombre Consorci"
+      id="nombre-img"
+    />
+    <img
+      v-if="!isHome"
+      src="/img/log_out.png"
+      alt="Log Out"
+      id="logout-img"
+      @click="handleLogout"
+    />
   </header>
 </template>
 <style scoped>
