@@ -9,6 +9,7 @@ import {
   updateTaller,
   getAllInstitucions,
 } from "@/services/communicationManagerDatabase";
+import Swal from "sweetalert2";
 
 //ejemplo para ver esta pagina: http://localhost:3000/Tallerista/1/2
 //teneis que tener datos que corresponden a esos ids en la base de datos
@@ -46,14 +47,27 @@ const horariParsed = computed(() => {
 
 const formatDia = (diaStr) => {
   const data = new Date(diaStr);
-  const opcions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+  const opcions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
   return data.toLocaleDateString("ca-ES", opcions);
 };
 
 const getInfoTorn = (diaStr) => {
   if (!horariParsed.value || !horariParsed.value.TORNS) return "";
   const data = new Date(diaStr);
-  const diesSetmana = ["Diumenge", "Dilluns", "Dimarts", "Dimecres", "Dijous", "Divendres", "Dissabte"];
+  const diesSetmana = [
+    "Diumenge",
+    "Dilluns",
+    "Dimarts",
+    "Dimecres",
+    "Dijous",
+    "Divendres",
+    "Dissabte",
+  ];
   const diaNom = diesSetmana[data.getDay()];
   const torn = horariParsed.value.TORNS.find((t) => t.DIA === diaNom);
   if (torn) {
@@ -122,7 +136,8 @@ const tancarModal = () => {
 };
 
 const toggleAssistenciaAlumne = (index) => {
-  alumnesDelDia.value[index].ASSISTENCIA = !alumnesDelDia.value[index].ASSISTENCIA;
+  alumnesDelDia.value[index].ASSISTENCIA =
+    !alumnesDelDia.value[index].ASSISTENCIA;
   // Si marca que ha assistit, treure justificat
   if (alumnesDelDia.value[index].ASSISTENCIA) {
     alumnesDelDia.value[index].JUSTIFICAT = false;
@@ -132,13 +147,15 @@ const toggleAssistenciaAlumne = (index) => {
 // Canviar justificat d'un alumne (només si no ha assistit)
 const toggleJustificatAlumne = (index) => {
   if (!alumnesDelDia.value[index].ASSISTENCIA) {
-    alumnesDelDia.value[index].JUSTIFICAT = !alumnesDelDia.value[index].JUSTIFICAT;
+    alumnesDelDia.value[index].JUSTIFICAT =
+      !alumnesDelDia.value[index].JUSTIFICAT;
   }
 };
 
 // Canviar assistència d'un professor
 const toggleAssistenciaProfe = (index) => {
-  professorsDelDia.value[index].ASSISTENCIA = !professorsDelDia.value[index].ASSISTENCIA;
+  professorsDelDia.value[index].ASSISTENCIA =
+    !professorsDelDia.value[index].ASSISTENCIA;
   if (professorsDelDia.value[index].ASSISTENCIA) {
     professorsDelDia.value[index].JUSTIFICAT = false;
   }
@@ -147,7 +164,8 @@ const toggleAssistenciaProfe = (index) => {
 // Canviar justificat d'un professor
 const toggleJustificatProfe = (index) => {
   if (!professorsDelDia.value[index].ASSISTENCIA) {
-    professorsDelDia.value[index].JUSTIFICAT = !professorsDelDia.value[index].JUSTIFICAT;
+    professorsDelDia.value[index].JUSTIFICAT =
+      !professorsDelDia.value[index].JUSTIFICAT;
   }
 };
 
@@ -158,18 +176,18 @@ const guardarAssistencia = async () => {
   guardant.value = true;
   try {
     // Preparar arrays sense ID i convertir el nom de institució back a ID
-    const alumnesParaGuardar = alumnesDelDia.value.map(a => ({
+    const alumnesParaGuardar = alumnesDelDia.value.map((a) => ({
       NOM: a.NOM,
-      INSTITUT: typeof a.INSTITUT === 'string' ? INSTITUT_USUARIO : a.INSTITUT,
+      INSTITUT: typeof a.INSTITUT === "string" ? INSTITUT_USUARIO : a.INSTITUT,
       ASSISTENCIA: a.ASSISTENCIA,
-      JUSTIFICAT: a.JUSTIFICAT
+      JUSTIFICAT: a.JUSTIFICAT,
     }));
 
-    const profsParaGuardar = professorsDelDia.value.map(p => ({
+    const profsParaGuardar = professorsDelDia.value.map((p) => ({
       NOM: p.NOM,
-      INSTITUT: typeof p.INSTITUT === 'string' ? INSTITUT_USUARIO : p.INSTITUT,
+      INSTITUT: typeof p.INSTITUT === "string" ? INSTITUT_USUARIO : p.INSTITUT,
       ASSISTENCIA: p.ASSISTENCIA,
-      JUSTIFICAT: p.JUSTIFICAT
+      JUSTIFICAT: p.JUSTIFICAT,
     }));
 
     const dataToUpdate = {
@@ -181,16 +199,19 @@ const guardarAssistencia = async () => {
     await updateAssistencia(dataToUpdate);
 
     // Actualitzar la llista local
-    const index = assistencies.value.findIndex((a) => a.id === diaSeleccionat.value.id);
+    const index = assistencies.value.findIndex(
+      (a) => a.id === diaSeleccionat.value.id,
+    );
     if (index !== -1) {
       assistencies.value[index].llista_alumnes = dataToUpdate.llista_alumnes;
-      assistencies.value[index].llista_professors = dataToUpdate.llista_professors;
+      assistencies.value[index].llista_professors =
+        dataToUpdate.llista_professors;
     }
 
     // Guardar el comentari del tallerista
     if (comentari.value !== (taller.value?.comentari_tallerista || "")) {
       await updateTaller(TALLER_ID, {
-        comentari_tallerista: comentari.value
+        comentari_tallerista: comentari.value,
       });
       // Actualizar el taller localmente
       if (taller.value) {
@@ -201,7 +222,11 @@ const guardarAssistencia = async () => {
     tancarModal();
   } catch (err) {
     console.error("Error al guardar assistència:", err);
-    alert("Error al guardar l'assistència");
+    Swal.fire({
+      icon: "error",
+      title: "Error al guardar l'assistència",
+      confirmButtonText: "Tancar",
+    });
   } finally {
     guardant.value = false;
   }
@@ -214,16 +239,24 @@ const guardarComentari = async () => {
   try {
     // Guardar el comentari del tallerista
     await updateTaller(TALLER_ID, {
-      comentari_tallerista: comentari.value
+      comentari_tallerista: comentari.value,
     });
     // Actualizar el taller localmente
     if (taller.value) {
       taller.value.comentari_tallerista = comentari.value;
     }
-    alert("Comentari guardat correctament!");
+    Swal.fire({
+      icon: "success",
+      title: "Comentari guardat correctament!",
+      confirmButtonText: "Tancar",
+    });
   } catch (err) {
     console.error("Error al guardar comentari:", err);
-    alert("Error al guardar el comentari");
+    Swal.fire({
+      icon: "error",
+      title: "Error al guardar el comentari",
+      confirmButtonText: "Tancar",
+    });
   }
 };
 
@@ -240,7 +273,7 @@ onMounted(async () => {
 
     // Obtenir institucions per mapareig
     const listaInst = await getAllInstitucions();
-    listaInst.forEach(inst => {
+    listaInst.forEach((inst) => {
       instMap.value[inst.id] = inst.nom;
     });
 
@@ -249,7 +282,6 @@ onMounted(async () => {
 
     // Obtenir assistències del taller
     assistencies.value = await getAssistenciesByTallerId(TALLER_ID);
-
   } catch (err) {
     console.error("Error carregant dades:", err);
     error.value = err.message;
@@ -287,8 +319,12 @@ onMounted(async () => {
         </div>
 
         <div v-else class="dies-container">
-          <div v-for="assistencia in assistencies" :key="assistencia.id" class="dia-item"
-            @click="obrirModal(assistencia)">
+          <div
+            v-for="assistencia in assistencies"
+            :key="assistencia.id"
+            class="dia-item"
+            @click="obrirModal(assistencia)"
+          >
             <div class="dia-info">
               <span class="dia-data">{{ formatDia(assistencia.dia) }}</span>
               <span class="dia-horari">{{ getInfoTorn(assistencia.dia) }}</span>
@@ -299,8 +335,12 @@ onMounted(async () => {
         <!-- Bloc de comentaris -->
         <div class="comentaris-section">
           <h3>Comentari sobre la sessió</h3>
-          <textarea v-model="comentari" placeholder="Afegeix comentaris sobre el taller (màxim 300 caràcters)"
-            maxlength="300" class="textarea-comentari"></textarea>
+          <textarea
+            v-model="comentari"
+            placeholder="Afegeix comentaris sobre el taller (màxim 300 caràcters)"
+            maxlength="300"
+            class="textarea-comentari"
+          ></textarea>
           <div class="char-counter">{{ comentari.length }}/300</div>
           <div class="comentari-actions">
             <button class="btn-guardar-comentari" @click="guardarComentari">
@@ -316,7 +356,10 @@ onMounted(async () => {
   <div v-if="mostrarModal" class="modal-overlay" @click.self="tancarModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Assistència - {{ diaSeleccionat ? formatDia(diaSeleccionat.dia) : "" }}</h3>
+        <h3>
+          Assistència -
+          {{ diaSeleccionat ? formatDia(diaSeleccionat.dia) : "" }}
+        </h3>
         <button class="btn-tancar" @click="tancarModal">✕</button>
       </div>
 
@@ -338,11 +381,19 @@ onMounted(async () => {
                 <td>{{ alumne.NOM }}</td>
                 <td>{{ alumne.INSTITUT }}</td>
                 <td>
-                  <input type="checkbox" :checked="alumne.ASSISTENCIA" @change="toggleAssistenciaAlumne(index)" />
+                  <input
+                    type="checkbox"
+                    :checked="alumne.ASSISTENCIA"
+                    @change="toggleAssistenciaAlumne(index)"
+                  />
                 </td>
                 <td>
-                  <input type="checkbox" :checked="alumne.JUSTIFICAT" :disabled="alumne.ASSISTENCIA"
-                    @change="toggleJustificatAlumne(index)" />
+                  <input
+                    type="checkbox"
+                    :checked="alumne.JUSTIFICAT"
+                    :disabled="alumne.ASSISTENCIA"
+                    @change="toggleJustificatAlumne(index)"
+                  />
                 </td>
               </tr>
             </tbody>
@@ -367,11 +418,19 @@ onMounted(async () => {
                 <td>{{ profe.NOM }}</td>
                 <td>{{ profe.INSTITUT }}</td>
                 <td>
-                  <input type="checkbox" :checked="profe.ASSISTENCIA" @change="toggleAssistenciaProfe(index)" />
+                  <input
+                    type="checkbox"
+                    :checked="profe.ASSISTENCIA"
+                    @change="toggleAssistenciaProfe(index)"
+                  />
                 </td>
                 <td>
-                  <input type="checkbox" :checked="profe.JUSTIFICAT" :disabled="profe.ASSISTENCIA"
-                    @change="toggleJustificatProfe(index)" />
+                  <input
+                    type="checkbox"
+                    :checked="profe.JUSTIFICAT"
+                    :disabled="profe.ASSISTENCIA"
+                    @change="toggleJustificatProfe(index)"
+                  />
                 </td>
               </tr>
             </tbody>
@@ -382,13 +441,16 @@ onMounted(async () => {
 
       <div class="modal-footer">
         <button class="btn-cancelar" @click="tancarModal">Cancel·lar</button>
-        <button class="btn-guardar" @click="guardarAssistencia" :disabled="guardant">
+        <button
+          class="btn-guardar"
+          @click="guardarAssistencia"
+          :disabled="guardant"
+        >
           {{ guardant ? "Guardant..." : "Guardar" }}
         </button>
       </div>
     </div>
   </div>
-
 </template>
 
 <style scoped>
@@ -465,7 +527,6 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   padding: 20px 30px;
-
 }
 
 .modal-header h3 {

@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import Swal from "sweetalert2";
 import Encabezado from "@/layouts/encabezado.vue";
 import { loginUsuari } from "~/services/communicationManagerDatabase";
 
@@ -12,7 +13,12 @@ const cargando = ref(false);
 async function handleLogin() {
   if (cargando.value) return;
   if (!input_email.value || !input_pass.value) {
-    alert("Si us plau, introdueix el teu email i la contrasenya.");
+    Swal.fire({
+      icon: "error",
+      title: "Login incomplet",
+      text: "Omple el formulari amb el teu email i contrasenya.",
+      confirmButtonText: "Tornar-hi",
+    });
     return;
   }
 
@@ -31,17 +37,29 @@ async function handleLogin() {
       localStorage.setItem("user_email", data.email);
       localStorage.setItem("user_institution_id", data.institucio || "");
       localStorage.setItem("user_role", data.rol);
-      alert("Login exitós! Benvingut/da.");
+      Swal.fire({
+        icon: "success",
+        title: "Éxit",
+        text: "Login correcte",
+        confirmButtonText: "Accedir",
+      });
       navigateTo(setPath(data.rol));
     } else {
-      alert(
-        data.error ||
-          "Credencials incorrectes. Revisa el teu email i contrasenya.",
-      );
+      Swal.fire({
+        icon: "error",
+        title: "Credencials incorrectes",
+        text: "Revisa el teu email i contrasenya." || data.error,
+        confirmButtonText: "Tornar-hi",
+      });
     }
   } catch (error) {
     console.error("Error en la conexión:", error);
-    alert("No s'ha pogut connectar amb el servidor. Intenta-ho més tard.");
+    Swal.fire({
+      icon: "error",
+      title: "Problemes amb el servidor",
+      text: error.message,
+      confirmButtonText: "Tornar-hi",
+    });
   } finally {
     cargando.value = false;
   }
