@@ -938,10 +938,11 @@ app.get("/tallers/:id/inscripcions", async (req, res) => {
 });
 
 app.get("/tallers/:id/inscripcions-ordenadas", async (req, res) => {
-  const token = req.headers.authorization.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ error: "Token requerit" });
-  }
+  // Pa afuera, que no hace falta el token aquí
+  // const token = req.headers.authorization.split(" ")[1];
+  // if (!token) {
+  //   return res.status(401).json({ error: "Token requerit" });
+  // }
   try {
     const { id } = req.params;
     const resultado = await calcularPuntuacionesDelTaller(id);
