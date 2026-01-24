@@ -17,7 +17,6 @@ const route = useRoute();
 
 // Obtener IDs de la URL
 const TALLER_ID = parseInt(route.params.tallerId) || 1;
-const INSTITUT_USUARIO = parseInt(route.params.institut) || 1;
 
 // Estats reactius
 const taller = ref(null);
@@ -72,16 +71,15 @@ const obrirModal = (assistencia) => {
 
     for (let i = 0; i < alumnesParsed.length; i++) {
       const alumne = alumnesParsed[i];
-      if (alumne.INSTITUT === INSTITUT_USUARIO) {
-        const nouAlumne = {};
-        for (const key in alumne) {
-          nouAlumne[key] = alumne[key];
-        }
-        if (instMap.value[alumne.INSTITUT]) {
-          nouAlumne.INSTITUT = instMap.value[alumne.INSTITUT];
-        }
-        alumnesFiltrats.push(nouAlumne);
+      const nouAlumne = {};
+      for (const key in alumne) {
+        nouAlumne[key] = alumne[key];
       }
+      nouAlumne.INSTITUT_ORIGINAL = alumne.INSTITUT;
+      if (instMap.value[alumne.INSTITUT]) {
+        nouAlumne.INSTITUT = instMap.value[alumne.INSTITUT];
+      }
+      alumnesFiltrats.push(nouAlumne);
     }
     alumnesDelDia.value = alumnesFiltrats;
   } catch (e) {
@@ -94,16 +92,15 @@ const obrirModal = (assistencia) => {
 
     for (let i = 0; i < profeParsed.length; i++) {
       const prof = profeParsed[i];
-      if (prof.INSTITUT === INSTITUT_USUARIO) {
-        const nouProf = {};
-        for (const key in prof) {
-          nouProf[key] = prof[key];
-        }
-        if (instMap.value[prof.INSTITUT]) {
-          nouProf.INSTITUT = instMap.value[prof.INSTITUT];
-        }
-        profesFiltrats.push(nouProf);
+      const nouProf = {};
+      for (const key in prof) {
+        nouProf[key] = prof[key];
       }
+      nouProf.INSTITUT_ORIGINAL = prof.INSTITUT;
+      if (instMap.value[prof.INSTITUT]) {
+        nouProf.INSTITUT = instMap.value[prof.INSTITUT];
+      }
+      profesFiltrats.push(nouProf);
     }
     professorsDelDia.value = profesFiltrats;
   } catch (e) {
@@ -157,17 +154,17 @@ const guardarAssistencia = async () => {
 
   guardant.value = true;
   try {
-    // Preparar arrays sense ID i convertir el nom de institució back a ID
+    // Preparar arrays de alumnos
     const alumnesParaGuardar = alumnesDelDia.value.map(a => ({
       NOM: a.NOM,
-      INSTITUT: typeof a.INSTITUT === 'string' ? INSTITUT_USUARIO : a.INSTITUT,
+      INSTITUT: a.INSTITUT_ORIGINAL || a.INSTITUT,
       ASSISTENCIA: a.ASSISTENCIA,
       JUSTIFICAT: a.JUSTIFICAT
     }));
 
     const profsParaGuardar = professorsDelDia.value.map(p => ({
       NOM: p.NOM,
-      INSTITUT: typeof p.INSTITUT === 'string' ? INSTITUT_USUARIO : p.INSTITUT,
+      INSTITUT: p.INSTITUT_ORIGINAL || p.INSTITUT,
       ASSISTENCIA: p.ASSISTENCIA,
       JUSTIFICAT: p.JUSTIFICAT
     }));
