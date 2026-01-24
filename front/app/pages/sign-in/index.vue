@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import Encabezado from "@/layouts/encabezado.vue";
 import { registerUsuari } from "~/services/communicationManagerDatabase";
-
+import Swal from "sweetalert2";
 const pantalla = ref("primero");
 
 //Variables para formulario del centre
@@ -19,7 +19,12 @@ const input_confirm_pass = ref("");
 
 function reviewForm1() {
   if (!input_sch_name.value || !input_sch_id.value) {
-    alert("Si us plau, omple tots els camps obligatoris.");
+    Swal.fire({
+      icon: "warning",
+      title: "Atenció",
+      text: "Si us plau, omple tots els camps obligatoris.",
+      confirmButtonText: "Tancar",
+    });
     return;
   }
   pantalla.value = "segundo";
@@ -34,12 +39,23 @@ async function reviewForm2() {
     input_confirm_pass.value;
 
   if (!camposCompletos) {
-    alert("Si us plau, omple tots els camps.");
+    Swal.fire({
+      icon: "warning",
+      title: "Atenció",
+      text: "Si us plau, omple tots els camps.",
+      confirmButtonText: "Tancar",
+    });
+
     return;
   }
 
   if (input_pass.value !== input_confirm_pass.value) {
-    alert("Les contrasenyes no coincideixen.");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Les contrasenyes no coincideixen.",
+    });
+
     return;
   }
   await sendForm();
@@ -65,8 +81,12 @@ async function sendForm() {
     pantalla.value = "finalitzat";
   } catch (error) {
     console.error("Error detallat:", error);
-    alert("No s'ha pogut fer el registre: " + error.message);
-    pantalla.value = "error";
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      html: "No s'ha pogut fer el registre <br>" + error.message,
+      confirmButtonText: "Tancar",
+    });
   }
 }
 </script>

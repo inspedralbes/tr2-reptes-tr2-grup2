@@ -1,4 +1,5 @@
 <script setup>
+import Swal from "sweetalert2";
 import { ref, onMounted, computed } from "vue";
 import {
   getAllTallers,
@@ -315,7 +316,6 @@ const cerrarModalEditar = () => {
   limpiarFormulario();
 };
 
-
 const limpiarFormulario = () => {
   nom.value = "";
   descripcio.value = "";
@@ -355,7 +355,12 @@ const crearTaller = async () => {
     !dataInici.value ||
     !dataFi.value
   ) {
-    alert("Tots els camps són obligatoris");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Tots els camps són obligatoris",
+      confirmButtonText: "Tancar",
+    });
     return;
   }
 
@@ -396,12 +401,22 @@ const crearTaller = async () => {
   try {
     const resultado = await createTaller(formData);
     console.log("Taller creado:", resultado);
-    alert("Taller creat correctament");
+    Swal.fire({
+      icon: "success",
+      title: "Éxit",
+      text: "Taller creat correctament",
+      confirmButtonText: "Tancar",
+    });
     cerrarModal();
     await cargarTallers();
   } catch (error) {
     console.error("Error al crear taller:", error);
-    alert(`Error: ${error.message}`);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: `Error: ${error.message}`,
+      confirmButtonText: "Tancar",
+    });
   }
 };
 
@@ -422,7 +437,12 @@ const actualizarTaller = async () => {
     !dataInici.value ||
     !dataFi.value
   ) {
-    alert("Tots els camps són obligatoris");
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Tots els camps són obligatoris",
+      confirmButtonText: "Tancar",
+    });
     return;
   }
 
@@ -450,7 +470,9 @@ const actualizarTaller = async () => {
   // Manté places_disp si no hi ha lògica específica (aquí igualem a places_max per simplicitat si cal)
   formData.append(
     "places_disp",
-    Number.parseInt(String(tallerSeleccionado.value.places_disp ?? placesMax.value)),
+    Number.parseInt(
+      String(tallerSeleccionado.value.places_disp ?? placesMax.value),
+    ),
   );
   formData.append("direccio", direccio.value);
   formData.append("horari", horariJSON);
@@ -459,7 +481,10 @@ const actualizarTaller = async () => {
     "institucio",
     Number.parseInt(String(tallerSeleccionado.value.institucio ?? 1)),
   );
-  formData.append("admin", Number.parseInt(String(tallerSeleccionado.value.admin ?? 1)));
+  formData.append(
+    "admin",
+    Number.parseInt(String(tallerSeleccionado.value.admin ?? 1)),
+  );
   formData.append(
     "autoritzat",
     (tallerSeleccionado.value.autoritzat ?? false) ? "true" : "false",
@@ -474,12 +499,22 @@ const actualizarTaller = async () => {
   try {
     const resultado = await updateTaller(formData);
     console.log("Taller actualitzat:", resultado);
-    alert("Taller actualitzat correctament");
+    Swal.fire({
+      icon: "success",
+      title: "Éxit",
+      text: "Taller actualitzat correctament",
+      confirmButtonText: "Tancar",
+    });
     cerrarModalEditar();
     await cargarTallers();
   } catch (error) {
     console.error("Error al actualitzar taller:", error);
-    alert(`Error: ${error.message}`);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: `Error: ${error.message}`,
+      confirmButtonText: "Tancar",
+    });
   }
 };
 
@@ -492,7 +527,13 @@ const getImageUrl = (source) => {
   if (typeof source === "string") {
     path = source;
   } else if (typeof source === "object") {
-    path = source.imatge || source.image || source.foto || source.url || source.path || null;
+    path =
+      source.imatge ||
+      source.image ||
+      source.foto ||
+      source.url ||
+      source.path ||
+      null;
   }
 
   if (!path) return DEFAULT_IMG;
@@ -508,15 +549,36 @@ const onImgError = (e) => {
 };
 
 async function confirmarEliminar(id) {
-  if (confirm("Estàs segur que vols eliminar aquest taller?")) {
+  const result = await Swal.fire({
+    title: "Estas segur?",
+    text: "No podràs revertir això!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    cancelButtonText: "Cancel·la",
+    confirmButtonText: "Sí, elimina-ho!",
+  });
+
+  if (result.isConfirmed) {
     await deleteTaller(id)
       .then(() => {
-        alert("Taller eliminat correctament");
+        Swal.fire({
+          icon: "success",
+          title: "Éxit",
+          text: "Taller eliminat correctament",
+          confirmButtonText: "Tancar",
+        });
         cargarTallers();
       })
       .catch((error) => {
         console.error("Error al eliminar taller:", error);
-        alert(`Error: ${error.message}`);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: `Error: ${error.message}`,
+          confirmButtonText: "Tancar",
+        });
       });
   }
 }
@@ -749,7 +811,7 @@ async function confirmarEliminar(id) {
           <div class="form-group">
             <label for="imatge">Imatge del Taller</label>
             <input id="imatge" type="file" accept="image/*" @change="handleFileChange" />
-            <small style="color: #666; margin-top: 5px;">Format: JPG, PNG, GIF (opcional)</small>
+            <small style="color: #666; margin-top: 5px">Format: JPG, PNG, GIF (opcional)</small>
           </div>
 
           <!-- Botones -->
@@ -824,6 +886,18 @@ async function confirmarEliminar(id) {
             <input id="datafi-edit" v-model="dataFi" type="date" required />
           </div>
 
+          <!-- Data Inici -->
+          <div class="form-group">
+            <label for="dataini-edit">Data Inici *</label>
+            <input id="dataini-edit" v-model="dataInici" type="date" required />
+          </div>
+
+          <!-- Data Fi -->
+          <div class="form-group">
+            <label for="datafi-edit">Data Fi *</label>
+            <input id="datafi-edit" v-model="dataFi" type="date" required />
+          </div>
+
           <!-- Dia de la setmana -->
           <div class="form-group">
             <label for="dia-edit">Dia de la Setmana *</label>
@@ -860,7 +934,7 @@ async function confirmarEliminar(id) {
           <div class="form-group">
             <label for="imatge-edit">Imatge del Taller</label>
             <input id="imatge-edit" type="file" accept="image/*" @change="handleFileChange" />
-            <small style="color: #666; margin-top: 5px;">Format: JPG, PNG, GIF (opcional)</small>
+            <small style="color: #666; margin-top: 5px">Format: JPG, PNG, GIF (opcional)</small>
           </div>
 
           <!-- Botones -->

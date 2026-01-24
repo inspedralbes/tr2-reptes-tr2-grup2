@@ -29,7 +29,6 @@ body {
   padding: 0;
   width: 100%;
 }
-
 .app-wrapper {
   position: relative;
   display: flex;
@@ -48,5 +47,14 @@ body {
 .page-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+/* SweetAlert2 global */
+.swal2-popup,
+.swal2-title,
+.swal2-html-container,
+.swal2-confirm,
+.swal2-cancel {
+  font-family: Arial, Helvetica, sans-serif !important;
 }
 </style>
