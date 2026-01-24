@@ -485,6 +485,9 @@ app.get("/inscripcions/:id", async (req, res) => {
 });
 
 app.post("/inscripcions", async (req, res) => {
+  if (!req.headers.authorization) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const token = req.headers.authorization.split(" ")[1];
   if (!token) {
     return res.status(401).json({ error: "Token requerit" });
@@ -495,6 +498,9 @@ app.post("/inscripcions", async (req, res) => {
 });
 
 app.post("/inscripcions/dadesinsc", async (req, res) => {
+  if (!req.headers.authorization) {
+    return res.status(401).json({ error: "Token requerit" });
+  }
   const token = req.headers.authorization.split(" ")[1];
   if (!token) {
     return res.status(401).json({ error: "Token requerit" });
