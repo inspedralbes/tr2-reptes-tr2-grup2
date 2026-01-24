@@ -151,7 +151,7 @@ const processTallers = (data, inscritos) => {
     });
 
     // Si no hay inscripción, no incluir el taller
-    if (!inscripcion) return;
+    // ELIMINADO: if (!inscripcion) return;
 
     let horari = {};
     try {
@@ -189,8 +189,8 @@ const processTallers = (data, inscritos) => {
     const mesNum = dateObj
       ? dateObj.getMonth() + 1
       : month !== null
-      ? month + 1
-      : null;
+        ? month + 1
+        : null;
 
     // Si el mes no existe en nuestro objeto agrupador, lo creamos
     if (!grouped[mesNombre]) {
@@ -199,6 +199,23 @@ const processTallers = (data, inscritos) => {
         diaNum: diaNum,
         cursos: [],
       };
+    }
+
+    // Determinar estado de la inscripción
+    let estado = "No sol·licitat";
+    if (inscripcion) {
+      if (!t.autoritzat) {
+        estado = "Pendent"; // El taller en sí no está autorizado
+      } else if (inscripcion.estat === true) {
+        estado = "Aprovada";
+      } else if (inscripcion.estat === false) {
+        estado = "Denegada";
+      } else {
+        estado = "Pendent";
+      }
+    } else {
+      // Si no hay inscripción
+      estado = "No sol·licitat";
     }
 
     // Añadimos el taller al grupo de su mes con el estado de inscripción
@@ -212,16 +229,8 @@ const processTallers = (data, inscritos) => {
       mesNum: mesNum,
       diaNum: diaNum,
       rawHorari: horari,
-      // Si el taller no está autorizado, siempre mostrar Pendent
-      // Si está autorizado, mostrar el estado real de la inscripción
-      estadoInscripcion: !t.autoritzat
-        ? "Pendent"
-        : inscripcion.estat !== null
-        ? inscripcion.estat
-          ? "Aprovada"
-          : "Pendent"
-        : "Pendent",
-      autoritzat: inscripcion.autoritzat || false,
+      estadoInscripcion: estado,
+      autoritzat: inscripcion ? (inscripcion.autoritzat || false) : false,
     });
   });
 
@@ -239,14 +248,21 @@ const loadData = async () => {
       getSystemSettings(),
     ]);
 
+    console.log("DEBUG: Total talleres cargados:", rawData.length);
+    console.log("DEBUG: Total inscripciones cargadas:", inscripciones.length);
+    console.log("DEBUG: Periodo seleccionado:", settings.selectedPeriodeId);
+
     // Filtrar talleres por período seleccionado
     const filteredData = rawData.filter(
       (t) => t.periode === settings.selectedPeriodeId
     );
+    console.log("DEBUG: Talleres tras filtro periodo:", filteredData.length);
 
     horaris.value = extractHoraris(filteredData);
 
     const usuarioInstitucionId = localStorage.getItem("user_institution_id");
+    console.log("DEBUG: ID institución usuario:", usuarioInstitucionId);
+
     const inscripcionesFiltridas = [];
     for (const i of inscripciones) {
       if (usuarioInstitucionId) {
@@ -257,6 +273,8 @@ const loadData = async () => {
         inscripcionesFiltridas.push(i);
       }
     }
+    console.log("DEBUG: Inscripciones filtradas por institución:", inscripcionesFiltridas.length);
+
     inscripcionsMap.value = {};
     for (const i of inscripcionesFiltridas) {
       let alumnesArray = [];
@@ -279,7 +297,15 @@ const loadData = async () => {
       }
     }
 
-    tallersGrouped.value = processTallers(filteredData, inscripcionesFiltridas);
+    const processed = processTallers(filteredData, inscripcionesFiltridas);
+    console.log("DEBUG: Talleres procesados finales:", processed.length); // Ver cuántos grupos de meses se crean
+    if (processed.length > 0) {
+      let countCursos = 0;
+      processed.forEach(p => countCursos += p.cursos.length);
+      console.log("DEBUG: Total cursos dentro de los grupos:", countCursos);
+    }
+
+    tallersGrouped.value = processed;
   } catch (error) {
     console.error("Error cargando talleres:", error);
   } finally {
@@ -393,13 +419,8 @@ const getMesNum = (mes) => {
         </div>
 
         <div v-if="openMonthFilter" class="months-grid">
-          <button
-            v-for="mes in meses"
-            :key="mes"
-            class="month-chip"
-            @click="toggleMonthSelection(mes)"
-            :class="{ 'is-active': selectedMonths.includes(mes) }"
-          >
+          <button v-for="mes in meses" :key="mes" class="month-chip" @click="toggleMonthSelection(mes)"
+            :class="{ 'is-active': selectedMonths.includes(mes) }">
             {{ mes }}
           </button>
           <button class="btn-aplicar" @click="openMonthFilter = false">
@@ -417,33 +438,20 @@ const getMesNum = (mes) => {
 
       <h3>TALLER</h3>
       <div>
-        <input
-          v-model="searchTaller"
-          type="text"
-          placeholder="Cercar taller..."
-          class="search-input"
-        />
+        <input v-model="searchTaller" type="text" placeholder="Cercar taller..." class="search-input" />
       </div>
 
       <h3>HORARI</h3>
       <div>
-        <div
-          @click="openHorariFilter = !openHorariFilter"
-          class="select-header"
-        >
+        <div @click="openHorariFilter = !openHorariFilter" class="select-header">
           <span v-if="selectedHoraris.length === 0">Escull l'horari...</span>
           <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
           <span>▲</span>
         </div>
 
         <div v-if="openHorariFilter" class="horaris-grid">
-          <button
-            v-for="horari in horaris"
-            :key="horari"
-            class="horari-chip"
-            @click="toggleHorariSelection(horari)"
-            :class="{ 'is-active': selectedHoraris.includes(horari) }"
-          >
+          <button v-for="horari in horaris" :key="horari" class="horari-chip" @click="toggleHorariSelection(horari)"
+            :class="{ 'is-active': selectedHoraris.includes(horari) }">
             {{ horari }}
           </button>
           <button class="btn-aplicar" @click="openHorariFilter = false">
@@ -452,11 +460,7 @@ const getMesNum = (mes) => {
         </div>
 
         <div class="selected-tags-container">
-          <div
-            v-for="horari in selectedHoraris"
-            :key="horari"
-            class="selected-tag"
-          >
+          <div v-for="horari in selectedHoraris" :key="horari" class="selected-tag">
             {{ horari }}
             <span class="remove-icon" @click="removeHorari(horari)">×</span>
           </div>
@@ -468,30 +472,18 @@ const getMesNum = (mes) => {
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
 
-      <div
-        v-for="seccion in filteredTallers"
-        :key="seccion.mes"
-        class="seccion-mes"
-      >
+      <div v-for="seccion in filteredTallers" :key="seccion.mes" class="seccion-mes">
         <h2 class="mes-titulo">{{ seccion.mes }}</h2>
 
-        <div
-          v-for="curso in seccion.cursos"
-          :key="curso.id"
-          class="bloque-curso"
-        >
-          <div
-            class="fila-curso"
-            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
-          >
+        <div v-for="curso in seccion.cursos" :key="curso.id" class="bloque-curso">
+          <div class="fila-curso" :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }">
             <div class="col-titulo">
               <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
             </div>
 
             <div class="col-info">
               <div class="text-info">
-                <span class="texto-titulo">{{ curso.titulo }}</span
-                ><br />
+                <span class="texto-titulo">{{ curso.titulo }}</span><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
                   {{ curso.diaNum }}/{{ getMesNum(seccion.mes) }}
@@ -502,32 +494,22 @@ const getMesNum = (mes) => {
             </div>
 
             <button class="btn-detalls" @click="toggleDetalles(curso.id)">
-              <span
-                class="btn-detalls-text"
-                :class="{ rotar: cursoExpandido === curso.id }"
-                >+</span
-              >
+              <span class="btn-detalls-text" :class="{ rotar: cursoExpandido === curso.id }">+</span>
             </button>
 
             <div class="col-estado">
-              <span
-                class="estado-badge"
-                :class="{
-                  'estado-aprovada': curso.estadoInscripcion === 'Aprovada',
-                  'estado-pendent': curso.estadoInscripcion === 'Pendent',
-                  'estado-denegado': curso.estadoInscripcion === 'Denegada',
-                }"
-              >
+              <span class="estado-badge" :class="{
+                'estado-aprovada': curso.estadoInscripcion === 'Aprovada',
+                'estado-pendent': curso.estadoInscripcion === 'Pendent',
+                'estado-denegado': curso.estadoInscripcion === 'Denegada',
+                'estado-nosolicitud': curso.estadoInscripcion === 'No sol·licitat',
+              }">
                 {{ curso.estadoInscripcion }}
               </span>
             </div>
             <div id="col-btn">
-              <AccionesInscripcion
-                :tallerId="curso.id"
-                :inscripcion="inscripcionsMap[curso.id]"
-                @refresh="loadData"
-                @active="(val) => (filaActiva = val ? curso.id : null)"
-              />
+              <AccionesInscripcion :tallerId="curso.id" :inscripcion="inscripcionsMap[curso.id]" @refresh="loadData"
+                @active="(val) => (filaActiva = val ? curso.id : null)" />
             </div>
           </div>
 
@@ -549,14 +531,13 @@ const getMesNum = (mes) => {
 /* --- CONTENEDOR PRINCIPAL --- */
 #container {
   margin-top: -25px;
-  margin-left: 50px;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Coolvetica";
   background-color: #ffffff;
   border-radius: 20px;
   border: 1px solid #87878779;
   padding: 25px;
   width: 950px;
-  height: 380px;
+  height: 350px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
@@ -564,20 +545,32 @@ const getMesNum = (mes) => {
 
 #popup-filter {
   position: absolute;
-  top: 150px;
-  right: 150px;
-  width: 300px;
-  max-height: 500px;
+  top: 70px;
+  right: 60px;
+  width: 320px;
+  max-height: 480px;
   background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(57, 73, 171, 0.2);
   padding: 20px;
   z-index: 1000;
-  border-radius: 10px;
+  border-radius: 20px;
   overflow-y: auto;
+  animation: slideDown 0.3s ease-out;
 }
 
-#popup-filter > button {
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#popup-filter>button {
   float: right;
   background: none;
   border: none;
@@ -587,7 +580,7 @@ const getMesNum = (mes) => {
   margin-bottom: 10px;
 }
 
-#popup-filter > button:hover {
+#popup-filter>button:hover {
   color: #333;
 }
 
@@ -853,10 +846,10 @@ const getMesNum = (mes) => {
 }
 
 .btn-detalls {
-  background-color: #c5cae9;
+  background-color: #C5CAE9;
   margin-left: -100px;
   z-index: 1;
-  width: 140px;
+  width: 150px;
   height: 110px;
   border: none;
   border-radius: 200px;
@@ -868,7 +861,7 @@ const getMesNum = (mes) => {
 
 .btn-detalls:hover {
   background-color: #d2d7f7;
-  width: 150px;
+  width: 160px;
 }
 
 .btn-detalls-text {
@@ -894,7 +887,7 @@ const getMesNum = (mes) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 100px;
+  margin-left: 50px;
   margin-right: 20px;
   width: auto;
   z-index: 4;
@@ -933,21 +926,36 @@ const getMesNum = (mes) => {
   color: #1d1d1d;
 }
 
+.estado-nosolicitud {
+  background-color: #e0e0e0;
+  border-color: #9e9e9e;
+  border-style: solid;
+  border-width: 4px;
+  color: #616161;
+}
+
+.estado-nosolicitud {
+  background-color: #e0e0e0;
+  border-color: #9e9e9e;
+  border-style: solid;
+  border-width: 4px;
+  color: #616161;
+}
+
 /* --- DESPLEGABLE DE INFORMACIÓN --- */
 .info-desplegable {
   margin-left: 153px;
-  background-color: #f5f6ff;
-  width: 34%;
+  background-color: #D5DAFB;
+  width: 39.5%;
   margin-top: -60px;
-  padding: 50px 20px 15px 40px;
+  padding: 70px 20px 15px 40px;
   border-radius: 0 0 30px 30px;
-  border: 1px solid #c5cae9;
   z-index: 0;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .contenido-detalle {
-  color: #3949ab;
+  color: #1d1d1d;
   font-size: 0.85rem;
   line-height: 1.4;
 }

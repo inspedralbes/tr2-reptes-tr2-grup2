@@ -23,6 +23,7 @@ import llistaEstados from "@/utils/components/centro/listaEstadoInscripciones.vu
   display: flex;
   height: calc(100vh - 85px);
   overflow: hidden;
+  font-size: 20px;
 }
 
 #contenido {

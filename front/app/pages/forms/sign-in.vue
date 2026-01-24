@@ -72,7 +72,6 @@ async function sendForm() {
 </script>
 
 <template>
-  <Encabezado></Encabezado>
   <div id="cuerpo">
     <div id="contenidor">
       <h2>Registre del Centre</h2>
@@ -163,9 +162,15 @@ async function sendForm() {
 
 #cuerpo {
   font-family: "Coolvetica", sans-serif;
-  margin-top: 5%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
+  margin-top: 22%;
 }
 
 #contenidor {
@@ -181,6 +186,7 @@ async function sendForm() {
 h2 {
   margin-bottom: 5px;
 }
+
 h4 {
   margin-bottom: 25px;
   color: #555;

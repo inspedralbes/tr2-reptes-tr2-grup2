@@ -30,12 +30,31 @@ import recordatorisAdmin from "@/utils/components/admin/recordatorisAdmin.vue";
 <style scoped>
 #cuerpo {
   display: flex;
+  height: 100vh;
+  overflow: hidden;
 }
 
 #contenido {
   margin-left: 50px;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 20px;
+}
+
+#contenido::-webkit-scrollbar {
+  width: 6px;
+}
+
+#contenido::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#contenido::-webkit-scrollbar-thumb {
+  background: #878787;
+  border-radius: 10px;
 }
 
 #user {
@@ -52,8 +71,11 @@ import recordatorisAdmin from "@/utils/components/admin/recordatorisAdmin.vue";
 
 /* Estilització de les targetes, canviar amb el style de Valeria/Alba */
 .tarjetas-admin {
-  background-color: #f5f5f5;
+  background-color: #FFFFFF;
   border-radius: 20px;
+  border-style: solid;
+  border-color: #87878748;
+  border-width: 2px;
   padding-top: 5px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   max-height: 250px;

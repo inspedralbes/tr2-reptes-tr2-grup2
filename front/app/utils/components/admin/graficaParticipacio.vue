@@ -74,6 +74,40 @@ const participacioPerTaller = computed(() => {
 
   return resultadoFinal;
 });
+
+// Función para determinar el color según el porcentaje
+const getColor = (percentatge) => {
+  if (percentatge >= 80) return '#3949ab';  // Excellent
+  if (percentatge >= 60) return '#5c6bc0';  // Bé
+  if (percentatge >= 40) return '#7986cb';  // Regular
+  if (percentatge >= 20) return '#9fa8da';  // Baix
+  return '#c5cae9';  // Molt baix
+};
+
+// Cargar datos al montar el componente
+onMounted(async () => {
+  try {
+    loading.value = true;
+    error.value = "";
+
+    // Cargar asistencias y talleres en paralelo
+    const [assistenciesData, tallersData] = await Promise.all([
+      getAllAssistencies(),
+      getAllTallers()
+    ]);
+
+    assistencies.value = assistenciesData;
+    tallers.value = tallersData;
+
+    console.log("Assistències carregades:", assistencies.value.length);
+    console.log("Tallers carregats:", tallers.value.length);
+  } catch (err) {
+    console.error("Error carregant dades:", err);
+    error.value = "Error al carregar les dades de participació";
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <template>
@@ -131,23 +165,23 @@ const participacioPerTaller = computed(() => {
       <div class="legend">
         <div class="legend-item">
           <span class="legend-color" style="background-color: #3949ab;"></span>
-          <span>Excellent (≥80%)</span>
+          <span>Excellent</span>
         </div>
         <div class="legend-item">
           <span class="legend-color" style="background-color: #5c6bc0;"></span>
-          <span>Bé (60-79%)</span>
+          <span>Bé</span>
         </div>
         <div class="legend-item">
           <span class="legend-color" style="background-color: #7986cb;"></span>
-          <span>Regular (40-59%)</span>
+          <span>Regular</span>
         </div>
         <div class="legend-item">
           <span class="legend-color" style="background-color: #9fa8da;"></span>
-          <span>Baix (20-39%)</span>
+          <span>Baix</span>
         </div>
         <div class="legend-item">
           <span class="legend-color" style="background-color: #c5cae9;"></span>
-          <span>Molt baix (&lt;20%)</span>
+          <span>Molt baix</span>
         </div>
       </div>
     </div>
@@ -159,7 +193,7 @@ const participacioPerTaller = computed(() => {
   padding: 0;
   background: transparent;
   min-height: auto;
-  max-height: 100px;
+  max-height: 400px;
   overflow-y: auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -181,24 +215,6 @@ const participacioPerTaller = computed(() => {
 
 .participacio-container::-webkit-scrollbar-thumb:hover {
   background: #283593;
-}
-
-.header {
-  text-align: center;
-  color: #3949ab;
-  margin-bottom: 12px;
-}
-
-.header h2 {
-  font-size: 1rem;
-  margin: 0 0 3px 0;
-  font-weight: 700;
-}
-
-.subtitle {
-  font-size: 0.7rem;
-  opacity: 0.7;
-  margin: 0;
 }
 
 .loading {
@@ -255,19 +271,17 @@ const participacioPerTaller = computed(() => {
 .chart-stats {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 50px;
   justify-content: center;
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #3949ab 0%, #5c6bc0 100%);
-  color: white;
+  color: rgb(51, 51, 51);
   padding: 8px 16px;
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 2px 6px rgba(57, 73, 171, 0.3);
+  border-bottom: 1px solid #8383837c;
 }
 
 .stat-number {
@@ -283,6 +297,7 @@ const participacioPerTaller = computed(() => {
 }
 
 .bars-container {
+  width: 100%;
   margin-bottom: 12px;
   max-height: 200px;
   overflow-y: auto;
@@ -353,7 +368,7 @@ const participacioPerTaller = computed(() => {
 
 .bar-wrapper {
   background-color: #f0f0f0;
-  border-radius: 6px;
+  border-radius: 20px;
   height: 22px;
   overflow: hidden;
   position: relative;
@@ -361,7 +376,7 @@ const participacioPerTaller = computed(() => {
 
 .bar {
   height: 100%;
-  border-radius: 6px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -372,6 +387,7 @@ const participacioPerTaller = computed(() => {
 }
 
 .bar-label {
+  margin-right: 10px;
   color: white;
   font-weight: 700;
   font-size: 0.7rem;
@@ -381,7 +397,7 @@ const participacioPerTaller = computed(() => {
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 10px;
   justify-content: center;
   padding-top: 10px;
   border-top: 1px solid #f0f0f0;
@@ -398,7 +414,7 @@ const participacioPerTaller = computed(() => {
 .legend-color {
   width: 12px;
   height: 12px;
-  border-radius: 2px;
+  border-radius: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 

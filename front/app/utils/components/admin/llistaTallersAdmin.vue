@@ -886,44 +886,37 @@ async function confirmarEliminar(id) {
 
 .header-lista {
   display: flex;
-  justify-content: space-between;
+  justify-content: right;
   align-items: center;
-  gap: 50px;
+  gap: 140px;
   margin-bottom: 15px;
   padding-right: 0;
 }
 
 #btn-filtres {
   background-color: #7986cb;
+  border: 3px solid #3949ab;
+  border-radius: 30px;
+  color: #1d1d1d;
+  font-weight: bold;
+  padding: 6px 18px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#btn-filtres:hover {
+  background-color: #6b75c2;
+}
+
+#btn-crear {
+  background-color: #d8dcf5;
   color: #1f1f1f;
   font-weight: 600;
   font-size: 16px;
   padding: 8px 22px;
-  border: 2px solid #3949ab70;
-  border-radius: 20px;
-  cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-#btn-filtres:hover {
-  background-color: #aab4e9;
-  transform: translateY(-1px);
-  border: 2px solid #5064cd70;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
-}
-
-#btn-crear {
-  background-color: #3949ab;
-  color: white;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 8px 22px;
-  border: 2px solid #3949ab70;
-  border-radius: 20px;
+  border: 5px solid #B0B7E3;
+  border-radius: 30px;
   cursor: pointer;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
   transition:
@@ -933,9 +926,9 @@ async function confirmarEliminar(id) {
 }
 
 #btn-crear:hover {
-  background-color: #5064cd;
+  background-color: #7987cbb6;
   transform: translateY(-1px);
-  border: 2px solid #5064cd70;
+  border: 5px solid #3949ab70;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
 }
 
@@ -1031,10 +1024,10 @@ async function confirmarEliminar(id) {
 }
 
 .btn-detalls {
-  background-color: #c5cae9;
+  background-color: #C5CAE9;
   margin-left: -100px;
   z-index: 1;
-  width: 140px;
+  width: 150px;
   height: 110px;
   border: none;
   border-radius: 200px;
@@ -1046,17 +1039,19 @@ async function confirmarEliminar(id) {
 
 .btn-detalls:hover {
   background-color: #d2d7f7;
-  width: 150px;
+  width: 160px;
 }
 
 #btn-editar-taller {
-  background-color: #5064cd;
+  background-color: #9FACFE;
   color: white;
   font-weight: 600;
   font-size: 14px;
   padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #717ED3;
+  border-radius: 30px;
   cursor: pointer;
   margin-left: 40px;
   transition:
@@ -1065,18 +1060,21 @@ async function confirmarEliminar(id) {
 }
 
 #btn-editar-taller:hover {
-  background-color: #3949ab;
+  background-color: #6878db;
+  border-color: #4956AA;
   transform: translateY(-2px);
 }
 
 #btn-eliminar-taller {
-  background-color: #cd5050;
+  background-color: #808bd1;
   color: white;
   font-weight: 600;
   font-size: 14px;
   padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
+  border-style: solid;
+  border-width: 4px;
+  border-color: #5762aa;
+  border-radius: 30px;
   cursor: pointer;
   margin-left: 40px;
   transition:
@@ -1085,7 +1083,8 @@ async function confirmarEliminar(id) {
 }
 
 #btn-eliminar-taller:hover {
-  background-color: #a52c2c;
+  background-color: #545ea3;
+  border-color: #3c4686;
   transform: translateY(-2px);
 }
 
@@ -1104,18 +1103,17 @@ async function confirmarEliminar(id) {
 /* --- DESPLEGABLE DE INFORMACIÓN --- */
 .info-desplegable {
   margin-left: 153px;
-  background-color: #f5f6ff;
-  width: 34%;
+  background-color: #D5DAFB;
+  width: 35.5%;
   margin-top: -60px;
   padding: 70px 20px 15px 40px;
   border-radius: 0 0 30px 30px;
-  border: 1px solid #c5cae9;
   z-index: 0;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .contenido-detalle {
-  color: #3949ab;
+  color: #2c2c2c;
   font-size: 0.85rem;
   line-height: 1.4;
 }
@@ -1160,6 +1158,9 @@ async function confirmarEliminar(id) {
 .modal-content {
   background: white;
   border-radius: 15px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #DBDBDB;
   padding: 30px;
   width: 85%;
   max-width: 500px;
@@ -1173,7 +1174,7 @@ async function confirmarEliminar(id) {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 2px solid #3949ab;
+  border-bottom: 2px solid #3948ab33;
   padding-bottom: 15px;
 }
 
@@ -1220,7 +1221,7 @@ async function confirmarEliminar(id) {
 .form-group select {
   padding: 10px;
   border: 1px solid #c5cae9;
-  border-radius: 8px;
+  border-radius: 30px;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 14px;
   color: #333;
@@ -1237,6 +1238,7 @@ async function confirmarEliminar(id) {
 .form-group textarea {
   resize: vertical;
   min-height: 80px;
+  border-radius: 8px;
 }
 
 .modal-buttons {
@@ -1250,44 +1252,64 @@ async function confirmarEliminar(id) {
 .btn-submit {
   padding: 10px 20px;
   border: none;
-  border-radius: 8px;
+  border-radius: 40px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-cancel {
-  background-color: #c5cae9;
+  background-color: #b0b5d9;
+  border-color: #878cb4;
+  border-style: solid;
+  border-width: 4px;
   color: #333;
 }
 
 .btn-cancel:hover {
-  background-color: #b0b5d9;
+  background-color: #c5cae9;
+  border-color: #8e94c0;
 }
 
 .btn-submit {
-  background-color: #3949ab;
+  background-color: #4654af;
+  border-color: #303869;
+  border-style: solid;
+  border-width: 4px;
   color: white;
 }
 
 .btn-submit:hover {
   background-color: #5064cd;
+  border-color: #424d91;
 }
 
 /* --- FILTROS --- */
 #popup-filter {
   position: absolute;
-  top: 150px;
-  right: 50px;
-  width: 300px;
-  max-height: 500px;
+  top: 70px;
+  right: 60px;
+  width: 320px;
+  max-height: 480px;
   background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(57, 73, 171, 0.2);
   padding: 20px;
   z-index: 1000;
-  border-radius: 10px;
+  border-radius: 20px;
   overflow-y: auto;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 #popup-filter>button {

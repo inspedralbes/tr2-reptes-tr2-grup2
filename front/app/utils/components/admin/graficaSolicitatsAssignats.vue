@@ -289,32 +289,21 @@ onMounted(() => {
   flex-direction: column;
   gap: 6px;
   justify-content: center;
+  margin-top: 25px;
+  margin-left: 10px;
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #3949ab 0%, #5c6bc0 100%);
-  color: white;
+  color: #1D1D1D;
   padding: 8px 12px;
-  border-radius: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(57, 73, 171, 0.25);
   min-width: 85px;
+  border-bottom: 1px solid #bdbdbda4;
   transition: transform 0.2s ease;
 }
 
-.stat-card:hover {
-  transform: translateY(-2px);
-}
-
-.stat-card.assignades {
-  background: linear-gradient(135deg, #3949ab 0%, #283593 100%);
-}
-
-.stat-card.pendents {
-  background: linear-gradient(135deg, #9fa8da 0%, #7986cb 100%);
-}
 
 .stat-number {
   font-size: 1.1rem;
@@ -337,6 +326,7 @@ onMounted(() => {
 }
 
 .legend-custom {
+  padding: 10px;
   display: flex;
   gap: 10px;
   justify-content: center;

@@ -2,6 +2,8 @@
 import { ref, reactive } from "vue";
 import graficaParticipacio from "./graficaParticipacio.vue";
 import graficaSolicitatsAssignats from "./graficaSolicitatsAssignats.vue";
+import graficaAutoritzacio from "./graficaAutoritzacio.vue";
+import graficaPeriodes from "./graficaPeriodes.vue";
 
 /* UI: abrir/cerrar panel filtros */
 const showFilters = ref(false);
@@ -52,16 +54,12 @@ function exportCSV() {
 <template>
   <div class="header-Centres">
     <h2>Gestió informes</h2>
-    <button id="btn-filtres" @click="toggleFilters">Filtres</button>
+    <!-- <button id="btn-filtres" @click="toggleFilters">Filtres</button> -->
   </div>
   <div id="container">
     <div class="container-informs">
-      <!-- PANEL FLOTANTE DE FILTROS -->
-      <div
-        v-if="showFilters"
-        class="filters-overlay"
-        @click.self="cancelFilters"
-      >
+      <!-- PANEL FLOTANTE DE FILTROS
+      <div v-if="showFilters" class="filters-overlay" @click.self="cancelFilters">
         <div class="filters-pop">
           <div class="filters-head">
             <h3>Filtres</h3>
@@ -90,36 +88,20 @@ function exportCSV() {
             <div class="field">
               <label>Modalitat</label>
               <div class="segmented">
-                <button
-                  class="seg"
-                  :class="{ active: filters.modalitat === 'Totes' }"
-                  @click="filters.modalitat = 'Totes'"
-                  type="button"
-                >
+                <button class="seg" :class="{ active: filters.modalitat === 'Totes' }"
+                  @click="filters.modalitat = 'Totes'" type="button">
                   Totes
                 </button>
-                <button
-                  class="seg"
-                  :class="{ active: filters.modalitat === 'A' }"
-                  @click="filters.modalitat = 'A'"
-                  type="button"
-                >
+                <button class="seg" :class="{ active: filters.modalitat === 'A' }" @click="filters.modalitat = 'A'"
+                  type="button">
                   A
                 </button>
-                <button
-                  class="seg"
-                  :class="{ active: filters.modalitat === 'B' }"
-                  @click="filters.modalitat = 'B'"
-                  type="button"
-                >
+                <button class="seg" :class="{ active: filters.modalitat === 'B' }" @click="filters.modalitat = 'B'"
+                  type="button">
                   B
                 </button>
-                <button
-                  class="seg"
-                  :class="{ active: filters.modalitat === 'C' }"
-                  @click="filters.modalitat = 'C'"
-                  type="button"
-                >
+                <button class="seg" :class="{ active: filters.modalitat === 'C' }" @click="filters.modalitat = 'C'"
+                  type="button">
                   C
                 </button>
               </div>
@@ -147,7 +129,7 @@ function exportCSV() {
             </button>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- AQUÍ IRÍAN LOS INFORMES (solo estructura visual) -->
 
@@ -161,7 +143,7 @@ function exportCSV() {
         </div>
 
         <!-- Gráfica para la participación de los talleres --->
-        <div class="card-wider">
+        <div class="card wider">
           <div class="card-title">Estadístiques de participació</div>
           <div class="chart-placeholder bigger">
             <graficaParticipacio />
@@ -169,14 +151,18 @@ function exportCSV() {
         </div>
 
         <div class="card">
-          <div class="card-title">Estat dels checklists</div>
-          <div class="chart-placeholder">Gràfic (placeholder)</div>
+          <div class="card-title">Estat dels tallers</div>
+          <div class="chart-placeholder">
+            <graficaAutoritzacio />
+          </div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">Comparatives entre edicions o períodes</div>
-        <div class="chart-placeholder wide">Comparativa (placeholder)</div>
+        <div class="chart-placeholder wide">
+          <graficaPeriodes />
+        </div>
       </div>
 
       <!-- EXPORTACIÓN
@@ -209,8 +195,6 @@ function exportCSV() {
   max-width: 1050px;
   margin: 0 auto;
   /* box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); */
-  overflow-y: auto;
-  max-height: 550px;
 }
 
 .header-Centres {
@@ -235,30 +219,9 @@ function exportCSV() {
   height: 400px;
 } */
 
-#btn-filtres {
-  background-color: #7986cb;
-  color: #1f1f1f;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 8px 22px;
-  border: 2px solid #3949ab70;
-  border-radius: 20px;
-  cursor: pointer;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
 
-#btn-filtres:hover {
-  background-color: #aab4e9;
-  transform: translateY(-1px);
-  border: 2px solid #5064cd70;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
-}
-
-/* OVERLAY + POPUP */
+/* 
+/* OVERLAY + POPUP 
 .filters-overlay {
   position: fixed;
   inset: 0;
@@ -267,7 +230,7 @@ function exportCSV() {
   align-items: flex-start;
   justify-content: center;
   padding-top: 130px;
-  /* para que no tape el header */
+  /* para que no tape el header 
   z-index: 2000;
 }
 
@@ -380,7 +343,7 @@ function exportCSV() {
   padding: 10px 16px;
   border-radius: 16px;
   cursor: pointer;
-}
+} */
 
 /* INFORMES */
 .reports-grid {
@@ -390,23 +353,34 @@ function exportCSV() {
 }
 
 .card {
-  background: #f5f5f5;
+  background-color: #FFFFFF;
   border-radius: 20px;
+  border-style: solid;
+  border-color: #87878748;
+  border-width: 2px;
   padding: 18px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  margin-bottom: 3.5%;
 }
+
 .card-solicituts {
-  background: #f5f5f5;
+  background-color: #FFFFFF;
   border-radius: 20px;
+  border-style: solid;
+  border-color: #87878748;
+  border-width: 2px;
   height: 240px;
   padding: 18px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
-.card-wider {
-  background: #f5f5f5;
+.card.wider {
+  background-color: #FFFFFF;
   border-radius: 20px;
-  height: 460px;
+  border-style: solid;
+  border-color: #87878748;
+  border-width: 2px;
+  height: 465px;
   padding: 18px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   grid-row: span 2;
@@ -430,14 +404,15 @@ function exportCSV() {
 
 .chart-placeholder.bigger {
   height: 100%;
+  margin-top: -30px;
 }
 
 .chart-placeholder.wide {
-  height: 170px;
+  height: 300px;
 }
 
-.card-wide {
-  margin-top: 16px;
+.card.wide {
+  margin-top: 10px;
 }
 
 .filters-summary {
