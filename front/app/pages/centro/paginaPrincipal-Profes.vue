@@ -130,7 +130,7 @@ async function fetchData() {
 
 onMounted(() => {
   if (typeof window !== "undefined") {
-    userName.value = localStorage.getItem("userName") || "";
+    userName.value = localStorage.getItem("user_name") || "";
   }
   fetchData();
 });

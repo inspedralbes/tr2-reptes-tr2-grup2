@@ -3,12 +3,19 @@ import graficaTallers from "@/utils/components/admin/graficaTallers.vue";
 import graficaInstitucions from "@/utils/components/admin/graficaInstitucions.vue";
 import calendari from "@/utils/components/admin/calendari.vue";
 import recordatorisAdmin from "@/utils/components/admin/recordatorisAdmin.vue";
+import { onMounted, ref } from "vue";
+const userName = ref("*AdminName*");
+onMounted(() => {
+  if (typeof window !== "undefined") {
+    userName.value = localStorage.getItem("user_name") || "*AdminName*";
+  }
+});
 </script>
 <template>
   <div>
     <div id="cuerpo">
       <div id="contenido">
-        <h2>Bon día, <span id="user">*AdminName*</span>:</h2>
+        <h2>Bon día, <span id="user">{{ userName }}</span>:</h2>
         <div class="panell-admin">
           <div class="tarjetas-admin">
             <recordatorisAdmin />

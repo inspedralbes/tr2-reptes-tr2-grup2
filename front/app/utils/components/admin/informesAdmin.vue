@@ -4,6 +4,7 @@ import graficaParticipacio from "./graficaParticipacio.vue";
 import graficaSolicitatsAssignats from "./graficaSolicitatsAssignats.vue";
 import graficaAutoritzacio from "./graficaAutoritzacio.vue";
 import graficaPeriodes from "./graficaPeriodes.vue";
+import Swal from "sweetalert2";
 
 /* UI: abrir/cerrar panel filtros */
 const showFilters = ref(false);
@@ -42,12 +43,20 @@ function clearFilters() {
 /* Exportación (solo estructura) */
 function exportPDF() {
   // Lógica para exportar a PDF
-  alert("Exportar a PDF (funcionalidad no implementada)");
+  Swal.fire({
+    title: "Exportar a PDF",
+    text: "Funcionalidad no implementada",
+    confirmButtonText: "Tancar",
+  });
 }
 
 function exportCSV() {
   // Lógica para exportar a CSV
-  alert("Exportar a CSV (funcionalidad no implementada)");
+  Swal.fire({
+    title: "Exportar a CSV",
+    text: "Funcionalidad no implementada",
+    confirmButtonText: "Tancar",
+  });
 }
 </script>
 
