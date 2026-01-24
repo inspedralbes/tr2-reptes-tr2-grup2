@@ -137,7 +137,7 @@ onMounted(async () => {
         <div class="card-body">
           <p class="desc">{{ taller.descripcio }}</p>
           <p class="ubicacion">{{ taller.direccio }}</p>
-          <NuxtLink :to="`/centro/paginaReviewTaller-Profes/${taller.id}`">
+          <NuxtLink :to="`/centro/reviewTallers/${taller.id}`">
             <button>Avaluar taller</button>
           </NuxtLink>
         </div>
@@ -167,73 +167,79 @@ onMounted(async () => {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
   padding-bottom: 20px;
+  margin-top: 2%;
+  margin-left: 2%;
 }
 
 .card-taller {
   background: white;
-  border-radius: 15px;
-  border: 1px solid #87878779;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  transition: transform 0.2s;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  max-width: 320px;
+}
+
+.card-taller:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
-  background-color: #5c6bc0;
+  background: linear-gradient(135deg, #5c6bc0, #3f51b5);
   color: white;
-  padding: 15px;
+  padding: 20px;
 }
 
 .card-header h4 {
   margin: 0;
-  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-size: 1.25rem;
 }
 
 .card-body {
-  padding: 15px;
-  flex-grow: 1;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 12px;
 }
 
 .desc {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 15px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
 }
 
 .ubicacion {
-  font-size: 0.85rem;
-  color: #888;
-  margin-bottom: 5px;
-}
-
-.loading,
-.no-data {
-  text-align: center;
-  margin-top: 40px;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   color: #666;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 button {
-  background-color: #9FACFE;
-  border-color: #717ed39c;
-  color: #1d1d1d;
+  background-color: #5c6bc0;
+  color: white;
   font-weight: 600;
-  padding: 10px 20px;
-  border-style: solid;
-  border-width: 4px;
+  padding: 12px 24px;
+  border: none;
   border-radius: 30px;
+  border: 4px solid #4453a5;
   cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(92, 107, 192, 0.3);
+  width: fit-content;
 }
 
 button:hover {
-  transform: translateY(-2px);
-  background-color: #7f8bdd;
-  border-color: #5d69bd;
+  background-color: #3f51b5;
+  box-shadow: 0 6px 15px rgba(92, 107, 192, 0.4);
+  border: 4px solid #2e3e96;
+  transform: scale(1.02);
 }
 </style>

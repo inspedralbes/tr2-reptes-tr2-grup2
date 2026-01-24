@@ -29,6 +29,7 @@ body {
   padding: 0;
   width: 100%;
 }
+
 .app-wrapper {
   position: relative;
   display: flex;

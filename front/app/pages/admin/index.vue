@@ -12,10 +12,10 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div>
+  <div class="page-container">
     <div id="cuerpo">
+      <h2 class="welcome-header">Bon dia, <span id="user">{{ userName }}</span>:</h2>
       <div id="contenido">
-        <h2>Bon día, <span id="user">{{ userName }}</span>:</h2>
         <div class="panell-admin">
           <div class="tarjetas-admin">
             <recordatorisAdmin />
@@ -35,33 +35,45 @@ onMounted(() => {
   </div>
 </template>
 <style scoped>
+.page-container {
+  width: 100%;
+  flex: 1;
+}
+
 #cuerpo {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 100px);
+  height: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.welcome-header {
+  margin-left: 4%;
+  width: 95%;
+  max-width: 1400px;
+  margin-top: 3%;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 2rem;
+  text-align: left;
+  align-self: center;
+  font-weight: bold;
 }
 
 #contenido {
-  margin-left: 50px;
+  margin-left: 4%;
+  margin-right: auto;
   font-family: Arial, Helvetica, sans-serif;
   font-weight: lighter;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 20px;
-}
-
-#contenido::-webkit-scrollbar {
-  width: 6px;
-}
-
-#contenido::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#contenido::-webkit-scrollbar-thumb {
-  background: #878787;
-  border-radius: 10px;
+  width: 95%;
+  max-width: 1400px;
+  padding-right: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
 }
 
 #user {
@@ -69,23 +81,34 @@ onMounted(() => {
   font-weight: bold;
 }
 
-.panell-admin {
-  display: grid;
-  grid-template-columns: minmax(280px, 320px) minmax(520px, 1fr);
-  gap: 40px;
-  align-items: start;
-}
 
-/* Estilització de les targetes, canviar amb el style de Valeria/Alba */
+
+/* Estilització de les targetes */
 .tarjetas-admin {
   background-color: #FFFFFF;
   border-radius: 20px;
-  border-style: solid;
-  border-color: #87878748;
-  border-width: 2px;
-  padding-top: 5px;
+  border: 2px solid #87878748;
+  padding: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  max-height: 250px;
+  min-height: 250px;
+  height: auto;
+  width: 95%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tarjetas-admin:nth-child(1) :deep(.lista-container) {
+  height: auto !important;
+  max-height: 220px;
+}
+
+.panell-admin {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) 1fr;
+  gap: 10px 40px;
   width: 100%;
+  grid-auto-rows: min-content;
+
 }
 </style>

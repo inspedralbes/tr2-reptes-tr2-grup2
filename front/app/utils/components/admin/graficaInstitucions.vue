@@ -235,12 +235,12 @@ onUnmounted(() => {
 
 <style scoped>
 .stats-container {
-  width: 90%;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
-  padding: 0;
+  padding: 10px;
   position: relative;
-  height: 100%;
 }
 
 .loading-state {
@@ -252,7 +252,6 @@ onUnmounted(() => {
 }
 
 .main-chart {
-  margin-left: 70px;
   width: 100%;
   height: 270px;
 }

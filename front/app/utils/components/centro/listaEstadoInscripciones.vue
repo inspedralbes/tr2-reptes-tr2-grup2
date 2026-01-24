@@ -452,65 +452,66 @@ const getMesNum = (mes) => {
 <template>
   <div id="container">
     <div class="header-lista">
-      <button @click="filterOpen = !filterOpen" id="btn-filtro">Filtres</button>
-    </div>
+      <div class="filter-wrapper">
+        <button @click="filterOpen = !filterOpen" id="btn-filtro">Filtres</button>
+        <div v-if="filterOpen" id="popup-filter">
+          <button @click="filterOpen = false">x</button>
 
-    <div v-if="filterOpen" id="popup-filter">
-      <button @click="filterOpen = false">x</button>
+          <h3>MES</h3>
+          <div>
+            <div @click="openMonthFilter = !openMonthFilter" class="select-header">
+              <span v-if="selectedMonths.length === 0">Escull el mes...</span>
+              <span v-else>{{ selectedMonths.length }} meses seleccionats</span>
+              <span>▲</span>
+            </div>
 
-      <h3>MES</h3>
-      <div>
-        <div @click="openMonthFilter = !openMonthFilter" class="select-header">
-          <span v-if="selectedMonths.length === 0">Escull el mes...</span>
-          <span v-else>{{ selectedMonths.length }} meses seleccionats</span>
-          <span>▲</span>
-        </div>
+            <div v-if="openMonthFilter" class="months-grid">
+              <button v-for="mes in meses" :key="mes" class="month-chip" @click="toggleMonthSelection(mes)"
+                :class="{ 'is-active': selectedMonths.includes(mes) }">
+                {{ mes }}
+              </button>
+              <button class="btn-aplicar" @click="openMonthFilter = false">
+                Aplicar
+              </button>
+            </div>
 
-        <div v-if="openMonthFilter" class="months-grid">
-          <button v-for="mes in meses" :key="mes" class="month-chip" @click="toggleMonthSelection(mes)"
-            :class="{ 'is-active': selectedMonths.includes(mes) }">
-            {{ mes }}
-          </button>
-          <button class="btn-aplicar" @click="openMonthFilter = false">
-            Aplicar
-          </button>
-        </div>
-
-        <div class="selected-tags-container">
-          <div v-for="mes in selectedMonths" :key="mes" class="selected-tag">
-            {{ mes }}
-            <span class="remove-icon" @click="removeMonth(mes)">×</span>
+            <div class="selected-tags-container">
+              <div v-for="mes in selectedMonths" :key="mes" class="selected-tag">
+                {{ mes }}
+                <span class="remove-icon" @click="removeMonth(mes)">×</span>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <h3>TALLER</h3>
-      <div>
-        <input v-model="searchTaller" type="text" placeholder="Cercar taller..." class="search-input" />
-      </div>
+          <h3>TALLER</h3>
+          <div>
+            <input v-model="searchTaller" type="text" placeholder="Cercar taller..." class="search-input" />
+          </div>
 
-      <h3>HORARI</h3>
-      <div>
-        <div @click="openHorariFilter = !openHorariFilter" class="select-header">
-          <span v-if="selectedHoraris.length === 0">Escull l'horari...</span>
-          <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
-          <span>▲</span>
-        </div>
+          <h3>HORARI</h3>
+          <div>
+            <div @click="openHorariFilter = !openHorariFilter" class="select-header">
+              <span v-if="selectedHoraris.length === 0">Escull l'horari...</span>
+              <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
+              <span>▲</span>
+            </div>
 
-        <div v-if="openHorariFilter" class="horaris-grid">
-          <button v-for="horari in horaris" :key="horari" class="horari-chip" @click="toggleHorariSelection(horari)"
-            :class="{ 'is-active': selectedHoraris.includes(horari) }">
-            {{ horari }}
-          </button>
-          <button class="btn-aplicar" @click="openHorariFilter = false">
-            Aplicar
-          </button>
-        </div>
+            <div v-if="openHorariFilter" class="horaris-grid">
+              <button v-for="horari in horaris" :key="horari" class="horari-chip" @click="toggleHorariSelection(horari)"
+                :class="{ 'is-active': selectedHoraris.includes(horari) }">
+                {{ horari }}
+              </button>
+              <button class="btn-aplicar" @click="openHorariFilter = false">
+                Aplicar
+              </button>
+            </div>
 
-        <div class="selected-tags-container">
-          <div v-for="horari in selectedHoraris" :key="horari" class="selected-tag">
-            {{ horari }}
-            <span class="remove-icon" @click="removeHorari(horari)">×</span>
+            <div class="selected-tags-container">
+              <div v-for="horari in selectedHoraris" :key="horari" class="selected-tag">
+                {{ horari }}
+                <span class="remove-icon" @click="removeHorari(horari)">×</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -584,17 +585,24 @@ const getMesNum = (mes) => {
   border-radius: 20px;
   border: 1px solid #87878779;
   padding: 25px;
-  width: 950px;
-  height: 350px;
+  width: 100%;
+  height: calc(100vh - 350px);
+  /* Altura fija relativa para scroll interno */
+  min-height: 400px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
 }
 
+.filter-wrapper {
+  position: relative;
+}
+
 #popup-filter {
   position: absolute;
-  top: 70px;
-  right: 60px;
+  top: 100%;
+  right: 0;
+  margin-top: 10px;
   width: 320px;
   max-height: 480px;
   background-color: white;
@@ -877,7 +885,7 @@ const getMesNum = (mes) => {
   background-color: #9fa8da;
   margin-left: -110px;
   z-index: 2;
-  width: 350px;
+  width: clamp(350px, 35vw, 650px);
   height: 110px;
   display: flex;
   flex-direction: column;
@@ -888,9 +896,9 @@ const getMesNum = (mes) => {
 
 .text-info {
   font-weight: bold;
-  margin-left: 30%;
-  margin-top: 40px;
-  font-size: 0.85rem;
+  margin-left: 20%;
+  margin-top: 30px;
+  font-size: clamp(1rem, 1.5vw, 1.5rem);
 }
 
 .btn-detalls {
@@ -994,7 +1002,7 @@ const getMesNum = (mes) => {
 .info-desplegable {
   margin-left: 153px;
   background-color: #D5DAFB;
-  width: 39.5%;
+  width: clamp(350px, 35vw, 650px);
   margin-top: -60px;
   padding: 70px 20px 15px 40px;
   border-radius: 0 0 30px 30px;
@@ -1004,13 +1012,13 @@ const getMesNum = (mes) => {
 
 .contenido-detalle {
   color: #1d1d1d;
-  font-size: 0.85rem;
+  font-size: clamp(0.9rem, 1.2vw, 1.2rem);
   line-height: 1.4;
 }
 
 /* --- OTROS --- */
 .mes-titulo {
-  font-size: 1.4rem;
+  font-size: clamp(1.2rem, 1.8vw, 1.8rem);
   font-weight: 900;
   color: #1a1a1a;
   margin: 25px 0px 10px 70px;

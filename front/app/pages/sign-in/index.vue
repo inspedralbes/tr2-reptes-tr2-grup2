@@ -165,10 +165,17 @@ async function sendForm() {
       <div v-else-if="pantalla === 'finalitzat'">
         <h3>Gràcies per omplir la sol·licitut</h3>
         <p>Quan l'administrador gestioni la sol·licitut podràs accedir.</p>
+        <NuxtLink to="/" class="link-small">
+          Tornar al Inici
+        </NuxtLink>
       </div>
       <div v-else-if="pantalla === 'error'">
         <h3>Ha succeit un problema amb la sol·licitut</h3>
         <p>Si us plau, torna a omplir-la amb valors correctes</p>
+        <NuxtLink to="/" class="link-small">
+          Tornar al Inici
+        </NuxtLink>
+
       </div>
     </div>
   </div>

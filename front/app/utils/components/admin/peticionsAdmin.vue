@@ -479,19 +479,19 @@ async function enviarsInscripciones() {
 
 <style scoped>
 /* --- CONTENEDOR PRINCIPAL --- */
-/* #container {
-  margin-top: -25px;
+#container {
   font-family: Arial, Helvetica, sans-serif;
   background-color: #ffffff;
   border-radius: 20px;
   border: 1px solid #87878779;
   padding: 25px;
-  width: 1050px;
-  height: 420px;
+  width: 95%;
+  height: calc(100vh - 350px);
+  min-height: 400px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.308);
-} */
+}
 
 .loading-state {
   text-align: center;
@@ -542,6 +542,7 @@ async function enviarsInscripciones() {
   flex: 1;
   overflow-y: auto;
   padding-right: 20px;
+  margin-top: 5%;
 }
 
 .lista-container::-webkit-scrollbar {
@@ -601,7 +602,7 @@ async function enviarsInscripciones() {
   background-color: #9fa8da;
   margin-left: -110px;
   z-index: 2;
-  width: 350px;
+  width: clamp(350px, 35vw, 650px);
   height: 110px;
   display: flex;
   flex-direction: column;
@@ -612,9 +613,9 @@ async function enviarsInscripciones() {
 
 .text-info {
   font-weight: bold;
-  margin-left: 30%;
-  margin-top: 40px;
-  font-size: 0.85rem;
+  margin-left: 20%;
+  margin-top: 30px;
+  font-size: clamp(1rem, 1.5vw, 1.5rem);
 }
 
 .btn-detalls {
@@ -647,7 +648,7 @@ async function enviarsInscripciones() {
   border-color: #5762aa;
   border-radius: 60px;
   cursor: pointer;
-  margin-left: 40px;
+  margin-left: 80px;
   transition:
     background-color 0.2s ease,
     transform 0.2s ease;
@@ -661,7 +662,7 @@ async function enviarsInscripciones() {
 
 
 .btn-veure-inscripcions.enviarsInscripcions {
-  margin-top: 5%;
+  width: fit-content;
   background-color: #808bd1;
   color: 1D1D1D;
   font-weight: 600;
@@ -672,7 +673,9 @@ async function enviarsInscripciones() {
   border-color: #5762aa;
   border-radius: 60px;
   cursor: pointer;
-  margin-left: 40px;
+  margin-left: 10%;
+  margin-bottom: 2%;
+  margin-top: 1%;
   transition:
     background-color 0.2s ease,
     transform 0.2s ease;
@@ -739,7 +742,7 @@ async function enviarsInscripciones() {
 .info-desplegable {
   margin-left: 153px;
   background-color: #D5DAFB;
-  width: 35.5%;
+  width: clamp(350px, 35vw, 650px);
   margin-top: -60px;
   padding: 70px 20px 15px 40px;
   border-radius: 0 0 30px 30px;
