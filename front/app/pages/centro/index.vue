@@ -21,95 +21,131 @@ const diasSemana = [
 ];
 
 function processTallers(allTallers, allInscripcions, periodeId) {
-  // 1. Filtrar inscripciones por institución del usuario
+  console.log("DEBUG: processTallers START", { allTallersCount: allTallers.length, allInscripcionsCount: allInscripcions.length });
   const usuarioInstitucionId = localStorage.getItem("user_institution_id");
-  let misInscripciones = [];
+  const misInscripciones = [];
+  const instId = (usuarioInstitucionId && usuarioInstitucionId.trim() !== "") ? parseInt(usuarioInstitucionId) : NaN;
 
-  if (usuarioInstitucionId) {
-    misInscripciones = allInscripcions.filter(
-      (i) => i.institucio === parseInt(usuarioInstitucionId)
-    );
-  } else {
-    misInscripciones = allInscripcions;
+  for (let i = 0; i < allInscripcions.length; i++) {
+    const ins = allInscripcions[i];
+    const matchesInst = isNaN(instId) || ins.institucio === instId;
+    const isApproved = (ins.estat == 1 || ins.estat === true || ins.autoritzat == 1 || ins.autoritzat === true);
+    if (matchesInst && isApproved) {
+      misInscripciones.push(ins);
+    }
   }
+  console.log("DEBUG: filtered misInscripciones count:", misInscripciones.length);
 
-  // Mapa de inscripciones activas (para filtrar tallers)
   const talleresIds = new Set();
-  misInscripciones.forEach(i => {
-    const alumnesArray = JSON.parse(i.alumnes || "[]");
-    alumnesArray.forEach(alumne => {
-      talleresIds.add(alumne.TALLER);
-    });
-  });
+  for (let i = 0; i < misInscripciones.length; i++) {
+    let alumnesArray = [];
+    try {
+      const ins = misInscripciones[i];
+      alumnesArray = typeof ins.alumnes === "string" ? JSON.parse(ins.alumnes || "[]") : ins.alumnes || [];
+    } catch (e) {
+      alumnesArray = [];
+    }
+    for (let j = 0; j < alumnesArray.length; j++) {
+      const tallerEntry = alumnesArray[j];
+      if (tallerEntry.ESTAT === "APROBADA") {
+        talleresIds.add(tallerEntry.TALLER);
+      }
+    }
+  }
+  console.log("DEBUG: talleresIds discovered:", Array.from(talleresIds));
 
   const grouped = {};
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  allTallers.forEach((t) => {
-    // Filtrar por periodo seleccionado
-    if (periodeId && t.periode !== periodeId) return;
-
-    if (!talleresIds.has(t.id)) return;
+  for (let i = 0; i < allTallers.length; i++) {
+    const t = allTallers[i];
+    if (!talleresIds.has(t.id)) {
+      continue;
+    }
 
     let horari = {};
     try {
-      horari = typeof t.horari === "string" && t.horari.trim() !== ""
-        ? JSON.parse(t.horari)
-        : t.horari || {};
+      horari = typeof t.horari === "string" && t.horari.trim() !== "" ? JSON.parse(t.horari) : t.horari || {};
     } catch (e) {
       horari = {};
     }
 
-    // Obtener fecha
-    const parts = (horari.DATAINI || "").split("/");
-    const year = parts[2] ? parseInt(parts[2], 10) : null;
-    const month = parts[1] ? parseInt(parts[1], 10) - 1 : null;
-    const day = parts[0] ? parseInt(parts[0], 10) : null;
+    // --- PARSEO DE FECHAS ROBUSTO ---
+    function parseDate(dataStr) {
+      if (!dataStr) return { day: null, month: null, year: null };
+      let d = null, m = null, y = null;
+      if (dataStr.indexOf("/") !== -1) {
+        const p = dataStr.split("/");
+        d = parseInt(p[0], 10);
+        m = parseInt(p[1], 10) - 1;
+        y = parseInt(p[2], 10);
+      } else if (dataStr.indexOf("-") !== -1) {
+        const p = dataStr.split("-");
+        // Asumimos YYYY-MM-DD
+        y = parseInt(p[0], 10);
+        m = parseInt(p[1], 10) - 1;
+        d = parseInt(p[2], 10);
+      }
+      return { day: d, month: m, year: y };
+    }
 
-    if (year && month !== null && day) {
-      const dateObj = new Date(year, month, day);
+    const { day: dayFi, month: monthFi, year: yearFi } = parseDate(horari.DATAFI);
+    let isFinalizado = false;
+    if (yearFi && monthFi !== null && dayFi) {
+      const dateFi = new Date(yearFi, monthFi, dayFi);
+      if (dateFi < today) isFinalizado = true;
+    }
+
+    const { day: dayIni, month: monthIni, year: yearIni } = parseDate(horari.DATAINI);
+    console.log(`DEBUG: Workshop ID ${t.id} ("${t.nom}") parsed dates:`, { DATAINI: horari.DATAINI, yearIni, monthIni, dayIni });
+
+    if (yearIni && monthIni !== null && dayIni && !isNaN(yearIni)) {
+      const dateObj = new Date(yearIni, monthIni, dayIni);
       const mesNombre = mesesNombres[dateObj.getMonth()];
       const diaNum = dateObj.getDate();
       const diaSemanaNombre = diasSemana[dateObj.getDay()];
 
-      // Inicializar Mes
       if (!grouped[mesNombre]) {
-        grouped[mesNombre] = {
-          mes: mesNombre,
-          mesIndex: dateObj.getMonth(),
-          diasMap: {}
-        };
+        grouped[mesNombre] = { mes: mesNombre, mesIndex: dateObj.getMonth(), diasMap: {} };
       }
-
-      // Inicializar Dia dentro del Mes
       if (!grouped[mesNombre].diasMap[diaNum]) {
-        grouped[mesNombre].diasMap[diaNum] = {
-          diaSemana: diaSemanaNombre,
-          diaNum: diaNum,
-          cursos: []
-        };
+        grouped[mesNombre].diasMap[diaNum] = { diaSemana: diaSemanaNombre, diaNum: diaNum, cursos: [] };
       }
-
-      // Añadir curso
       grouped[mesNombre].diasMap[diaNum].cursos.push({
         titulo: t.nom,
         lugar: t.direccio || "Ubicación desconocida",
-        hora: horari.TORNS?.[0]?.HORAINICI || "00:00"
+        hora: horari.TORNS?.[0]?.HORAINICI || "00:00",
+        isFinalizado: isFinalizado
       });
+    } else {
+      console.warn(`DEBUG: Workshop ID ${t.id} ignored because it has invalid or missing DATAINI:`, horari.DATAINI);
     }
-  });
+  }
 
-  // Transformar objeto agrupado a array array
-  const result = Object.values(grouped).map(grupoMes => {
-    return {
-      mes: grupoMes.mes,
-      dias: Object.values(grupoMes.diasMap).sort((a, b) => a.diaNum - b.diaNum)
-    };
-  });
+  const result = [];
+  const mesKeys = Object.keys(grouped);
+  for (let i = 0; i < mesKeys.length; i++) {
+    const grupoMes = grouped[mesKeys[i]];
+    const dias = [];
+    const diaKeys = Object.keys(grupoMes.diasMap);
+    for (let j = 0; j < diaKeys.length; j++) {
+      dias.push(grupoMes.diasMap[diaKeys[j]]);
+    }
+    // Ordenar burbuja
+    for (let j = 0; j < dias.length - 1; j++) {
+      for (let k = 0; k < dias.length - 1 - j; k++) {
+        if (dias[k].diaNum > dias[k + 1].diaNum) {
+          const temp = dias[k];
+          dias[k] = dias[k + 1];
+          dias[k + 1] = temp;
+        }
+      }
+    }
+    result.push({ mes: grupoMes.mes, dias: dias });
+  }
 
-  // Ordenar meses?? El array original no parecía tener orden estricto, 
-  // pero podemos ordenar por índice de mes si queremos. 
-  // Por ahora lo dejamos como el orden de aparición o iteración.
-
+  console.log("DEBUG: processTallers END. Resulting result count:", result.length);
   return result;
 }
 

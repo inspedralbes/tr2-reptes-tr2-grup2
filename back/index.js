@@ -19,6 +19,7 @@ import {
   getUsuariForAuth,
   updateUsuariToken,
   getUserId,
+  getUsuariById,
 } from "./functions/database/CRUD/Usuaris.js";
 import {
   getInscripciosByTallerId,
@@ -519,11 +520,33 @@ app.post("/inscripcions/dadesinsc", async (req, res) => {
       });
     }
 
+    // Decodificar token para obtener userId
+    const decoded = jwt.verify(token, secretKey);
+    const userId = decoded.id;
+
+    // Obtener institución del usuario
+    const user = await getUsuariById(userId);
+    if (!user || !user.institucio) {
+      return res.status(400).json({
+        message: "Usuario no tiene institución asignada",
+      });
+    }
+
+    // Obtener periodo actual del sistema
+    const settings = await getSystemSettings();
+    if (!settings || !settings.selectedPeriodeId) {
+      return res.status(400).json({
+        message: "No hay periodo seleccionado en el sistema",
+      });
+    }
+
     // Paula: llamando a la función que procesa las inscripciones
     const resultado = await procesarInscripcio(
       selecciones,
       docentRef || null,
       comentari || null,
+      user.institucio,
+      settings.selectedPeriodeId,
     );
 
     return res.status(200).json({
@@ -1038,7 +1061,6 @@ app.post("/tallers/:id/comentari-profe", async (req, res) => {
 
 import {
   getAllUsuaris,
-  getUsuariById,
   createUsuari,
   updateUsuari,
   deleteUsuari,

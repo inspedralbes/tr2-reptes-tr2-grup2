@@ -222,8 +222,8 @@ export async function procesarInscripcio(
   selections,
   docentRef,
   comentari,
-  institucioId = 3,
-  periode = 2,
+  institucioId,
+  periode,
 ) {
   try {
     const prisma = await getPrisma();

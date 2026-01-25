@@ -36,7 +36,7 @@ async function handleLogin() {
       localStorage.setItem("user_id", data.id);
       localStorage.setItem("user_email", data.email);
       localStorage.setItem("user_name", data.nom);
-      localStorage.setItem("user_institution_id", data.institucio || "");
+      localStorage.setItem("user_institution_id", data.id_institucio || "");
       localStorage.setItem("user_role", data.rol);
       Swal.fire({
         icon: "success",
