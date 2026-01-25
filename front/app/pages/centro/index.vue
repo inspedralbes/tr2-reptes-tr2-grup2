@@ -21,7 +21,6 @@ const diasSemana = [
 ];
 
 function processTallers(allTallers, allInscripcions, periodeId) {
-  console.log("DEBUG: processTallers START", { allTallersCount: allTallers.length, allInscripcionsCount: allInscripcions.length });
   const usuarioInstitucionId = localStorage.getItem("user_institution_id");
   const misInscripciones = [];
   const instId = (usuarioInstitucionId && usuarioInstitucionId.trim() !== "") ? parseInt(usuarioInstitucionId) : NaN;
@@ -34,7 +33,6 @@ function processTallers(allTallers, allInscripcions, periodeId) {
       misInscripciones.push(ins);
     }
   }
-  console.log("DEBUG: filtered misInscripciones count:", misInscripciones.length);
 
   const talleresIds = new Set();
   for (let i = 0; i < misInscripciones.length; i++) {
@@ -52,7 +50,6 @@ function processTallers(allTallers, allInscripcions, periodeId) {
       }
     }
   }
-  console.log("DEBUG: talleresIds discovered:", Array.from(talleresIds));
 
   const grouped = {};
   const today = new Date();
@@ -98,7 +95,6 @@ function processTallers(allTallers, allInscripcions, periodeId) {
     }
 
     const { day: dayIni, month: monthIni, year: yearIni } = parseDate(horari.DATAINI);
-    console.log(`DEBUG: Workshop ID ${t.id} ("${t.nom}") parsed dates:`, { DATAINI: horari.DATAINI, yearIni, monthIni, dayIni });
 
     if (yearIni && monthIni !== null && dayIni && !isNaN(yearIni)) {
       const dateObj = new Date(yearIni, monthIni, dayIni);
@@ -144,8 +140,6 @@ function processTallers(allTallers, allInscripcions, periodeId) {
     }
     result.push({ mes: grupoMes.mes, dias: dias });
   }
-
-  console.log("DEBUG: processTallers END. Resulting result count:", result.length);
   return result;
 }
 
