@@ -9,16 +9,19 @@ const mostrarModalWeights = ref(false);
 const isActive = (path) => {
   return route.path === path;
 };
-
 </script>
 <template>
   <div id="navBar">
     <div id="btns">
       <NuxtLink to="/admin" custom v-slot="{ navigate }">
-        <button @click="
-          navigate();
-        closeMenu();
-        " data-tooltip="Pàgina Principal" :class="{ 'btn-activo': isActive('/admin') }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Pàgina Principal"
+          :class="{ 'btn-activo': isActive('/admin') }"
+        >
           <img src="/img/navBarAdmin/home.png" alt="" />
         </button>
       </NuxtLink>
@@ -26,40 +29,58 @@ const isActive = (path) => {
       <br />
 
       <NuxtLink to="/admin/gestioTallers" custom v-slot="{ navigate }">
-        <button @click="navigate()" data-tooltip="Gestió Tallers"
-          :class="{ 'btn-activo': isActive('/admin/gestioTallers') }">
+        <button
+          @click="navigate()"
+          data-tooltip="Gestió Tallers"
+          :class="{ 'btn-activo': isActive('/admin/gestioTallers') }"
+        >
           <img src="/img/navBarAdmin/backpack.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/admin/gestioPeticions" custom v-slot="{ navigate }">
-        <button @click="navigate()" data-tooltip="Gestió Peticions"
-          :class="{ 'btn-activo': isActive('/admin/gestioPeticions') }">
+        <button
+          @click="navigate()"
+          data-tooltip="Gestió Peticions"
+          :class="{ 'btn-activo': isActive('/admin/gestioPeticions') }"
+        >
           <img src="/img/navBarAdmin/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/admin/gestioCentres" custom v-slot="{ navigate }">
-        <button @click="navigate()" data-tooltip="Informació Centres"
-          :class="{ 'btn-activo': isActive('/admin/gestioCentres') }">
+        <button
+          @click="navigate()"
+          data-tooltip="Informació Centres"
+          :class="{ 'btn-activo': isActive('/admin/gestioCentres') }"
+        >
           <img src="/img/navBarAdmin/academic-cap.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/admin/gestioInformes" custom v-slot="{ navigate }">
-        <button @click="navigate()" data-tooltip="Gestió Informes"
-          :class="{ 'btn-activo': isActive('/admin/gestioInformes') }">
+        <button
+          @click="navigate()"
+          data-tooltip="Gestió Informes"
+          :class="{ 'btn-activo': isActive('/admin/gestioInformes') }"
+        >
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
-      <button @click="mostrarModalWeights = true" title="Configurar criteris">
+      <button
+        @click="mostrarModalWeights = true"
+        data-tooltip="Configuració"
+      >
         <i class="fas fa-cog"></i>
       </button>
     </div>
 
-    <GestioWeights v-if="mostrarModalWeights" @close="mostrarModalWeights = false" />
+    <GestioWeights
+      v-if="mostrarModalWeights"
+      @close="mostrarModalWeights = false"
+    />
   </div>
 </template>
 <style>
@@ -69,8 +90,10 @@ const isActive = (path) => {
   flex-direction: column;
   align-items: center;
   width: 70px;
-  height: auto;
-  min-height: 100%;
+  height: calc(100vh - 150px);
+  min-height: calc(100vh - 150px);
+  max-height: calc(100vh - 150px);
+  flex-shrink: 0;
   background-color: #3949ab;
   padding: 10px;
   border-radius: 20px;
@@ -78,10 +101,8 @@ const isActive = (path) => {
   margin-bottom: 30px;
   margin-left: 30px;
   position: relative;
-
+  overflow-y: auto;
 }
-
-
 
 #btns {
   margin-top: 10px;
@@ -153,14 +174,13 @@ const isActive = (path) => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-
-
 /* RESPONSIVE: Pantallas grandes */
 @media (min-width: 1280px) and (max-width: 1919px) {
   #navBar {
     width: 80px;
-    height: auto;
-    min-height: 100%;
+    height: calc(100vh - 170px);
+    min-height: calc(100vh - 170px);
+    max-height: calc(100vh - 170px);
     margin-top: 40px;
     margin-bottom: 40px;
     margin-left: 40px;
@@ -191,8 +211,9 @@ const isActive = (path) => {
 @media (min-width: 1920px) {
   #navBar {
     width: 90px;
-    height: auto;
-    min-height: 100%;
+    height: calc(100vh - 190px);
+    min-height: calc(100vh - 190px);
+    max-height: calc(100vh - 190px);
     margin-top: 50px;
     margin-bottom: 50px;
     margin-left: 50px;

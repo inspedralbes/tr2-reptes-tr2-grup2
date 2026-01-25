@@ -14,10 +14,8 @@ const codisPostals = ref([]);
 const cargarInstitucions = async () => {
   try {
     institucions.value = await getAllInstitucions();
-    console.log("Institucions obtingudes:", institucions.value);
     // Extraer códigos postales únicos
     codisPostals.value = extractCodiPostals(institucions.value);
-    console.log("Codis postals disponibles:", codisPostals.value);
   } catch (error) {
     console.error("Error al obtenir les institucions:", error);
   }

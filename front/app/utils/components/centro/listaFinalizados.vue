@@ -12,10 +12,8 @@ function processTallers(allTallers, allInscripcions) {
   // 1. Obtener ID de institución
   const rawId = localStorage.getItem("user_institution_id");
   const myInstId = parseInt(rawId);
-  console.log("DEBUG Finalizados: ID Institución:", myInstId);
 
   if (!myInstId) {
-    console.log("DEBUG Finalizados: No hay ID de institución, retornando vacío.");
     return [];
   }
 
@@ -27,12 +25,10 @@ function processTallers(allTallers, allInscripcions) {
       misTalleresIds.push(inscripcion.tallerId);
     }
   }
-  console.log("DEBUG Finalizados: IDs de talleres inscritos:", misTalleresIds);
 
   // 3. Filtrar talleres: Que sean míos Y que ya hayan pasado
   const resultado = [];
   const hoy = new Date();
-  console.log("DEBUG Finalizados: Fecha hoy:", hoy);
 
   for (let j = 0; j < allTallers.length; j++) {
     const taller = allTallers[j];
@@ -48,7 +44,6 @@ function processTallers(allTallers, allInscripcions) {
 
     // Si no es mío, pasamos al siguiente taller inmediatamente
     if (!esMio) {
-      // console.log(`DEBUG Finalizados: Taller ${taller.id} no es mío.`);
       continue;
     }
 
@@ -85,18 +80,11 @@ function processTallers(allTallers, allInscripcions) {
       continue;
     }
 
-    /* console.log(
-      `DEBUG Finalizados: Taller ${taller.id} (${taller.nom}) Fecha: ${fechaTaller}`
-    ); */
-
     if (fechaTaller && fechaTaller < hoy) {
       resultado.push(taller);
-    } else {
-      // console.log(`DEBUG Finalizados: Taller ${taller.id} es futuro o hoy.`);
     }
   }
 
-  console.log("DEBUG Finalizados: Resultado final:", resultado.length);
   return resultado;
 }
 

@@ -32,7 +32,7 @@ import llistaTallers from "@/utils/components/admin/llistaTallersAdmin.vue";
 }
 
 #contenido {
-  margin-top: 3%;
+ 
   margin-left: 4%;
   margin-right: auto;
   font-family: Arial, Helvetica, sans-serif;

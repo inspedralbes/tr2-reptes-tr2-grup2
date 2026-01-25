@@ -1,17 +1,25 @@
 <template>
   <div class="stats-container">
     <div v-if="loading" class="loading-state">
-      <img src="/assets/gifs/loading.gif" alt="Carregant..." width="30" height="30" />
+      <img
+        src="/assets/gifs/loading.gif"
+        alt="Carregant..."
+        width="30"
+        height="30"
+      />
     </div>
     <div ref="chartRef" class="main-chart"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import * as echarts from 'echarts';
+import { ref, onMounted, onUnmounted } from "vue";
+import * as echarts from "echarts";
 // Ajusta la ruta d'importació
-import { getAllTallers, getAllInstitucions } from '@/services/communicationManagerDatabase';
+import {
+  getAllTallers,
+  getAllInstitucions,
+} from "@/services/communicationManagerDatabase";
 
 const chartRef = ref(null);
 const loading = ref(true);
@@ -25,124 +33,126 @@ const initChart = (institutionNames, seriesData) => {
 
   // Paleta de colores azules (de más oscuro a más claro)
   const blueColors = [
-    '#1a237e', // Índigo oscuro
-    '#283593', // Índigo
-    '#3949ab', // Índigo medio
-    '#5c6bc0', // Índigo claro
-    '#7986cb', // Índigo muy claro
-    '#9fa8da'  // Índigo pastel
+    "#1a237e", // Índigo oscuro
+    "#283593", // Índigo
+    "#3949ab", // Índigo medio
+    "#5c6bc0", // Índigo claro
+    "#7986cb", // Índigo muy claro
+    "#9fa8da", // Índigo pastel
   ];
 
   const option = {
     title: {
-      text: 'Institucions amb Major Volum d\'Alumnes',
-      subtext: 'Total de places disponibles',
-      left: 'center',
+      text: "Institucions amb Major Volum d'Alumnes",
+      subtext: "Total de places disponibles",
+      left: "center",
       textStyle: {
         fontSize: 16,
         fontWeight: 600,
-        color: '#333'
+        color: "#333",
       },
       subtextStyle: {
         fontSize: 12,
-        color: '#666'
-      }
+        color: "#666",
+      },
     },
     tooltip: {
-      trigger: 'axis',
+      trigger: "axis",
       axisPointer: {
-        type: 'shadow',
+        type: "shadow",
         shadowStyle: {
-          color: 'rgba(57, 73, 171, 0.1)'
-        }
+          color: "rgba(57, 73, 171, 0.1)",
+        },
       },
-      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-      borderColor: '#5c6bc0',
+      backgroundColor: "rgba(255, 255, 255, 0.95)",
+      borderColor: "#5c6bc0",
       borderWidth: 1,
       textStyle: {
-        color: '#333'
+        color: "#333",
       },
       formatter: (params) => {
         const data = params[0];
         return `<strong>${data.name}</strong><br/>Total Alumnes: <strong>${data.value}</strong>`;
-      }
+      },
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '10%',
-      top: '20%',
-      containLabel: true
+      left: "3%",
+      right: "4%",
+      bottom: "10%",
+      top: "20%",
+      containLabel: true,
     },
     xAxis: {
-      type: 'category',
+      type: "category",
       data: institutionNames,
       axisLabel: {
-        show: false
+        show: false,
       },
       axisLine: {
         lineStyle: {
-          color: '#ddd'
-        }
+          color: "#ddd",
+        },
       },
       axisTick: {
-        show: false
-      }
+        show: false,
+      },
     },
     yAxis: {
-      type: 'value',
-      name: 'Total Alumnes',
+      type: "value",
+      name: "Total Alumnes",
       nameTextStyle: {
-        color: '#666',
+        color: "#666",
         fontSize: 11,
-        fontWeight: 500
+        fontWeight: 500,
       },
       axisLabel: {
-        color: '#999',
-        fontSize: 10
+        color: "#999",
+        fontSize: 10,
       },
       axisLine: {
-        show: false
+        show: false,
       },
       axisTick: {
-        show: false
+        show: false,
       },
       splitLine: {
         lineStyle: {
-          color: '#f0f0f0',
-          type: 'dashed'
-        }
-      }
-    },
-    series: [{
-      name: 'Total Alumnes',
-      type: 'bar',
-      barWidth: '50%',
-      label: {
-        show: true,
-        position: 'top',
-        fontSize: 12,
-        fontWeight: 600,
-        color: '#333'
+          color: "#f0f0f0",
+          type: "dashed",
+        },
       },
-      data: seriesData[0].data.map((value, index) => ({
-        value: value,
-        itemStyle: {
-          color: blueColors[index % blueColors.length],
-          borderRadius: [6, 6, 0, 0],
-          shadowColor: 'rgba(0, 0, 0, 0.2)',
-          shadowBlur: 8,
-          shadowOffsetY: 3
-        }
-      })),
-      emphasis: {
-        itemStyle: {
-          shadowBlur: 15,
-          shadowOffsetY: 5,
-          shadowColor: 'rgba(57, 73, 171, 0.4)'
-        }
-      }
-    }]
+    },
+    series: [
+      {
+        name: "Total Alumnes",
+        type: "bar",
+        barWidth: "50%",
+        label: {
+          show: true,
+          position: "top",
+          fontSize: 12,
+          fontWeight: 600,
+          color: "#333",
+        },
+        data: seriesData[0].data.map((value, index) => ({
+          value: value,
+          itemStyle: {
+            color: blueColors[index % blueColors.length],
+            borderRadius: [6, 6, 0, 0],
+            shadowColor: "rgba(0, 0, 0, 0.2)",
+            shadowBlur: 8,
+            shadowOffsetY: 3,
+          },
+        })),
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 15,
+            shadowOffsetY: 5,
+            shadowColor: "rgba(57, 73, 171, 0.4)",
+          },
+        },
+      },
+    ],
   };
 
   myChart.setOption(option);
@@ -154,28 +164,23 @@ const fetchData = async () => {
     // Demanem les dues coses en paral·lel
     const [tallers, institucions] = await Promise.all([
       getAllTallers(),
-      getAllInstitucions()
+      getAllInstitucions(),
     ]);
-
-    console.log('🔍 DEBUG - Institucions recibidas:', institucions);
-    console.log('🔍 DEBUG - Tallers recibidos:', tallers);
-
-    if (tallers.length > 0) {
-      console.log('🔍 Primer taller:', tallers[0]);
-      console.log('🔍 Propiedades del taller:', Object.keys(tallers[0]));
-    }
 
     // NUEVA LÓGICA: Mostrar instituciones en el eje X con el total de plazas
     // En lugar de agrupar por años (que no existen), mostramos el total por institución
 
-    const instData = institucions.map(inst => {
+    const instData = institucions.map((inst) => {
       // Calcular el total de plazas de todos los tallers de esta institución
-      const tallersDeInst = tallers.filter(t => t.institucio === inst.id);
-      const totalPlazas = tallersDeInst.reduce((sum, t) => sum + (t.places_max || 0), 0);
+      const tallersDeInst = tallers.filter((t) => t.institucio === inst.id);
+      const totalPlazas = tallersDeInst.reduce(
+        (sum, t) => sum + (t.places_max || 0),
+        0,
+      );
 
       return {
         nom: inst.nom,
-        total: totalPlazas
+        total: totalPlazas,
       };
     });
 
@@ -199,8 +204,6 @@ const fetchData = async () => {
       }
     }
 
-    console.log('📊 Datos procesados:', activeInst);
-
     // Preparar datos para ECharts
     const names = [];
     const values = [];
@@ -211,8 +214,7 @@ const fetchData = async () => {
       values.push(activeInst[i].total);
     }
 
-    initChart(names, [{ name: 'Total Alumnes', data: values }]);
-
+    initChart(names, [{ name: "Total Alumnes", data: values }]);
   } catch (error) {
     console.error("Error obtenint dades institucions:", error);
   } finally {
@@ -224,11 +226,11 @@ const handleResize = () => myChart?.resize();
 
 onMounted(() => {
   fetchData();
-  window.addEventListener('resize', handleResize);
+  window.addEventListener("resize", handleResize);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize);
+  window.removeEventListener("resize", handleResize);
   myChart?.dispose();
 });
 </script>

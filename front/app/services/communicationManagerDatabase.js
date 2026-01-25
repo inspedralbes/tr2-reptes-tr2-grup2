@@ -455,8 +455,6 @@ export async function getTallersStats() {
 
   checklistPendents = await resChecklistPendents.json();
 
-  console.log(nTallersAssignar);
-
   return {
     nPeticions,
     nTallersAssignar,

@@ -78,9 +78,6 @@ onMounted(async () => {
             percentatgeActius.value = Math.round((tallersActius.value / totalTallers.value) * 100);
         }
 
-        console.log("Tallers carregats:", totalTallers.value);
-        console.log("Tallers actius:", tallersActius.value);
-        console.log("Tallers finalitzats:", tallersFinalitzats.value);
     } catch (err) {
         console.error("Error carregant tallers:", err);
         error.value = "Error al carregar les dades dels tallers";

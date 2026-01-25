@@ -99,8 +99,6 @@ onMounted(async () => {
     assistencies.value = assistenciesData;
     tallers.value = tallersData;
 
-    console.log("Assistències carregades:", assistencies.value.length);
-    console.log("Tallers carregats:", tallers.value.length);
   } catch (err) {
     console.error("Error carregant dades:", err);
     error.value = "Error al carregar les dades de participació";
