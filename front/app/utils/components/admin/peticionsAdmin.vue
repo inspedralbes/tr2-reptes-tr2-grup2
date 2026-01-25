@@ -593,8 +593,8 @@ async function enviarsInscripciones() {
 }
 
 .col-titulo img.img-curso {
-  width: 100px;
-  height: 100px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
