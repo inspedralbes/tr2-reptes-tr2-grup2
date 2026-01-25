@@ -1,6 +1,7 @@
 <script setup>
 import { useRoute } from "vue-router";
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
+import { createPopper } from "@popperjs/core";
 
 const route = useRoute();
 const menuOpen = ref(false);
@@ -16,75 +17,110 @@ const toggleMenu = () => {
 const closeMenu = () => {
   menuOpen.value = false;
 };
+
+// Tooltip Logic
+const tooltipRef = ref(null);
+const tooltipText = ref("");
+const showTooltipState = ref(false);
+let popperInstance = null;
+
+const showTooltip = (event, text) => {
+  tooltipText.value = text;
+  showTooltipState.value = true;
+
+  nextTick(() => {
+    if (tooltipRef.value && event.target) {
+      // Destroy any existing instance
+      if (popperInstance) popperInstance.destroy();
+
+      popperInstance = createPopper(event.target, tooltipRef.value, {
+        placement: "top",
+        modifiers: [
+          {
+            name: "offset",
+            options: {
+              offset: [0, 10],
+            },
+          },
+          {
+            name: "preventOverflow",
+            options: {
+              boundary: "viewport",
+            },
+          },
+        ],
+      });
+    }
+  });
+};
+
+const hideTooltip = () => {
+  showTooltipState.value = false;
+  if (popperInstance) {
+    popperInstance.destroy();
+    popperInstance = null;
+  }
+};
 </script>
 <template>
   <div id="navBar" :class="{ 'menu-open': menuOpen }">
     <div id="btns" :class="{ active: menuOpen }">
       <NuxtLink to="/centro" custom v-slot="{ navigate }">
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Pàgina Principal"
-          :class="{ 'btn-activo': isActive('/centro') }"
-        >
+        <button @click="
+          navigate();
+        closeMenu();
+        " @mouseenter="showTooltip($event, 'Pàgina Principal')" @mouseleave="hideTooltip"
+          :class="{ 'btn-activo': isActive('/centro') }">
           <img src="/img/navBarProfes/home.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
 
+      <br />
+
       <NuxtLink to="/centro/inscripcionsTallers" custom v-slot="{ navigate }">
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Inscripcions Tallers"
-          :class="{
-            'btn-activo': isActive('/centro/inscripcionsTalleres'),
-          }"
-        >
+        <button @click="
+          navigate();
+        closeMenu();
+        " @mouseenter="showTooltip($event, 'Inscripcions Tallers')" @mouseleave="hideTooltip" :class="{
+          'btn-activo': isActive('/centro/inscripcionsTalleres'),
+        }">
           <img src="/img/navBarProfes/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink
-        to="/centro/estatInscripcionsTallers"
-        custom
-        v-slot="{ navigate }"
-      >
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Estat Inscripcions"
-          :class="{
-            'btn-activo': isActive('/centro/estatInscripcionsTalleres'),
-          }"
-        >
+      <br />
+      <NuxtLink to="/centro/estatInscripcionsTallers" custom v-slot="{ navigate }">
+        <button @click="
+          navigate();
+        closeMenu();
+        " @mouseenter="showTooltip($event, 'Estat Inscripcions')" @mouseleave="hideTooltip" :class="{
+          'btn-activo': isActive('/centro/estatInscripcionsTalleres'),
+        }">
           <img src="/img/navBarProfes/checkbox.png" alt="" />
         </button>
       </NuxtLink>
       <br />
+      <br />
       <NuxtLink to="/centro/tallersFinalitzats" custom v-slot="{ navigate }">
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Tallers Finalitzats"
-          :class="{
-            'btn-activo': isActive('/centro/tallersFinalitzats'),
-          }"
-        >
+        <button @click="
+          navigate();
+        closeMenu();
+        " @mouseenter="showTooltip($event, 'Tallers Finalitzats')" @mouseleave="hideTooltip" :class="{
+          'btn-activo': isActive('/centro/tallersFinalitzats'),
+        }">
           <img src="/img/navBarProfes/document-alt.png" alt="" />
         </button>
       </NuxtLink>
     </div>
   </div>
+
+  <Teleport to="body">
+    <div v-if="showTooltipState" ref="tooltipRef" class="custom-popper-tooltip">
+      {{ tooltipText }}
+    </div>
+  </Teleport>
 </template>
 <style>
 /* Desktop: Vertical sidebar (default) */
@@ -172,12 +208,7 @@ const closeMenu = () => {
   transform: scale(1.1);
 }
 
-#btns button:hover::after {
-  content: attr(data-tooltip);
-  position: fixed;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
+.custom-popper-tooltip {
   background-color: rgba(0, 0, 0, 0.9);
   color: white;
   padding: 5px 10px;
@@ -187,6 +218,7 @@ const closeMenu = () => {
   z-index: 9999;
   pointer-events: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-family: "Coolvetica", Arial, sans-serif;
 }
 
 /* Overlay oscuro */
@@ -256,7 +288,8 @@ const closeMenu = () => {
     height: 50px;
   }
 
-  #btns button:hover::after {
+
+  .custom-popper-tooltip {
     font-size: 13px;
     padding: 7px 12px;
   }

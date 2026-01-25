@@ -1,6 +1,7 @@
 <script setup>
 import { useRoute } from "vue-router";
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
+import { createPopper } from "@popperjs/core";
 import GestioWeights from "@/utils/components/admin/GestioWeights.vue";
 
 const route = useRoute();
@@ -9,19 +10,59 @@ const mostrarModalWeights = ref(false);
 const isActive = (path) => {
   return route.path === path;
 };
+
+// Tooltip Logic
+const tooltipRef = ref(null);
+const tooltipText = ref("");
+const showTooltipState = ref(false);
+let popperInstance = null;
+
+const showTooltip = (event, text) => {
+  tooltipText.value = text;
+  showTooltipState.value = true;
+
+  nextTick(() => {
+    if (tooltipRef.value && event.target) {
+      if (popperInstance) popperInstance.destroy();
+
+      popperInstance = createPopper(event.target, tooltipRef.value, {
+        placement: "top",
+        modifiers: [
+          {
+            name: "offset",
+            options: {
+              offset: [0, 10],
+            },
+          },
+          {
+            name: "preventOverflow",
+            options: {
+              boundary: "viewport",
+            },
+          },
+        ],
+      });
+    }
+  });
+};
+
+const hideTooltip = () => {
+  showTooltipState.value = false;
+  if (popperInstance) {
+    popperInstance.destroy();
+    popperInstance = null;
+  }
+};
 </script>
 <template>
   <div id="navBar">
     <div id="btns">
       <NuxtLink to="/admin" custom v-slot="{ navigate }">
-        <button
-          @click="
-            navigate();
-            closeMenu();
-          "
-          data-tooltip="Pàgina Principal"
-          :class="{ 'btn-activo': isActive('/admin') }"
-        >
+        <button @click="
+          navigate();
+        closeMenu();
+        " @mouseenter="showTooltip($event, 'Pàgina Principal')" @mouseleave="hideTooltip"
+          :class="{ 'btn-activo': isActive('/admin') }">
           <img src="/img/navBarAdmin/home.png" alt="" />
         </button>
       </NuxtLink>
@@ -29,59 +70,48 @@ const isActive = (path) => {
       <br />
 
       <NuxtLink to="/admin/gestioTallers" custom v-slot="{ navigate }">
-        <button
-          @click="navigate()"
-          data-tooltip="Gestió Tallers"
-          :class="{ 'btn-activo': isActive('/admin/gestioTallers') }"
-        >
+        <button @click="navigate()" @mouseenter="showTooltip($event, 'Gestió Tallers')" @mouseleave="hideTooltip"
+          :class="{ 'btn-activo': isActive('/admin/gestioTallers') }">
           <img src="/img/navBarAdmin/backpack.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/admin/gestioPeticions" custom v-slot="{ navigate }">
-        <button
-          @click="navigate()"
-          data-tooltip="Gestió Peticions"
-          :class="{ 'btn-activo': isActive('/admin/gestioPeticions') }"
-        >
+        <button @click="navigate()" @mouseenter="showTooltip($event, 'Gestió Peticions')" @mouseleave="hideTooltip"
+          :class="{ 'btn-activo': isActive('/admin/gestioPeticions') }">
           <img src="/img/navBarAdmin/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/admin/gestioCentres" custom v-slot="{ navigate }">
-        <button
-          @click="navigate()"
-          data-tooltip="Informació Centres"
-          :class="{ 'btn-activo': isActive('/admin/gestioCentres') }"
-        >
+        <button @click="navigate()" @mouseenter="showTooltip($event, 'Informació Centres')" @mouseleave="hideTooltip"
+          :class="{ 'btn-activo': isActive('/admin/gestioCentres') }">
           <img src="/img/navBarAdmin/academic-cap.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/admin/gestioInformes" custom v-slot="{ navigate }">
-        <button
-          @click="navigate()"
-          data-tooltip="Gestió Informes"
-          :class="{ 'btn-activo': isActive('/admin/gestioInformes') }"
-        >
+        <button @click="navigate()" @mouseenter="showTooltip($event, 'Gestió Informes')" @mouseleave="hideTooltip"
+          :class="{ 'btn-activo': isActive('/admin/gestioInformes') }">
           <img src="/img/navBarAdmin/document-alt.png" alt="" />
         </button>
       </NuxtLink>
 
       <br />
-      <button
-        @click="mostrarModalWeights = true"
-        data-tooltip="Configuració"
-      >
+      <button @click="mostrarModalWeights = true" @mouseenter="showTooltip($event, 'Configuració')"
+        @mouseleave="hideTooltip">
         <i class="fas fa-cog"></i>
       </button>
     </div>
 
-    <GestioWeights
-      v-if="mostrarModalWeights"
-      @close="mostrarModalWeights = false"
-    />
+    <GestioWeights v-if="mostrarModalWeights" @close="mostrarModalWeights = false" />
   </div>
+
+  <Teleport to="body">
+    <div v-if="showTooltipState" ref="tooltipRef" class="custom-popper-tooltip">
+      {{ tooltipText }}
+    </div>
+  </Teleport>
 </template>
 <style>
 /* Desktop: Vertical sidebar (default) */
@@ -157,12 +187,7 @@ const isActive = (path) => {
   transform: scale(1.1);
 }
 
-#btns button:hover::after {
-  content: attr(data-tooltip);
-  position: fixed;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
+.custom-popper-tooltip {
   background-color: rgba(0, 0, 0, 0.9);
   color: white;
   padding: 5px 10px;
@@ -172,6 +197,7 @@ const isActive = (path) => {
   z-index: 9999;
   pointer-events: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-family: "Coolvetica", Arial, sans-serif;
 }
 
 /* RESPONSIVE: Pantallas grandes */
@@ -239,7 +265,7 @@ const isActive = (path) => {
     font-size: 32px;
   }
 
-  #btns button:hover::after {
+  .custom-popper-tooltip {
     font-size: 13px;
     padding: 7px 12px;
   }
