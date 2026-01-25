@@ -14,6 +14,6 @@ export default defineNuxtConfig({
   routeRules: {
     "/admin/**": { appMiddleware: "auth" },
     "/centro/**": { appMiddleware: "auth" },
-    "/talleristes/**": { appMiddleware: "auth" },
+    // "/talleristes/**": { appMiddleware: "auth" },
   },
 });
