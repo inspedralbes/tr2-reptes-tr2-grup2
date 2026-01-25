@@ -5,7 +5,7 @@ import { computed } from "vue";
 const router = useRouter();
 const route = useRoute();
 
-const isHome = computed(() => route.path === "/" || route.path === "/sign-in");
+const isHome = computed(() => route.path === "/" || route.path === "/sign-in" || route.path.startsWith("/talleristes"));
 
 const handleLogout = () => {
   localStorage.clear();
