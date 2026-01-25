@@ -57,7 +57,6 @@ export async function enviarEmail(type, userData) {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log("Enviat: %s", info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("Error:", error);
@@ -68,7 +67,6 @@ export async function enviarEmail(type, userData) {
 function getTemplate(fileName, replacements) {
   const filePath = path.join(__dirname, "templates", fileName);
   let html = fs.readFileSync(filePath, "utf8");
-  console.log("Template loaded from:", filePath);
   // Reemplaza {{variable}} por el valor real
   Object.keys(replacements).forEach((key) => {
     html = html.replace(new RegExp(`{{${key}}}`, "g"), replacements[key]);

@@ -7,7 +7,7 @@ import {
   getAllInscripcions,
   confirmarInscripciones,
   saveInscripcions,
-  getSystemSettings
+  getSystemSettings,
 } from "@/services/communicationManagerDatabase";
 
 // Estados reactivos
@@ -42,7 +42,6 @@ const actualizarPrioridad = (id, isOpen) => {
 //al backend para hacer los inserts de la bbdd cuando se haga una insc
 const guardarSeleccion = (tallerId, numeroSeleccionado) => {
   selecciones.value[tallerId] = Number(numeroSeleccionado);
-  console.log("Selecciones actuales:", selecciones.value);
 };
 
 // Devuelve true si hay al menos una selección guardada
@@ -51,7 +50,6 @@ const hasSelections = () => Object.keys(selecciones.value).length > 0;
 // Paula: funcion para abrir el modal de inscripciones
 const enviarTodasSeleccionadas = () => {
   if (Object.keys(selecciones.value).length === 0) {
-    console.log("No hay selecciones para enviar");
     return;
   }
   mostrarModalInsc.value = true;
@@ -61,13 +59,12 @@ const enviarTodasSeleccionadas = () => {
 const confirmarEnvio = async () => {
   try {
     await saveInscripcions(selecciones.value, docentRef.value, comentari.value);
-    console.log("Guardadas todas las selecciones");
 
     // Limpiar y cerrar
     selecciones.value = {};
     cerrarModal();
   } catch (err) {
-    console.log("Error al guardar selecciones:", err.message);
+    console.error("Error al guardar selecciones:", err.message);
   }
 };
 
@@ -272,11 +269,9 @@ onMounted(async () => {
     //Cuando se haga el filtro por periodo, se descomenta y se elimina el const filteredData = rawData;
     // const filteredData = rawData.filter(t => t.periode === settings.selectedPeriodeId);
     const filteredData = rawData;
-    console.log("Datos crudos de talleres:", filteredData);
 
     // Extraer horarios únicos
     horaris.value = extractHoraris(filteredData);
-    console.log("Horarios disponibles:", horaris.value);
 
     tallersGrouped.value = processTallers(filteredData);
   } catch (error) {
@@ -377,28 +372,42 @@ const getMesNum = (mes) => {
 <template>
   <div id="container">
     <div class="header-lista">
-      <button v-if="hasSelections()" class="btn-guardar" @click="enviarTodasSeleccionadas">
+      <button
+        v-if="hasSelections()"
+        class="btn-guardar"
+        @click="enviarTodasSeleccionadas"
+      >
         Guardar selecciones
       </button>
       <p>Alumnes</p>
 
       <div class="filter-wrapper">
-        <button id="btn-filtro" @click="filterOpen = !filterOpen">Filtres</button>
+        <button id="btn-filtro" @click="filterOpen = !filterOpen">
+          Filtres
+        </button>
         <div v-if="filterOpen" id="popup-filter">
           <button @click="filterOpen = false">x</button>
 
           <!-- Filtro de MES -->
           <h3>MES</h3>
           <div>
-            <div @click="openMonthFilter = !openMonthFilter" class="select-header">
+            <div
+              @click="openMonthFilter = !openMonthFilter"
+              class="select-header"
+            >
               <span v-if="selectedMonths.length === 0">Escull el mes...</span>
               <span v-else>{{ selectedMonths.length }} meses seleccionats</span>
               <span>▲</span>
             </div>
 
             <div v-if="openMonthFilter" class="months-grid">
-              <button v-for="mes in meses" :key="mes" class="month-chip" @click="toggleMonthSelection(mes)"
-                :class="{ 'is-active': selectedMonths.includes(mes) }">
+              <button
+                v-for="mes in meses"
+                :key="mes"
+                class="month-chip"
+                @click="toggleMonthSelection(mes)"
+                :class="{ 'is-active': selectedMonths.includes(mes) }"
+              >
                 {{ mes }}
               </button>
               <button class="btn-aplicar" @click="openMonthFilter = false">
@@ -407,7 +416,11 @@ const getMesNum = (mes) => {
             </div>
 
             <div class="selected-tags-container">
-              <div v-for="mes in selectedMonths" :key="mes" class="selected-tag">
+              <div
+                v-for="mes in selectedMonths"
+                :key="mes"
+                class="selected-tag"
+              >
                 {{ mes }}
                 <span class="remove-icon" @click="removeMonth(mes)">×</span>
               </div>
@@ -417,21 +430,38 @@ const getMesNum = (mes) => {
           <!-- Filtro de BÚSQUEDA -->
           <h3>TALLER</h3>
           <div>
-            <input v-model="searchTaller" type="text" class="search-input" placeholder="Cercar taller..." />
+            <input
+              v-model="searchTaller"
+              type="text"
+              class="search-input"
+              placeholder="Cercar taller..."
+            />
           </div>
 
           <!-- Filtro de HORARI -->
           <h3>HORARI</h3>
           <div>
-            <div @click="openHorariFilter = !openHorariFilter" class="select-header">
-              <span v-if="selectedHoraris.length === 0">Escull el horari...</span>
-              <span v-else>{{ selectedHoraris.length }} horaris seleccionats</span>
+            <div
+              @click="openHorariFilter = !openHorariFilter"
+              class="select-header"
+            >
+              <span v-if="selectedHoraris.length === 0"
+                >Escull el horari...</span
+              >
+              <span v-else
+                >{{ selectedHoraris.length }} horaris seleccionats</span
+              >
               <span>▲</span>
             </div>
 
             <div v-if="openHorariFilter" class="horaris-grid">
-              <button v-for="horari in horaris" :key="horari" class="horari-chip" @click="toggleHorariSelection(horari)"
-                :class="{ 'is-active': selectedHoraris.includes(horari) }">
+              <button
+                v-for="horari in horaris"
+                :key="horari"
+                class="horari-chip"
+                @click="toggleHorariSelection(horari)"
+                :class="{ 'is-active': selectedHoraris.includes(horari) }"
+              >
                 {{ horari }}
               </button>
               <button class="btn-aplicar" @click="openHorariFilter = false">
@@ -440,7 +470,11 @@ const getMesNum = (mes) => {
             </div>
 
             <div class="selected-tags-container">
-              <div v-for="horari in selectedHoraris" :key="horari" class="selected-tag">
+              <div
+                v-for="horari in selectedHoraris"
+                :key="horari"
+                class="selected-tag"
+              >
                 {{ horari }}
                 <span class="remove-icon" @click="removeHorari(horari)">×</span>
               </div>
@@ -454,18 +488,30 @@ const getMesNum = (mes) => {
         {{ cargando ? "Carregant tallers..." : "No hi ha tallers disponibles" }}
       </div>
 
-      <div v-for="seccion in filteredTallers" :key="seccion.mes" class="seccion-mes">
+      <div
+        v-for="seccion in filteredTallers"
+        :key="seccion.mes"
+        class="seccion-mes"
+      >
         <h2 class="mes-titulo">{{ seccion.mes }}</h2>
 
-        <div v-for="curso in seccion.cursos" :key="curso.id" class="bloque-curso">
-          <div class="fila-curso" :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }">
+        <div
+          v-for="curso in seccion.cursos"
+          :key="curso.id"
+          class="bloque-curso"
+        >
+          <div
+            class="fila-curso"
+            :style="{ zIndex: filaActiva === curso.id ? 100 : 1 }"
+          >
             <div class="col-titulo">
               <img :src="curso.imagen" class="img-curso" alt="imagen curso" />
             </div>
 
             <div class="col-info">
               <div class="text-info">
-                <span class="texto-titulo">{{ curso.titulo }}</span><br />
+                <span class="texto-titulo">{{ curso.titulo }}</span
+                ><br />
                 <span class="info-item">
                   <img src="/img/centro/calendar.png" class="icon" />
                   {{ curso.diaNum }}/{{ getMesNum(seccion.mes) }}
@@ -476,12 +522,18 @@ const getMesNum = (mes) => {
             </div>
 
             <button class="btn-detalls" @click="toggleDetalles(curso.id)">
-              <span class="btn-detalls-text" :class="{ rotar: cursoExpandido === curso.id }">+</span>
+              <span
+                class="btn-detalls-text"
+                :class="{ rotar: cursoExpandido === curso.id }"
+                >+</span
+              >
             </button>
 
             <div class="desplegable">
-              <SelectorAlumnos @toggle="(state) => actualizarPrioridad(curso.id, state)"
-                @select="(num) => guardarSeleccion(curso.id, num)" />
+              <SelectorAlumnos
+                @toggle="(state) => actualizarPrioridad(curso.id, state)"
+                @select="(num) => guardarSeleccion(curso.id, num)"
+              />
             </div>
           </div>
 
@@ -504,14 +556,25 @@ const getMesNum = (mes) => {
 
         <div class="form-group">
           <label for="docent-ref">Docent de Referència (opcional):</label>
-          <input id="docent-ref" v-model="docentRef" type="text" class="input-field" placeholder="Nom del docent"
-            maxlength="100" />
+          <input
+            id="docent-ref"
+            v-model="docentRef"
+            type="text"
+            class="input-field"
+            placeholder="Nom del docent"
+            maxlength="100"
+          />
         </div>
 
         <div class="form-group">
           <label for="comentari">Comentari (opcional):</label>
-          <textarea id="comentari" v-model="comentari" class="textarea-field" placeholder="Afegeix un comentari..."
-            maxlength="191"></textarea>
+          <textarea
+            id="comentari"
+            v-model="comentari"
+            class="textarea-field"
+            placeholder="Afegeix un comentari..."
+            maxlength="191"
+          ></textarea>
           <span class="char-count">{{ comentari.length }}/191</span>
         </div>
 
@@ -749,7 +812,7 @@ h3 {
 }
 
 .btn-detalls {
-  background-color: #C5CAE9;
+  background-color: #c5cae9;
   margin-left: -100px;
   z-index: 1;
   width: 150px;
@@ -788,7 +851,7 @@ h3 {
 /* --- DESPLEGABLE DE INFORMACIÓN --- */
 .info-desplegable {
   margin-left: 153px;
-  background-color: #D5DAFB;
+  background-color: #d5dafb;
   width: clamp(350px, 35vw, 650px);
   margin-top: -60px;
   padding: 70px 20px 15px 40px;
@@ -798,7 +861,7 @@ h3 {
 }
 
 .contenido-detalle {
-  color: #1D1D1D;
+  color: #1d1d1d;
   font-size: clamp(0.9rem, 1.2vw, 1.2rem);
   line-height: 1.4;
 }
@@ -887,7 +950,7 @@ h3 {
   }
 }
 
-#popup-filter>button {
+#popup-filter > button {
   float: right;
   background: none;
   border: none;
@@ -897,7 +960,7 @@ h3 {
   margin-bottom: 10px;
 }
 
-#popup-filter>button:hover {
+#popup-filter > button:hover {
   color: #333;
 }
 

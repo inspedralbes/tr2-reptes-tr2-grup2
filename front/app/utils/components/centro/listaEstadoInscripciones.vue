@@ -273,12 +273,7 @@ const loadData = async () => {
       getSystemSettings(),
     ]);
 
-    console.log("DEBUG: Total talleres cargados:", rawData.length);
-    console.log("DEBUG: Total inscripciones cargadas:", inscripciones.length);
-    console.log("DEBUG: Periodo seleccionado:", settings.selectedPeriodeId);
-
     const usuarioInstitucionId = localStorage.getItem("user_institution_id");
-    console.log("DEBUG: ID institución usuario:", usuarioInstitucionId);
 
     // Filtrar inscripciones por institución y período
     const inscripcionesFiltridas = [];
@@ -312,14 +307,11 @@ const loadData = async () => {
         }
       }
     }
-    console.log("DEBUG: Inscripciones filtradas por institución y período:", inscripcionesFiltridas.length);
-    console.log("DEBUG: Talleres inscritos por institución:", tallersInscritos.size);
 
     // Filtrar talleres por período Y por los que hay inscripción en esta institución
     const filteredData = rawData.filter(
       (t) => t.periode === settings.selectedPeriodeId && tallersInscritos.has(t.id)
     );
-    console.log("DEBUG: Talleres tras filtro periodo e institución:", filteredData.length);
 
     horaris.value = extractHoraris(filteredData);
 
@@ -346,12 +338,6 @@ const loadData = async () => {
     }
 
     const processed = processTallers(filteredData, inscripcionesFiltridas);
-    console.log("DEBUG: Talleres procesados finales:", processed.length); // Ver cuántos grupos de meses se crean
-    if (processed.length > 0) {
-      let countCursos = 0;
-      processed.forEach(p => countCursos += p.cursos.length);
-      console.log("DEBUG: Total cursos dentro de los grupos:", countCursos);
-    }
 
     tallersGrouped.value = processed;
   } catch (error) {

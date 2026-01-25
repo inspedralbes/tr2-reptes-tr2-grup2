@@ -118,7 +118,6 @@ const handleInscriptionUpdate = async () => {
       alumnesAfegir: alumnesLimpios,
       profesAfegir: profesLimpios,
     };
-    console.log("Datos a enviar:", dataToSend);
     await afegirPersonalAssistencia(dataToSend);
     showInscriptionModal.value = false;
     emit("refresh");

@@ -26,7 +26,6 @@ async function loadWeightsFromDB() {
     for (const w of dbWeights) {
       PRIORITY_WEIGHTS[w.criterio] = w.peso;
     }
-    console.log("✅ Pesos de criterios cargados desde BD");
   } catch (error) {
     console.warn(
       "⚠️ Error cargando pesos de BD, usando valores por defecto:",

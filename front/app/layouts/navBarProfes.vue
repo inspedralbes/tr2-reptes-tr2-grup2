@@ -19,13 +19,16 @@ const closeMenu = () => {
 </script>
 <template>
   <div id="navBar" :class="{ 'menu-open': menuOpen }">
-
     <div id="btns" :class="{ active: menuOpen }">
       <NuxtLink to="/centro" custom v-slot="{ navigate }">
-        <button @click="
-          navigate();
-        closeMenu();
-        " data-tooltip="Pàgina Principal" :class="{ 'btn-activo': isActive('/centro') }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Pàgina Principal"
+          :class="{ 'btn-activo': isActive('/centro') }"
+        >
           <img src="/img/navBarProfes/home.png" alt="" />
         </button>
       </NuxtLink>
@@ -33,34 +36,50 @@ const closeMenu = () => {
       <br />
 
       <NuxtLink to="/centro/inscripcionsTallers" custom v-slot="{ navigate }">
-        <button @click="
-          navigate();
-        closeMenu();
-        " data-tooltip="Inscripcions Tallers" :class="{
-          'btn-activo': isActive('/centro/inscripcionsTalleres'),
-        }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Inscripcions Tallers"
+          :class="{
+            'btn-activo': isActive('/centro/inscripcionsTalleres'),
+          }"
+        >
           <img src="/img/navBarProfes/clipboard.png" alt="" />
         </button>
       </NuxtLink>
       <br />
-      <NuxtLink to="/centro/estatInscripcionsTallers" custom v-slot="{ navigate }">
-        <button @click="
-          navigate();
-        closeMenu();
-        " data-tooltip="Estat Inscripcions" :class="{
-          'btn-activo': isActive('/centro/estatInscripcionsTalleres'),
-        }">
+      <NuxtLink
+        to="/centro/estatInscripcionsTallers"
+        custom
+        v-slot="{ navigate }"
+      >
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Estat Inscripcions"
+          :class="{
+            'btn-activo': isActive('/centro/estatInscripcionsTalleres'),
+          }"
+        >
           <img src="/img/navBarProfes/checkbox.png" alt="" />
         </button>
       </NuxtLink>
       <br />
       <NuxtLink to="/centro/tallersFinalitzats" custom v-slot="{ navigate }">
-        <button @click="
-          navigate();
-        closeMenu();
-        " data-tooltip="Tallers Finalitzats" :class="{
-          'btn-activo': isActive('/centro/tallersFinalitzats'),
-        }">
+        <button
+          @click="
+            navigate();
+            closeMenu();
+          "
+          data-tooltip="Tallers Finalitzats"
+          :class="{
+            'btn-activo': isActive('/centro/tallersFinalitzats'),
+          }"
+        >
           <img src="/img/navBarProfes/document-alt.png" alt="" />
         </button>
       </NuxtLink>
@@ -75,7 +94,10 @@ const closeMenu = () => {
   flex-direction: column;
   align-items: center;
   width: 80px;
-  height: auto;
+  height: calc(100vh - 150px);
+  min-height: calc(100vh - 150px);
+  max-height: calc(100vh - 150px);
+  flex-shrink: 0;
   background-color: #3949ab;
   padding: 10px;
   border-radius: 20px;
@@ -83,6 +105,7 @@ const closeMenu = () => {
   margin-bottom: 30px;
   margin-left: 30px;
   position: relative;
+  overflow-y: auto;
 }
 
 /* Hamburger button (oculto en desktop) */
@@ -120,7 +143,6 @@ const closeMenu = () => {
 }
 
 #btns button {
-  
   width: 50px;
   height: 50px;
   background-color: transparent;
@@ -167,27 +189,25 @@ const closeMenu = () => {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-
-  /* Overlay oscuro */
-  .menu-overlay {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-  }
-
-
+/* Overlay oscuro */
+.menu-overlay {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
 
 /* RESPONSIVE: Pantallas grandes */
 @media (min-width: 1280px) and (max-width: 1919px) {
   #navBar {
     width: 80px;
-    height: auto;
-    min-height: 100%;
+    height: calc(100vh - 170px);
+    min-height: calc(100vh - 170px);
+    max-height: calc(100vh - 170px);
     margin-top: 40px;
     margin-bottom: 40px;
     margin-left: 40px;
@@ -212,8 +232,9 @@ const closeMenu = () => {
 @media (min-width: 1920px) {
   #navBar {
     width: 90px;
-    height: auto;
-    min-height: 100%;
+    height: calc(100vh - 190px);
+    min-height: calc(100vh - 190px);
+    max-height: calc(100vh - 190px);
     margin-top: 50px;
     margin-bottom: 50px;
     margin-left: 50px;

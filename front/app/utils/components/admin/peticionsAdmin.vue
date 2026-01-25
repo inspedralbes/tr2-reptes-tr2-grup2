@@ -159,7 +159,6 @@ const guardarSeleccion = () => {
     inscripcionesAprobadas: idsSeleccionados,
     alumnosAprobados: alumnosSeleccionados(),
   };
-  console.log("Inscripciones aprobadas:", resultado);
   Swal.fire({
     icon: "success",
     title: "Éxit",
@@ -240,7 +239,6 @@ onMounted(async () => {
     // Obtener el periodo actual
     const settings = await getSystemSettings();
     periodeActual.value = settings.selectedPeriodeId;
-    console.log("Periodo actual:", periodeActual.value);
 
     // Obtener solo los talleres del periodo actual
     const rawData = await getTallersByPeriode(periodeActual.value);
