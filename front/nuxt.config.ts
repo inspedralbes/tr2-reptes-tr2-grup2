@@ -7,12 +7,13 @@ export default defineNuxtConfig({
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { name: "description", content: "Tu descripción aquí" },
+        { name: "description", content: "La teva descripció aquí" },
       ],
     },
   },
   routeRules: {
     "/admin/**": { appMiddleware: "auth" },
     "/centro/**": { appMiddleware: "auth" },
+    "/talleristes/**": { appMiddleware: "auth" },
   },
 });

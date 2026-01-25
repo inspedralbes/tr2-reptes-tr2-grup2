@@ -4,6 +4,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const role = localStorage.getItem("user_role"); // 'admin' o 'profes'
     const currentRoute = to.path;
 
+    if (currentRoute.includes("/talleristes")) {
+      return; // Permitir acceso sin token
+    }
+
     // Si no hay token, redirige a login (excepto si ya estás en login)
     if (
       !token &&
