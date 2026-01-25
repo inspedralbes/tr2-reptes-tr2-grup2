@@ -83,6 +83,6 @@ jobs:
             # 7. Executar migracions i seed dins del contenidor
             echo " Executant migracions i seed..."
             # El flag -T és vital per evitar errors de "interactive terminal"
-            docker compose -f docker-compose.prod.yml exec -T tr2g2-back sh -c "npx prisma migrate deploy && npx prisma db seed"
+            docker compose -f docker-compose.prod.yml exec -T tr2g2-back sh -c "npx prisma migrate deploy"
 
             echo "Desplegem finalitzat amb èxit!"
