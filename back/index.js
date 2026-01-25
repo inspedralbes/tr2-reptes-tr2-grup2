@@ -594,22 +594,12 @@ app.post("/inscripcions/procesar", async (req, res) => {
     );
 
     // Processar inscripcions per a cada taller
+    // Validación de JSON pero permitiendo inscripciones en ESPERA
     for (const inscripcio of inscripcions) {
-      // Verificar que cap alumne estigui en estat "ESPERA"
       if (inscripcio.alumnes) {
         try {
-          const alumnes = JSON.parse(inscripcio.alumnes);
-
-          for (const alumne of alumnes) {
-            if (alumne.ESTAT === "ESPERA") {
-              return res.status(400).json({
-                error:
-                  "No es pot processar: existeixen alumnes en estat ESPERA",
-                inscripcioId: inscripcio.id,
-                alumneEnEspera: alumne,
-              });
-            }
-          }
+          // Solo validar que el JSON sea válido
+          JSON.parse(inscripcio.alumnes);
         } catch (parseError) {
           console.error("Error al parsejar alumnes JSON:", parseError);
           return res.status(400).json({
