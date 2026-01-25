@@ -18,6 +18,8 @@ Nom del projecte: GesTallers
 
 [Documentació Producció](./doc/prod/README.md)
 
+[DEEPWIKI](https://deepwiki.com/inspedralbes/tr2-reptes-tr2-grup2)
+
 ## Gestor de tasques
 
 [Trello](https://trello.com/b/JnevTkCR/tr2-tallers)
