@@ -32,6 +32,7 @@ export async function getUsuariById(id) {
         rol: true,
         tallers: true,
         responsable: true,
+        institucio: true,
       },
     });
   } catch (error) {
