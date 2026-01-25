@@ -20,16 +20,19 @@ const colorMap = computed(() => {
   const map = {};
   let colorIndex = 0;
 
-  tallers.value.forEach((grupo) => {
-    grupo.dias.forEach((dia) => {
-      dia.cursos.forEach((taller) => {
+  for (let i = 0; i < tallers.value.length; i++) {
+    const grupo = tallers.value[i];
+    for (let j = 0; j < grupo.dias.length; j++) {
+      const dia = grupo.dias[j];
+      for (let k = 0; k < dia.cursos.length; k++) {
+        const taller = dia.cursos[k];
         if (!map[taller.titulo]) {
           map[taller.titulo] = paleta[colorIndex % paleta.length];
           colorIndex++;
         }
-      });
-    });
-  });
+      }
+    }
+  }
   return map;
 });
 
@@ -107,9 +110,13 @@ const tallers = computed(() => props.tallers);
             <h3 class="date-label">{{ dia.diaSemana }}, {{ dia.diaNum }}</h3>
 
             <div class="cards-container">
-              <div v-for="taller in dia.cursos" :key="taller.titulo" class="card" :style="getCardStyle(taller.titulo)">
+              <div v-for="taller in dia.cursos" :key="taller.titulo" class="card" :style="getCardStyle(taller.titulo)"
+                :class="{ 'finalizado-card': taller.isFinalizado }">
                 <div class="card-info">
-                  <p class="title">{{ taller.titulo }}</p>
+                  <div class="title-container">
+                    <p class="title">{{ taller.titulo }}</p>
+                    <span v-if="taller.isFinalizado" class="finalizado-badge">Finalitzat</span>
+                  </div>
                   <p class="location">{{ taller.lugar }}</p>
                 </div>
                 <div class="card-time">
@@ -236,6 +243,48 @@ const tallers = computed(() => props.tallers);
   opacity: 0.8;
 }
 
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.finalizado-badge {
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.finalizado-card {
+  opacity: 0.8;
+  filter: grayscale(0.5);
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.finalizado-badge {
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.finalizado-card {
+  opacity: 0.8;
+  filter: grayscale(0.5);
+}
+
 .clock-icon {
   width: 16px;
   height: 16px;
@@ -283,6 +332,6 @@ const tallers = computed(() => props.tallers);
   padding: 40px;
   color: #666;
   font-size: 1.1rem;
-  
+
 }
 </style>
