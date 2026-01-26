@@ -53,6 +53,20 @@ export async function enviarEmail(type, userData) {
         html: html,
       };
       break;
+    case "tallerista":
+      subject = "Avís de tallerista"
+      html = getTemplate("tallerista.html", {
+        nom: userData.nom,
+        idTaller: userData.idTaller,
+        url: `${process.env.URL_BASE}`,
+      });
+      mailOptions = {
+        from: `"GesTaller" <${process.env.EMAIL_USER_SMTP}>`,
+        to: userData.email,
+        subject: subject,
+        html: html,
+      };
+      break;
   }
 
   try {
